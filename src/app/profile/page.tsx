@@ -5,6 +5,7 @@ import { useRouter } from "next/navigation";
 import { useEffect, useState } from "react";
 import Link from "next/link";
 import { User, MapPin, Calendar, Shield, Save, X } from "lucide-react";
+import { formatAgeGrade } from "@/lib/utils";
 
 export default function ProfilePage() {
   const { data: session, status } = useSession();
@@ -129,9 +130,14 @@ export default function ProfilePage() {
                 <p className="text-[10px] uppercase tracking-wider font-bold text-foreground/50">
                   Age Grade
                 </p>
-                <p className="font-serif font-bold text-sm sm:text-base leading-tight">
-                  {user?.ageGrade || "Calculating..."}
-                </p>
+                <div className="flex flex-col sm:flex-row sm:items-baseline sm:space-x-1">
+                  <p className="font-serif font-bold text-sm sm:text-base leading-tight">
+                    {formatAgeGrade(user?.ageGrade).name || "Calculating..."}
+                  </p>
+                  <p className="text-[10px] text-foreground/40 font-medium lowercase tracking-normal">
+                    {formatAgeGrade(user?.ageGrade).years}
+                  </p>
+                </div>
                 <p className="text-[9px] text-red-600/60 mt-0.5 italic font-medium">
                   By birth year
                 </p>

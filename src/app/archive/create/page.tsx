@@ -3,7 +3,7 @@
 import { useState } from "react";
 import { useRouter } from "next/navigation";
 import { useSession } from "next-auth/react";
-import { BookOpen, Type, Image as ImageIcon, Send } from "lucide-react";
+import { BookOpen, Type, Image as ImageIcon, Send, X } from "lucide-react";
 
 export default function CreatePostPage() {
   const router = useRouter();
@@ -14,8 +14,32 @@ export default function CreatePostPage() {
     type: "ARTICLE",
     imageUrl: "",
   });
+  const [imagePreview, setImagePreview] = useState<string | null>(null);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState("");
+
+  const handleImageChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (file) {
+      if (file.size > 5 * 1024 * 1024) {
+        setError("Image size must be less than 5MB");
+        return;
+      }
+
+      const reader = new FileReader();
+      reader.onloadend = () => {
+        const base64String = reader.result as string;
+        setImagePreview(base64String);
+        setFormData({ ...formData, imageUrl: base64String });
+      };
+      reader.readAsDataURL(file);
+    }
+  };
+
+  const removeImage = () => {
+    setImagePreview(null);
+    setFormData({ ...formData, imageUrl: "" });
+  };
 
   if (status === "unauthenticated") {
     router.push("/login");
@@ -95,11 +119,15 @@ export default function CreatePostPage() {
                       }
                       className={`flex-1 flex items-center justify-center space-x-2 py-3 px-4 rounded-lg border-2 transition-all ${
                         formData.type === "BIOGRAPHY"
-                          ? "border-secondary bg-secondary/5 text-secondary"
-                          : "border-border text-foreground/50 hover:border-secondary/50"
+                          ? "border-accent bg-accent/5 text-secondary font-bold"
+                          : "border-border text-foreground/50 hover:border-accent/50"
                       }`}
                     >
-                      <Type className="w-4 h-4" />
+                      <Type
+                        className={`w-4 h-4 ${
+                          formData.type === "BIOGRAPHY" ? "text-accent" : ""
+                        }`}
+                      />
                       <span className="font-bold text-sm">Biography</span>
                     </button>
                   </div>
@@ -126,24 +154,46 @@ export default function CreatePostPage() {
                 </div>
 
                 <div>
-                  <label
-                    htmlFor="imageUrl"
-                    className="block text-sm font-bold text-primary uppercase tracking-wider mb-2"
-                  >
-                    Cover Image URL (Optional)
+                  <label className="block text-sm font-bold text-primary uppercase tracking-wider mb-2">
+                    Cover Image
                   </label>
                   <div className="relative">
-                    <ImageIcon className="absolute left-4 top-1/2 -translate-y-1/2 w-4 h-4 text-foreground/30" />
-                    <input
-                      id="imageUrl"
-                      type="url"
-                      placeholder="https://images.unsplash.com/..."
-                      className="w-full pl-12 pr-4 py-3 rounded-lg border border-border focus:ring-2 focus:ring-primary/20 focus:border-primary outline-none transition-all placeholder:text-foreground/30 text-sm"
-                      value={formData.imageUrl}
-                      onChange={(e) =>
-                        setFormData({ ...formData, imageUrl: e.target.value })
-                      }
-                    />
+                    {!imagePreview ? (
+                      <label className="flex flex-col items-center justify-center w-full h-40 border-2 border-dashed border-border rounded-xl hover:bg-primary/5 hover:border-primary/50 transition-all cursor-pointer group">
+                        <div className="flex flex-col items-center justify-center pt-5 pb-6">
+                          <ImageIcon className="w-8 h-8 text-foreground/30 group-hover:text-primary/50 mb-2 transition-colors" />
+                          <p className="text-sm text-foreground/50 font-medium">
+                            Click to upload cover photo
+                          </p>
+                          <p className="text-xs text-foreground/30 mt-1">
+                            PNG, JPG or WEBP (Max 5MB)
+                          </p>
+                        </div>
+                        <input
+                          type="file"
+                          className="hidden"
+                          accept="image/*"
+                          onChange={handleImageChange}
+                        />
+                      </label>
+                    ) : (
+                      <div className="relative group rounded-xl overflow-hidden border border-border shadow-sm">
+                        <img
+                          src={imagePreview}
+                          alt="Preview"
+                          className="w-full h-40 object-cover"
+                        />
+                        <div className="absolute inset-0 bg-primary/20 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center">
+                          <button
+                            type="button"
+                            onClick={removeImage}
+                            className="bg-red-500 text-white p-2 rounded-full shadow-lg hover:bg-red-600 transition-colors"
+                          >
+                            <X className="w-5 h-5" />
+                          </button>
+                        </div>
+                      </div>
+                    )}
                   </div>
                 </div>
               </div>

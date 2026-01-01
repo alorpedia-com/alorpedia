@@ -3,7 +3,7 @@
 import { useState, useEffect } from "react";
 import Link from "next/link";
 import { Search, Filter, User as UserIcon, MapPin, Shield } from "lucide-react";
-import { VILLAGES } from "@/lib/utils";
+import { VILLAGES, formatAgeGrade } from "@/lib/utils";
 
 export default function DirectoryPage() {
   const [users, setUsers] = useState<any[]>([]);
@@ -137,9 +137,14 @@ export default function DirectoryPage() {
                 </div>
                 <div className="flex items-center justify-center space-x-2 text-sm">
                   <Shield className="w-4 h-4 text-accent" />
-                  <span className="font-bold text-foreground/70">
-                    {user.ageGrade}
-                  </span>
+                  <div className="flex items-baseline space-x-1">
+                    <span className="font-bold text-foreground/70">
+                      {formatAgeGrade(user.ageGrade).name}
+                    </span>
+                    <span className="text-[10px] text-foreground/30 font-medium lowercase tracking-normal">
+                      {formatAgeGrade(user.ageGrade).years}
+                    </span>
+                  </div>
                 </div>
               </div>
 

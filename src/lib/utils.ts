@@ -16,30 +16,39 @@ export const VILLAGES = [
 
 export function calculateAgeGrade(birthDate: Date): string {
   const year = birthDate.getFullYear();
-
-  // Example logic: Group by 3 years starting from 1940
-  // 1940-1942, 1943-1945, etc.
-
   const baseYear = 1940;
   const period = 3;
 
-  if (year < baseYear) return "Elders";
+  if (year < baseYear) return "Council of Elders (< 1940)";
 
   const diff = year - baseYear;
   const gradeIndex = Math.floor(diff / period);
-
   const startYear = baseYear + gradeIndex * period;
   const endYear = startYear + period - 1;
 
-  // Custom names could be mapped here. For now, we use the years.
-  const gradeNames: { [key: number]: string } = {
-    0: "Ancient Roots",
-    10: "Wisdom Bearers",
-    20: "Community Pillars",
-    // ... we can add more specific names
+  const names = [
+    "Ancient Roots",
+    "Wisdom Keepers",
+    "Heritage Guardians",
+    "Community Pillars",
+    "Bridge Builders",
+    "Cultural Sentinels",
+    "Golden Generation",
+    "Future Seedlings",
+    "Morning Dew",
+    "Rising Pioneers",
+    "New Horizons",
+  ];
+
+  const name = names[gradeIndex % names.length];
+  return `${name} (${startYear}-${endYear})`;
+}
+export function formatAgeGrade(ageGrade: string) {
+  if (!ageGrade) return { name: "", years: "" };
+  const parts = ageGrade.split(" (");
+  if (parts.length < 2) return { name: ageGrade, years: "" };
+  return {
+    name: parts[0],
+    years: `(${parts[1]}`, // Re-add the opening parenthesis
   };
-
-  const name = gradeNames[gradeIndex] || `Age Grade ${startYear}-${endYear}`;
-
-  return name;
 }

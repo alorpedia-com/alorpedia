@@ -10,7 +10,7 @@ import {
   User as UserIcon,
   Clock,
 } from "lucide-react";
-import { VILLAGES } from "@/lib/utils";
+import { VILLAGES, formatAgeGrade } from "@/lib/utils";
 
 export default function DialoguePage() {
   const { data: session } = useSession();
@@ -131,9 +131,14 @@ export default function DialoguePage() {
                           {discussion.author.village}
                         </span>
                         <span className="hidden sm:inline">•</span>
-                        <span className="text-accent">
-                          {discussion.author.ageGrade}
-                        </span>
+                        <div className="flex items-center space-x-1 text-accent">
+                          <span className="font-bold">
+                            {formatAgeGrade(discussion.author.ageGrade).name}
+                          </span>
+                          <span className="opacity-40 font-medium lowercase tracking-normal">
+                            {formatAgeGrade(discussion.author.ageGrade).years}
+                          </span>
+                        </div>
                       </div>
                     </div>
                   </div>

@@ -14,6 +14,7 @@ import {
 } from "lucide-react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
+import { formatAgeGrade } from "@/lib/utils";
 
 export default function DiscussionDetailsPage({
   params,
@@ -179,35 +180,61 @@ export default function DiscussionDetailsPage({
             {discussion.replies?.map((r: any) => (
               <div
                 key={r.id}
-                className="bg-card border border-border rounded-xl p-6 shadow-sm"
+                className="bg-card border border-border rounded-xl p-4 sm:p-6 shadow-sm flex flex-col sm:flex-row space-y-4 sm:space-y-0 sm:space-x-4 transition-all hover:shadow-md"
               >
-                <div className="flex items-start space-x-4">
-                  <div className="w-10 h-10 bg-secondary/10 rounded-lg flex items-center justify-center text-secondary font-bold">
+                <div className="flex items-center sm:items-start sm:flex-shrink-0 space-x-3 sm:space-x-0">
+                  <div className="w-10 h-10 sm:w-12 sm:h-12 bg-secondary/10 rounded-xl flex items-center justify-center text-secondary font-bold border border-secondary/5">
                     {r.author.name[0]}
                   </div>
-                  <div className="flex-grow">
-                    <div className="flex items-center justify-between mb-3 underline decoration-secondary/10 underline-offset-4">
-                      <div className="flex items-center space-x-3">
-                        <span className="font-serif font-bold text-primary">
-                          {r.author.name}
+                  <div className="sm:hidden">
+                    <span className="block font-serif font-bold text-primary leading-tight">
+                      {r.author.name}
+                    </span>
+                    <span className="block text-[10px] text-foreground/40 font-medium tracking-tight">
+                      {new Date(r.createdAt).toLocaleDateString()}
+                    </span>
+                  </div>
+                </div>
+                <div className="flex-grow">
+                  <div className="hidden sm:flex items-center justify-between mb-2">
+                    <div className="flex items-center space-x-3">
+                      <span className="font-serif font-bold text-primary text-base">
+                        {r.author.name}
+                      </span>
+                      <div className="flex items-center space-x-2 text-[9px] uppercase font-bold tracking-widest text-foreground/40 font-sans">
+                        <span className="text-secondary bg-secondary/5 px-2 py-0.5 rounded">
+                          {r.author.village}
                         </span>
-                        <div className="flex items-center space-x-2 text-[8px] uppercase font-bold tracking-[0.2em] text-foreground/40 font-sans">
-                          <span className="text-secondary">
-                            {r.author.village}
+                        <div className="flex items-center space-x-1 text-accent bg-accent/5 px-2 py-0.5 rounded">
+                          <span className="font-bold">
+                            {formatAgeGrade(r.author.ageGrade).name}
                           </span>
-                          <span className="text-accent">
-                            {r.author.ageGrade}
+                          <span className="opacity-50 font-medium lowercase tracking-normal">
+                            {formatAgeGrade(r.author.ageGrade).years}
                           </span>
                         </div>
                       </div>
-                      <span className="text-[10px] text-foreground/30 font-medium">
-                        {new Date(r.createdAt).toLocaleDateString()}
+                    </div>
+                    <span className="text-[10px] text-foreground/30 font-medium">
+                      {new Date(r.createdAt).toLocaleDateString()}
+                    </span>
+                  </div>
+                  <div className="sm:hidden flex flex-wrap gap-2 mb-2">
+                    <span className="text-secondary bg-secondary/5 text-[8px] font-bold px-2 py-0.5 rounded uppercase tracking-widest">
+                      {r.author.village}
+                    </span>
+                    <div className="inline-flex items-center space-x-1 text-accent bg-accent/5 px-2 py-0.5 rounded uppercase tracking-widest">
+                      <span className="text-[8px] font-bold">
+                        {formatAgeGrade(r.author.ageGrade).name}
+                      </span>
+                      <span className="text-[7px] opacity-70 font-medium lowercase tracking-normal">
+                        {formatAgeGrade(r.author.ageGrade).years}
                       </span>
                     </div>
-                    <p className="text-foreground/70 text-sm leading-relaxed">
-                      {r.content}
-                    </p>
                   </div>
+                  <p className="text-foreground/70 text-sm leading-relaxed sm:text-base">
+                    {r.content}
+                  </p>
                 </div>
               </div>
             ))}
