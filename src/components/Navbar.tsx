@@ -1,15 +1,11 @@
 "use client";
 
-import { useState } from "react";
 import Link from "next/link";
 import { useSession, signOut } from "next-auth/react";
-import { Trees, Menu, X } from "lucide-react";
+import { Trees, User } from "lucide-react";
 
 export default function Navbar() {
   const { data: session } = useSession();
-  const [isMenuOpen, setIsMenuOpen] = useState(false);
-
-  const toggleMenu = () => setIsMenuOpen(!isMenuOpen);
 
   const navLinks = [
     { href: "/archive", label: "Archive" },
@@ -47,114 +43,61 @@ export default function Navbar() {
             ))}
           </div>
 
-          <div className="flex items-center space-x-4">
-            {/* Desktop Auth */}
-            <div className="hidden md:flex items-center space-x-4">
-              {session ? (
-                <>
-                  <Link
-                    href="/profile"
-                    className="text-sm font-bold uppercase tracking-widest hover:text-accent"
-                  >
-                    {session.user?.name || "Profile"}
-                  </Link>
-                  <button
-                    onClick={() => signOut()}
-                    className="bg-secondary px-5 py-2.5 rounded-xl text-sm font-bold uppercase tracking-widest hover:bg-secondary/90 transition-all active:scale-95 shadow-md"
-                  >
-                    Sign Out
-                  </button>
-                </>
-              ) : (
-                <>
-                  <Link
-                    href="/login"
-                    className="text-sm font-bold uppercase tracking-widest hover:text-accent"
-                  >
-                    Login
-                  </Link>
-                  <Link
-                    href="/register"
-                    className="bg-accent text-primary px-5 py-2.5 rounded-xl text-sm font-bold uppercase tracking-widest hover:bg-accent/90 transition-all active:scale-95 shadow-md"
-                  >
-                    Join
-                  </Link>
-                </>
-              )}
-            </div>
+          {/* Desktop Auth */}
+          <div className="hidden md:flex items-center space-x-4">
+            {session ? (
+              <>
+                <Link
+                  href="/profile"
+                  className="text-sm font-bold uppercase tracking-widest hover:text-accent"
+                >
+                  {session.user?.name || "Profile"}
+                </Link>
+                <button
+                  onClick={() => signOut()}
+                  className="bg-secondary px-5 py-2.5 rounded-xl text-sm font-bold uppercase tracking-widest hover:bg-secondary/90 transition-all active:scale-95 shadow-md"
+                >
+                  Sign Out
+                </button>
+              </>
+            ) : (
+              <>
+                <Link
+                  href="/login"
+                  className="text-sm font-bold uppercase tracking-widest hover:text-accent"
+                >
+                  Login
+                </Link>
+                <Link
+                  href="/register"
+                  className="bg-accent text-primary px-5 py-2.5 rounded-xl text-sm font-bold uppercase tracking-widest hover:bg-accent/90 transition-all active:scale-95 shadow-md"
+                >
+                  Join
+                </Link>
+              </>
+            )}
+          </div>
 
-            {/* Mobile Menu Button */}
-            <button
-              onClick={toggleMenu}
-              className="md:hidden p-2 text-background hover:text-accent transition-colors"
-            >
-              {isMenuOpen ? (
-                <X className="w-8 h-8" />
-              ) : (
-                <Menu className="w-8 h-8" />
-              )}
-            </button>
+          {/* Mobile Auth/Profile Icon - Keep it simple as a native app header */}
+          <div className="md:hidden">
+            {session ? (
+              <Link
+                href="/profile"
+                className="w-10 h-10 bg-accent text-primary rounded-full flex items-center justify-center font-bold shadow-sm active:scale-90 transition-transform"
+              >
+                {session.user?.name?.[0] || <User className="w-5 h-5" />}
+              </Link>
+            ) : (
+              <Link
+                href="/login"
+                className="text-xs font-bold uppercase tracking-widest text-accent border border-accent/30 px-3 py-1.5 rounded-lg active:scale-95"
+              >
+                Login
+              </Link>
+            )}
           </div>
         </div>
       </div>
-
-      {/* Mobile Menu Overlay */}
-      {isMenuOpen && (
-        <div className="md:hidden fixed inset-0 top-20 bg-primary/95 backdrop-blur-xl z-40 animate-fadeIn overflow-y-auto">
-          <div className="flex flex-col space-y-4 p-6">
-            {navLinks.map((link) => (
-              <Link
-                key={link.href}
-                href={link.href}
-                onClick={toggleMenu}
-                className="text-2xl font-serif font-bold border-b border-border/10 pb-4 hover:text-accent transition-colors"
-              >
-                {link.label}
-              </Link>
-            ))}
-
-            <div className="pt-8 space-y-4">
-              {session ? (
-                <>
-                  <Link
-                    href="/profile"
-                    onClick={toggleMenu}
-                    className="block text-xl font-bold"
-                  >
-                    My Profile ({session.user?.name})
-                  </Link>
-                  <button
-                    onClick={() => {
-                      signOut();
-                      toggleMenu();
-                    }}
-                    className="w-full bg-secondary py-4 rounded-xl text-lg font-bold shadow-lg"
-                  >
-                    Sign Out
-                  </button>
-                </>
-              ) : (
-                <>
-                  <Link
-                    href="/login"
-                    onClick={toggleMenu}
-                    className="block text-xl font-bold"
-                  >
-                    Login
-                  </Link>
-                  <Link
-                    href="/register"
-                    onClick={toggleMenu}
-                    className="block w-full bg-accent text-primary text-center py-4 rounded-xl text-lg font-bold shadow-lg"
-                  >
-                    Join Alorpedia
-                  </Link>
-                </>
-              )}
-            </div>
-          </div>
-        </div>
-      )}
     </nav>
   );
 }

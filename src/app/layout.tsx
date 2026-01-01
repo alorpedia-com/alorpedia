@@ -3,6 +3,7 @@ import { Inter, Playfair_Display } from "next/font/google";
 import "./globals.css";
 import NextAuthSessionProvider from "@/components/SessionProvider";
 import Navbar from "@/components/Navbar";
+import MobileNav from "@/components/MobileNav";
 
 const inter = Inter({
   variable: "--font-inter",
@@ -32,7 +33,8 @@ export default function RootLayout({
       >
         <NextAuthSessionProvider>
           <Navbar />
-          <main className="flex-grow">{children}</main>
+          <main className="flex-grow pb-20 md:pb-0">{children}</main>
+          <MobileNav />
         </NextAuthSessionProvider>
       </body>
     </html>

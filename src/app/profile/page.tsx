@@ -73,86 +73,86 @@ export default function ProfilePage() {
   const user = session?.user as any;
 
   return (
-    <div className="max-w-4xl mx-auto px-4 py-12 sm:px-6 lg:px-8 bg-background min-h-screen">
-      <div className="bg-card shadow-lg rounded-2xl overflow-hidden border border-border">
+    <div className="max-w-4xl mx-auto px-native py-native bg-background min-h-screen">
+      <div className="card-premium overflow-hidden border-none shadow-2xl">
         {/* Header/Cover Placeholder */}
-        <div className="h-24 sm:h-32 bg-primary/10 relative">
-          <div className="absolute -bottom-10 sm:-bottom-12 left-6 sm:left-8">
-            <div className="w-20 h-20 sm:w-24 sm:h-24 bg-card rounded-2xl border-4 border-card flex items-center justify-center shadow-md">
-              <User className="w-10 h-10 sm:w-12 sm:h-12 text-primary" />
+        <div className="h-32 sm:h-48 bg-primary/10 relative">
+          <div className="absolute -bottom-12 sm:-bottom-16 left-8 sm:left-12">
+            <div className="w-24 h-24 sm:w-32 sm:h-32 bg-card rounded-3xl border-8 border-card flex items-center justify-center shadow-2xl">
+              <User className="w-12 h-12 sm:w-16 sm:h-16 text-primary" />
             </div>
           </div>
         </div>
 
-        <div className="pt-14 sm:pt-16 pb-6 sm:pb-8 px-5 sm:px-8">
-          <div className="flex flex-col sm:flex-row sm:justify-between sm:items-start gap-4">
-            <div>
-              <h1 className="text-2xl sm:text-3xl font-serif font-bold text-primary">
+        <div className="pt-20 sm:pt-24 pb-8 sm:pb-12 px-8 sm:px-12">
+          <div className="flex flex-col sm:flex-row sm:justify-between sm:items-start gap-6">
+            <div className="space-y-2">
+              <h1 className="font-serif font-bold text-primary tracking-tight">
                 {user?.name || "Member Name"}
               </h1>
-              <p className="text-secondary font-medium text-sm">
+              <p className="text-secondary font-black text-xs uppercase tracking-[0.2em] opacity-80">
                 alor.pedia/u/{user?.id?.substring(0, 8)}
               </p>
             </div>
             {!isEditingBio && (
               <button
                 onClick={() => setIsEditingBio(true)}
-                className="w-full sm:w-auto px-4 py-2 border border-primary text-primary rounded-xl text-sm font-bold hover:bg-primary/5 transition-all active:scale-95"
+                className="w-full sm:w-auto px-6 py-2.5 border-2 border-primary text-primary rounded-2xl text-xs font-black uppercase tracking-widest hover:bg-primary/5 transition-all active:scale-95"
               >
                 Edit Bio
               </button>
             )}
           </div>
 
-          <div className="mt-8 grid grid-cols-1 sm:grid-cols-3 gap-4 sm:gap-6 border-t border-border pt-8">
-            <div className="flex items-center space-x-3 text-foreground/80 bg-background/30 p-4 rounded-2xl border border-border/50">
-              <div className="p-2 bg-secondary/10 rounded-lg text-secondary flex-shrink-0">
-                <MapPin className="w-5 h-5" />
+          <div className="mt-12 grid grid-cols-1 sm:grid-cols-3 gap-6 sm:gap-8 border-t border-border/30 pt-12">
+            <div className="flex items-center space-x-4 bg-primary/5 p-5 rounded-2xl border border-primary/10 shadow-sm">
+              <div className="p-3 bg-secondary text-background rounded-xl flex-shrink-0 shadow-lg">
+                <MapPin className="w-6 h-6" />
               </div>
-              <div>
-                <p className="text-[10px] uppercase tracking-wider font-bold text-foreground/50">
+              <div className="space-y-1">
+                <p className="text-[10px] font-black uppercase tracking-[0.2em] text-primary/40">
                   Village
                 </p>
-                <p className="font-serif font-bold text-sm sm:text-base leading-tight">
+                <p className="font-serif font-bold text-base text-primary leading-none">
                   {user?.village || "Not set"}
                 </p>
-                <p className="text-[9px] text-red-600/60 mt-0.5 italic font-medium">
-                  Permanent identity
-                </p>
+                <div className="flex items-center space-x-1">
+                  <span className="w-1 h-1 rounded-full bg-secondary animate-pulse"></span>
+                  <p className="text-[9px] text-secondary font-black uppercase tracking-widest">
+                    Identity
+                  </p>
+                </div>
               </div>
             </div>
 
-            <div className="flex items-center space-x-3 text-foreground/80 bg-background/30 p-4 rounded-2xl border border-border/50">
-              <div className="p-2 bg-accent/10 rounded-lg text-accent flex-shrink-0">
-                <Shield className="w-5 h-5" />
+            <div className="flex items-center space-x-4 bg-primary/5 p-5 rounded-2xl border border-primary/10 shadow-sm">
+              <div className="p-3 bg-accent text-primary rounded-xl flex-shrink-0 shadow-lg">
+                <Shield className="w-6 h-6" />
               </div>
-              <div>
-                <p className="text-[10px] uppercase tracking-wider font-bold text-foreground/50">
+              <div className="space-y-1">
+                <p className="text-[10px] font-black uppercase tracking-[0.2em] text-primary/40">
                   Age Grade
                 </p>
-                <div className="flex flex-col sm:flex-row sm:items-baseline sm:space-x-1">
-                  <p className="font-serif font-bold text-sm sm:text-base leading-tight">
+                <div className="flex flex-col">
+                  <p className="font-serif font-bold text-base text-primary leading-none">
                     {formatAgeGrade(user?.ageGrade).name || "Calculating..."}
                   </p>
-                  <p className="text-[10px] text-foreground/40 font-medium lowercase tracking-normal">
+                  <p className="text-[10px] text-foreground/40 font-black uppercase tracking-widest mt-1">
                     {formatAgeGrade(user?.ageGrade).years}
                   </p>
                 </div>
-                <p className="text-[9px] text-red-600/60 mt-0.5 italic font-medium">
-                  By birth year
-                </p>
               </div>
             </div>
 
-            <div className="flex items-center space-x-3 text-foreground/80 bg-background/30 p-4 rounded-2xl border border-border/50">
-              <div className="p-2 bg-primary/10 rounded-lg text-primary flex-shrink-0">
-                <Calendar className="w-5 h-5" />
+            <div className="flex items-center space-x-4 bg-primary/5 p-5 rounded-2xl border border-primary/10 shadow-sm">
+              <div className="p-3 bg-primary text-background rounded-xl flex-shrink-0 shadow-lg">
+                <Calendar className="w-6 h-6" />
               </div>
-              <div>
-                <p className="text-[10px] uppercase tracking-wider font-bold text-foreground/50">
+              <div className="space-y-1">
+                <p className="text-[10px] font-black uppercase tracking-[0.2em] text-primary/40">
                   Joined
                 </p>
-                <p className="font-medium text-xs sm:text-sm">
+                <p className="font-black text-xs uppercase tracking-widest text-primary">
                   {profileData?.createdAt
                     ? new Date(profileData.createdAt).toLocaleDateString()
                     : "Member since 2024"}
@@ -161,39 +161,39 @@ export default function ProfilePage() {
             </div>
           </div>
 
-          <div className="mt-10">
-            <h3 className="text-lg font-serif font-bold text-primary mb-4 flex items-center justify-between">
+          <div className="mt-16">
+            <h3 className="font-serif font-bold text-primary mb-6 flex items-center justify-between">
               <span>Biography</span>
               {isEditingBio && (
-                <div className="flex space-x-2">
+                <div className="flex space-x-3">
                   <button
                     onClick={() => setIsEditingBio(false)}
-                    className="p-1 px-3 border border-border text-foreground/50 rounded-lg text-xs font-bold hover:bg-foreground/5 transition-all flex items-center space-x-1"
+                    className="p-2 px-4 border border-border/50 text-foreground/40 rounded-xl text-[10px] font-black uppercase tracking-widest hover:bg-foreground/5 transition-all flex items-center space-x-2"
                   >
-                    <X className="w-3 h-3" />
+                    <X className="w-3.5 h-3.5" />
                     <span>Cancel</span>
                   </button>
                   <button
                     onClick={handleUpdateBio}
                     disabled={savingBio}
-                    className="p-1 px-3 bg-primary text-background rounded-lg text-xs font-bold hover:bg-primary/90 transition-all flex items-center space-x-1 shadow-sm disabled:opacity-50"
+                    className="p-2 px-4 bg-primary text-background rounded-xl text-[10px] font-black uppercase tracking-widest hover:bg-primary/90 transition-all flex items-center space-x-2 shadow-lg disabled:opacity-50"
                   >
-                    <Save className="w-3 h-3" />
-                    <span>{savingBio ? "Saving..." : "Save Changes"}</span>
+                    <Save className="w-3.5 h-3.5" />
+                    <span>{savingBio ? "Saving..." : "Save"}</span>
                   </button>
                 </div>
               )}
             </h3>
-            <div className="bg-background/50 border border-border/50 rounded-xl p-6 transition-all">
+            <div className="bg-primary/5 border border-primary/10 rounded-[2rem] p-8 transition-all min-h-[120px] shadow-inner">
               {isEditingBio ? (
                 <textarea
-                  className="w-full bg-background border border-border rounded-lg p-3 text-sm focus:ring-2 focus:ring-primary/20 focus:border-primary outline-none min-h-[150px] resize-none leading-relaxed transition-all italic text-foreground/80"
+                  className="w-full bg-card border border-border/50 rounded-2xl p-5 text-base focus:ring-4 focus:ring-primary/5 focus:border-primary outline-none min-h-[200px] resize-none leading-relaxed transition-all italic text-foreground/80 font-medium"
                   placeholder="Tell the community about your journey and contributions..."
                   value={newBio}
                   onChange={(e) => setNewBio(e.target.value)}
                 />
               ) : (
-                <p className="text-foreground/70 leading-relaxed italic">
+                <p className="text-foreground/70 text-lg leading-relaxed italic font-medium">
                   {profileData?.bio ||
                     "No biography provided yet. Tell the community about your journey and contributions."}
                 </p>
@@ -201,25 +201,25 @@ export default function ProfilePage() {
             </div>
           </div>
 
-          <div className="mt-12">
-            <div className="border-b border-border">
-              <div className="flex space-x-8">
+          <div className="mt-16">
+            <div className="border-b border-border/30">
+              <div className="flex space-x-12">
                 <button
                   onClick={() => setActiveTab("stories")}
-                  className={`pb-4 text-sm font-bold uppercase tracking-wider transition-all border-b-2 ${
+                  className={`pb-6 text-xs font-black uppercase tracking-[0.2em] transition-all border-b-4 ${
                     activeTab === "stories"
                       ? "border-primary text-primary"
-                      : "border-transparent text-foreground/40 hover:text-foreground/60"
+                      : "border-transparent text-foreground/20 hover:text-foreground/40"
                   }`}
                 >
                   My Stories ({profileData?.posts?.length || 0})
                 </button>
                 <button
                   onClick={() => setActiveTab("dialogues")}
-                  className={`pb-4 text-sm font-bold uppercase tracking-wider transition-all border-b-2 ${
+                  className={`pb-6 text-xs font-black uppercase tracking-[0.2em] transition-all border-b-4 ${
                     activeTab === "dialogues"
                       ? "border-primary text-primary"
-                      : "border-transparent text-foreground/40 hover:text-foreground/60"
+                      : "border-transparent text-foreground/20 hover:text-foreground/40"
                   }`}
                 >
                   My Dialogues ({profileData?.discussions?.length || 0})
@@ -227,56 +227,58 @@ export default function ProfilePage() {
               </div>
             </div>
 
-            <div className="mt-6">
+            <div className="mt-10">
               {activeTab === "stories" ? (
-                <div className="space-y-4">
+                <div className="space-y-6">
                   {profileData?.posts?.length > 0 ? (
                     profileData.posts.map((post: any) => (
                       <Link
                         key={post.id}
                         href={`/archive/${post.id}`}
-                        className="block p-4 bg-background/50 border border-border/50 rounded-xl hover:border-primary/30 transition-all group"
+                        className="block p-6 sm:p-8 card-premium group"
                       >
-                        <div className="flex justify-between items-center">
-                          <div>
-                            <span className="text-[10px] font-bold text-accent uppercase tracking-widest bg-accent/5 px-2 py-0.5 rounded">
+                        <div className="flex justify-between items-center gap-6">
+                          <div className="space-y-3">
+                            <span className="text-[10px] font-black text-accent uppercase tracking-[0.2em] bg-accent/5 px-3 py-1 rounded-lg border border-accent/10">
                               {post.type}
                             </span>
-                            <h4 className="mt-1 font-serif font-bold text-primary group-hover:text-secondary transition-colors">
+                            <h3 className="font-serif font-bold text-primary group-hover:text-secondary transition-colors line-clamp-1">
                               {post.title}
-                            </h4>
+                            </h3>
                           </div>
-                          <span className="text-xs text-foreground/40">
+                          <span className="text-[10px] font-black uppercase tracking-widest text-foreground/20 bg-background/50 px-3 py-1.5 rounded-xl border border-border/30 flex-shrink-0">
                             {new Date(post.createdAt).toLocaleDateString()}
                           </span>
                         </div>
                       </Link>
                     ))
                   ) : (
-                    <p className="text-center py-8 text-foreground/40 italic text-sm">
-                      You haven't shared any stories yet.
-                    </p>
+                    <div className="py-16 text-center border-4 border-dashed border-border/30 rounded-[2rem] bg-primary/5">
+                      <p className="text-foreground/40 font-black uppercase tracking-widest text-[10px]">
+                        The archive awaits your story
+                      </p>
+                    </div>
                   )}
                 </div>
               ) : (
-                <div className="space-y-4">
+                <div className="space-y-6">
                   {profileData?.discussions?.length > 0 ? (
                     profileData.discussions.map((discussion: any) => (
                       <Link
                         key={discussion.id}
                         href={`/dialogue/${discussion.id}`}
-                        className="block p-4 bg-background/50 border border-border/50 rounded-xl hover:border-primary/30 transition-all group"
+                        className="block p-6 sm:p-8 card-premium group"
                       >
-                        <div className="flex justify-between items-center">
-                          <div>
-                            <h4 className="font-serif font-bold text-primary group-hover:text-secondary transition-colors">
+                        <div className="flex justify-between items-center gap-6">
+                          <div className="space-y-3">
+                            <h3 className="font-serif font-bold text-primary group-hover:text-secondary transition-colors line-clamp-1">
                               {discussion.title}
-                            </h4>
-                            <p className="text-xs text-foreground/50 mt-1">
+                            </h3>
+                            <p className="text-[10px] font-black uppercase tracking-[0.2em] text-secondary opacity-60">
                               {discussion.village}
                             </p>
                           </div>
-                          <span className="text-xs text-foreground/40">
+                          <span className="text-[10px] font-black uppercase tracking-widest text-foreground/20 bg-background/50 px-3 py-1.5 rounded-xl border border-border/30 flex-shrink-0">
                             {new Date(
                               discussion.createdAt
                             ).toLocaleDateString()}
@@ -285,9 +287,11 @@ export default function ProfilePage() {
                       </Link>
                     ))
                   ) : (
-                    <p className="text-center py-8 text-foreground/40 italic text-sm">
-                      You haven't started any dialogues yet.
-                    </p>
+                    <div className="py-16 text-center border-4 border-dashed border-border/30 rounded-[2rem] bg-primary/5">
+                      <p className="text-foreground/40 font-black uppercase tracking-widest text-[10px]">
+                        Silence is not dialogue
+                      </p>
+                    </div>
                   )}
                 </div>
               )}

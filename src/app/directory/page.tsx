@@ -46,37 +46,37 @@ export default function DirectoryPage() {
   };
 
   return (
-    <div className="max-w-7xl mx-auto px-4 py-12 sm:px-6 lg:px-8 bg-background min-h-screen">
-      <div className="mb-12">
-        <h1 className="text-4xl font-serif font-bold text-primary mb-2">
+    <div className="max-w-7xl mx-auto px-native py-native bg-background min-h-screen">
+      <div className="mb-12 sm:mb-20">
+        <h1 className="text-primary mb-4 leading-tight tracking-tight">
           Global Brain Trust
         </h1>
-        <p className="text-foreground/70 max-w-2xl">
+        <p className="text-foreground/70 max-w-2xl text-lg sm:text-xl font-medium italic border-l-4 border-primary/20 pl-6 py-2">
           Connect with the collective intelligence of Alor. Search for
           professionals, elders, and peers across our global community.
         </p>
       </div>
 
-      <div className="flex flex-col lg:flex-row gap-8 mb-12">
+      <div className="flex flex-col lg:flex-row gap-6 sm:gap-8 mb-12 sm:mb-16">
         {/* Search and Filters */}
         <div className="flex-grow">
-          <form onSubmit={handleSearchSubmit} className="relative">
-            <Search className="absolute left-4 top-1/2 -translate-y-1/2 w-5 h-5 text-foreground/30" />
+          <form onSubmit={handleSearchSubmit} className="relative group">
+            <Search className="absolute left-5 top-1/2 -translate-y-1/2 w-5 h-5 text-foreground/20 group-focus-within:text-primary transition-colors" />
             <input
               type="text"
               placeholder="Search by name..."
-              className="w-full pl-12 pr-4 py-4 rounded-xl border border-border focus:ring-2 focus:ring-primary/20 focus:border-primary outline-none transition-all placeholder:text-foreground/30 text-lg shadow-sm"
+              className="w-full pl-14 pr-6 py-5 rounded-2xl border border-border/50 bg-card/50 backdrop-blur-sm focus:ring-4 focus:ring-primary/5 focus:border-primary outline-none transition-all placeholder:text-foreground/20 text-lg shadow-sm font-medium italic"
               value={search}
               onChange={(e) => setSearch(e.target.value)}
             />
           </form>
         </div>
 
-        <div className="flex flex-wrap gap-4">
-          <div className="flex items-center space-x-2 bg-card border border-border rounded-xl px-4 py-2">
+        <div className="flex flex-wrap gap-4 sm:gap-6">
+          <div className="flex items-center space-x-3 bg-card/50 backdrop-blur-sm border border-border/50 rounded-2xl px-5 py-3 shadow-sm hover:border-primary/30 transition-all focus-within:ring-4 focus-within:ring-primary/5">
             <Filter className="w-4 h-4 text-primary" />
             <select
-              className="bg-transparent text-sm font-bold text-primary outline-none cursor-pointer"
+              className="bg-transparent text-sm font-black text-primary outline-none cursor-pointer uppercase tracking-widest"
               value={village}
               onChange={(e) => setVillage(e.target.value)}
             >
@@ -89,10 +89,10 @@ export default function DirectoryPage() {
             </select>
           </div>
 
-          <div className="flex items-center space-x-2 bg-card border border-border rounded-xl px-4 py-2">
+          <div className="flex items-center space-x-3 bg-card/50 backdrop-blur-sm border border-border/50 rounded-2xl px-5 py-3 shadow-sm hover:border-accent/30 transition-all focus-within:ring-4 focus-within:ring-accent/5">
             <Shield className="w-4 h-4 text-accent" />
             <select
-              className="bg-transparent text-sm font-bold text-primary outline-none cursor-pointer"
+              className="bg-transparent text-sm font-black text-primary outline-none cursor-pointer uppercase tracking-widest"
               value={ageGrade}
               onChange={(e) => setAgeGrade(e.target.value)}
             >
@@ -108,50 +108,54 @@ export default function DirectoryPage() {
       </div>
 
       {loading ? (
-        <div className="flex justify-center items-center py-20">
-          <div className="animate-spin rounded-full h-12 w-12 border-t-2 border-b-2 border-primary"></div>
+        <div className="flex justify-center items-center py-32">
+          <div className="animate-spin rounded-full h-16 w-16 border-t-2 border-b-2 border-primary"></div>
         </div>
       ) : (
-        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6 sm:gap-8">
           {users.map((user) => (
             <div
               key={user.id}
-              className="bg-card border border-border rounded-2xl p-6 shadow-sm hover:shadow-md transition-shadow flex flex-col items-center text-center"
+              className="card-premium p-8 flex flex-col items-center text-center group active:scale-[0.98] border-none shadow-md"
             >
-              <div className="w-20 h-20 bg-primary/10 rounded-2xl flex items-center justify-center mb-4">
-                <UserIcon className="w-10 h-10 text-primary" />
+              <div className="w-24 h-24 bg-primary text-background rounded-[2rem] flex items-center justify-center mb-6 shadow-xl group-hover:scale-110 transition-transform duration-500 ease-out border border-primary/10">
+                <UserIcon className="w-10 h-10" />
               </div>
-              <h3 className="text-xl font-serif font-bold text-primary mb-1">
+              <h3 className="text-xl sm:text-2xl font-serif font-bold text-primary mb-2">
                 {user.name}
               </h3>
-              <p className="text-xs text-foreground/40 font-bold uppercase tracking-widest mb-4">
+              <p className="text-[10px] text-foreground/20 font-black uppercase tracking-[0.2em] mb-6 border border-border/30 px-3 py-1 rounded-lg">
                 Member ID: {user.id.substring(0, 8)}
               </p>
 
-              <div className="space-y-2 w-full pt-4 border-t border-border/50">
-                <div className="flex items-center justify-center space-x-2 text-sm">
-                  <MapPin className="w-4 h-4 text-secondary" />
-                  <span className="font-bold text-foreground/70">
+              <div className="space-y-4 w-full pt-6 border-t border-border/30 mb-8">
+                <div className="flex items-center justify-center space-x-3 text-sm">
+                  <div className="w-8 h-8 bg-secondary/10 rounded-xl flex items-center justify-center">
+                    <MapPin className="w-4 h-4 text-secondary" />
+                  </div>
+                  <span className="font-black text-secondary uppercase tracking-widest text-xs">
                     {user.village}
                   </span>
                 </div>
-                <div className="flex items-center justify-center space-x-2 text-sm">
-                  <Shield className="w-4 h-4 text-accent" />
-                  <div className="flex items-baseline space-x-1">
-                    <span className="font-bold text-foreground/70">
+                <div className="flex items-center justify-center space-x-3 text-sm">
+                  <div className="w-8 h-8 bg-accent/10 rounded-xl flex items-center justify-center">
+                    <Shield className="w-4 h-4 text-accent" />
+                  </div>
+                  <div className="flex items-baseline space-x-2">
+                    <span className="font-black text-accent uppercase tracking-widest text-[10px]">
                       {formatAgeGrade(user.ageGrade).name}
                     </span>
-                    <span className="text-[10px] text-foreground/30 font-medium lowercase tracking-normal">
+                    <span className="text-[9px] text-foreground/30 font-medium lowercase tracking-normal italic">
                       {formatAgeGrade(user.ageGrade).years}
                     </span>
                   </div>
                 </div>
               </div>
 
-              <div className="mt-6 w-full">
+              <div className="mt-auto w-full">
                 <Link
                   href={`/profile/${user.id}`}
-                  className="block w-full py-2 bg-primary/5 text-primary rounded-lg text-sm font-bold hover:bg-primary/10 transition-colors"
+                  className="block w-full py-4 bg-primary text-background rounded-2xl text-[10px] font-black uppercase tracking-[0.2em] shadow-lg hover:shadow-primary/20 hover:-translate-y-1 transition-all active:scale-95"
                 >
                   View Full Profile
                 </Link>
@@ -160,9 +164,9 @@ export default function DirectoryPage() {
           ))}
 
           {users.length === 0 && (
-            <div className="col-span-full py-20 text-center border-2 border-dashed border-border rounded-2xl opacity-50">
-              <UserIcon className="w-16 h-16 text-primary/20 mx-auto mb-4" />
-              <p className="text-primary font-serif italic">
+            <div className="col-span-full py-32 text-center border-4 border-dashed border-primary/10 rounded-[3rem] opacity-50">
+              <UserIcon className="w-20 h-20 text-primary/10 mx-auto mb-6" />
+              <p className="text-primary font-serif italic text-xl">
                 No community members found matching your criteria.
               </p>
             </div>

@@ -42,21 +42,21 @@ export default function DialoguePage() {
   };
 
   return (
-    <div className="max-w-7xl mx-auto px-4 py-12 sm:px-6 lg:px-8 bg-background min-h-screen">
-      <div className="flex flex-col md:flex-row md:items-end justify-between mb-12 gap-6">
-        <div>
-          <h1 className="text-4xl font-serif font-bold text-primary mb-2">
+    <div className="max-w-7xl mx-auto px-native py-native bg-background min-h-screen">
+      <div className="flex flex-col md:flex-row md:items-end justify-between mb-12 gap-8">
+        <div className="space-y-4">
+          <h1 className="font-serif font-bold text-primary tracking-tight">
             Village Dialogue
           </h1>
-          <p className="text-foreground/70 max-w-2xl">
-            A space for consultation and community dialogue. Connect with your
-            neighbors and share your perspective.
+          <p className="text-foreground/70 max-w-2xl text-lg leading-relaxed font-medium">
+            A sacred space for consultation and community dialogue. Connect with
+            kin, share wisdom, and shape our collective future.
           </p>
         </div>
         {session && (
           <Link
             href="/dialogue/create"
-            className="flex items-center space-x-2 bg-primary text-background px-6 py-3 rounded-lg font-bold hover:bg-primary/90 transition-shadow shadow-md"
+            className="flex items-center justify-center space-x-2 bg-primary text-background px-8 py-3.5 rounded-2xl font-black uppercase tracking-widest hover:bg-primary/90 transition-all shadow-xl active:scale-95 text-sm"
           >
             <Plus className="w-5 h-5" />
             <span>Start a Dialogue</span>
@@ -64,21 +64,21 @@ export default function DialoguePage() {
         )}
       </div>
 
-      <div className="flex flex-col lg:flex-row gap-8 lg:gap-12">
+      <div className="flex flex-col lg:flex-row gap-10 lg:gap-16">
         {/* Sidebar Filters */}
-        <aside className="lg:w-64 space-y-8">
-          <div>
-            <h3 className="flex items-center space-x-2 text-xs font-bold text-primary uppercase tracking-widest mb-4">
+        <aside className="lg:w-72 space-y-10 lg:sticky lg:top-32 h-fit">
+          <div className="sticky top-20 bg-background/90 backdrop-blur-xl pt-2 pb-6 -mx-4 px-4 lg:relative lg:top-0 lg:p-0 lg:bg-transparent z-20 border-b border-border/10 lg:border-none">
+            <h4 className="flex items-center space-x-3 text-[10px] font-black text-primary uppercase tracking-[0.2em] mb-5 opacity-60">
               <Filter className="w-4 h-4" />
               <span>By Village</span>
-            </h3>
-            <div className="flex overflow-x-auto lg:flex-col gap-2 pb-4 lg:pb-0 scrollbar-none snap-x">
+            </h4>
+            <div className="flex overflow-x-auto lg:flex-col gap-3 pb-2 lg:pb-0 scrollbar-none snap-x">
               <button
                 onClick={() => setSelectedVillage("All")}
-                className={`flex-shrink-0 px-4 py-2.5 rounded-xl text-xs sm:text-sm font-bold transition-all text-left snap-start ${
+                className={`flex-shrink-0 px-6 py-3 rounded-2xl text-xs font-black uppercase tracking-widest transition-all text-left snap-start border ${
                   selectedVillage === "All"
-                    ? "bg-primary text-background shadow-md border border-primary"
-                    : "bg-card border border-border text-foreground/60 hover:border-primary/50"
+                    ? "bg-primary text-background shadow-xl border-primary scale-105"
+                    : "bg-card border-border/50 text-foreground/40 hover:border-primary/30"
                 }`}
               >
                 All Alor
@@ -87,10 +87,10 @@ export default function DialoguePage() {
                 <button
                   key={village}
                   onClick={() => setSelectedVillage(village)}
-                  className={`flex-shrink-0 px-4 py-2.5 rounded-xl text-xs sm:text-sm font-bold transition-all text-left snap-start ${
+                  className={`flex-shrink-0 px-6 py-3 rounded-2xl text-xs font-black uppercase tracking-widest transition-all text-left snap-start border ${
                     selectedVillage === village
-                      ? "bg-primary text-background shadow-md border border-primary"
-                      : "bg-card border border-border text-foreground/60 hover:border-primary/50"
+                      ? "bg-primary text-background shadow-xl border-primary scale-105"
+                      : "bg-card border-border/50 text-foreground/40 hover:border-primary/30"
                   }`}
                 >
                   {village}
@@ -101,83 +101,88 @@ export default function DialoguePage() {
         </aside>
 
         {/* Discussions List */}
-        <div className="flex-grow space-y-4 sm:space-y-6">
+        <div className="flex-grow space-y-6">
           {loading ? (
-            <div className="flex justify-center items-center py-20">
-              <div className="animate-spin rounded-full h-12 w-12 border-t-2 border-b-2 border-primary"></div>
+            <div className="flex justify-center items-center py-32">
+              <div className="relative w-16 h-16">
+                <div className="absolute inset-0 border-4 border-primary/10 rounded-full"></div>
+                <div className="absolute inset-0 border-4 border-primary rounded-full border-t-transparent animate-spin"></div>
+              </div>
             </div>
           ) : discussions.length > 0 ? (
             discussions.map((discussion) => (
               <Link
                 key={discussion.id}
                 href={`/dialogue/${discussion.id}`}
-                className="block bg-card border border-border rounded-2xl p-5 sm:p-6 hover:shadow-xl transition-all duration-300 group active:scale-[0.98]"
+                className="block card-premium p-6 sm:p-10 group"
               >
-                <div className="flex items-start justify-between mb-4 gap-4">
-                  <div className="flex items-start sm:items-center space-x-3 sm:space-x-4">
-                    <div className="w-10 h-10 sm:w-12 sm:h-12 bg-primary/5 rounded-xl flex-shrink-0 flex items-center justify-center text-primary font-serif font-bold text-lg sm:text-xl border border-primary/10">
+                <div className="flex items-start justify-between mb-6 gap-6">
+                  <div className="flex items-start sm:items-center space-x-4 sm:space-x-6">
+                    <div className="w-12 h-12 sm:w-16 sm:h-16 bg-primary text-background rounded-2xl flex-shrink-0 flex items-center justify-center font-serif font-bold text-xl sm:text-2xl border border-primary/10 shadow-lg group-hover:scale-110 transition-transform">
                       {discussion.author.name[0]}
                     </div>
-                    <div>
-                      <h3 className="text-lg sm:text-xl font-serif font-bold text-primary group-hover:text-secondary transition-colors leading-tight mb-2">
+                    <div className="space-y-2">
+                      <h3 className="text-primary group-hover:text-secondary transition-colors leading-tight line-clamp-2">
                         {discussion.title}
                       </h3>
-                      <div className="flex flex-wrap items-center gap-x-3 gap-y-1 text-[10px] uppercase font-bold tracking-widest text-foreground/40">
+                      <div className="flex flex-wrap items-center gap-x-4 gap-y-2 text-[10px] uppercase font-black tracking-[0.15em]">
                         <span className="text-secondary">
                           {discussion.author.name}
                         </span>
-                        <span className="hidden sm:inline">•</span>
-                        <span className="text-primary bg-primary/5 px-2 py-0.5 rounded border border-primary/10">
+                        <span className="text-primary bg-primary/5 px-2.5 py-1 rounded-lg border border-primary/10 font-bold">
                           {discussion.author.village}
                         </span>
-                        <span className="hidden sm:inline">•</span>
-                        <div className="flex items-center space-x-1 text-accent">
-                          <span className="font-bold">
+                        <div className="flex items-center space-x-2 text-accent bg-accent/5 px-2.5 py-1 rounded-lg border border-accent/10">
+                          <span className="font-bold tracking-widest">
                             {formatAgeGrade(discussion.author.ageGrade).name}
                           </span>
-                          <span className="opacity-40 font-medium lowercase tracking-normal">
+                          <span className="opacity-60 font-medium lowercase tracking-normal italic">
                             {formatAgeGrade(discussion.author.ageGrade).years}
                           </span>
                         </div>
                       </div>
                     </div>
                   </div>
-                  <div className="flex items-center space-x-4 flex-shrink-0">
-                    <div className="flex flex-col items-center bg-background/50 px-2 py-1 rounded-lg border border-border/50">
-                      <MessageSquare className="w-4 h-4 sm:w-5 sm:h-5 text-foreground/20" />
-                      <span className="text-[10px] sm:text-xs font-bold text-foreground/40 mt-1">
+                  <div className="flex items-center flex-shrink-0">
+                    <div className="flex flex-col items-center bg-background/50 px-3 py-2 rounded-2xl border border-border/50 shadow-sm group-hover:border-secondary transition-colors">
+                      <MessageSquare className="w-5 h-5 text-foreground/20 group-hover:text-secondary transition-colors" />
+                      <span className="text-xs font-black text-foreground/40 mt-1">
                         {discussion._count?.replies || 0}
                       </span>
                     </div>
                   </div>
                 </div>
 
-                <p className="text-foreground/70 text-sm mb-6 line-clamp-2 leading-relaxed italic border-l-2 border-primary/10 pl-4">
+                <p className="text-foreground/60 text-base mb-8 line-clamp-2 leading-relaxed font-medium italic border-l-4 border-primary/5 pl-6">
                   {discussion.content}
                 </p>
 
-                <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 pt-4 border-t border-border/50 text-[10px] font-bold text-foreground/30 uppercase tracking-widest">
-                  <div className="flex items-center space-x-2">
-                    <Clock className="w-3 h-3" />
-                    <span>
+                <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-6 pt-6 border-t border-border/30 text-[10px] font-black text-foreground/30 uppercase tracking-[0.2em]">
+                  <div className="flex items-center space-x-3">
+                    <Clock className="w-4 h-4 opacity-50" />
+                    <span className="opacity-60">
                       LATEST ACTIVITY:{" "}
-                      {new Date(discussion.updatedAt).toLocaleDateString()}
+                      <span className="text-foreground/50 tracking-normal">
+                        {new Date(discussion.updatedAt).toLocaleDateString()}
+                      </span>
                     </span>
                   </div>
-                  <div className="flex items-center justify-end space-x-2 text-primary group-hover:text-secondary transition-colors bg-primary/5 sm:bg-transparent px-3 py-2 sm:p-0 rounded-lg">
-                    <span>JOIN DIALOGUE</span>
-                    <Plus className="w-3 h-3" />
+                  <div className="flex items-center justify-end space-x-3 text-primary group-hover:text-secondary transition-all bg-primary/5 sm:bg-transparent px-5 py-3 sm:p-0 rounded-2xl">
+                    <span className="font-black tracking-[0.2em]">
+                      JOIN DIALOGUE
+                    </span>
+                    <Plus className="w-4 h-4" />
                   </div>
                 </div>
               </Link>
             ))
           ) : (
-            <div className="py-16 sm:py-24 text-center border-2 border-dashed border-border rounded-3xl bg-card/30">
-              <MessageSquare className="w-12 h-12 sm:w-16 sm:h-16 text-primary/20 mx-auto mb-4" />
-              <h3 className="text-lg sm:text-xl font-serif font-bold text-primary mb-2 px-4">
-                Silence is not dialogue
-              </h3>
-              <p className="text-foreground/60 mb-8 max-w-sm mx-auto text-sm px-6">
+            <div className="py-24 sm:py-32 text-center border-4 border-dashed border-border/30 rounded-[3rem] bg-card/20 backdrop-blur-sm">
+              <div className="w-24 h-24 bg-primary/5 rounded-[2rem] flex items-center justify-center mx-auto mb-8 animate-pulse text-primary/20">
+                <MessageSquare className="w-12 h-12" />
+              </div>
+              <h2 className="text-primary mb-4">Silence is not dialogue</h2>
+              <p className="text-foreground/60 mb-12 max-w-sm mx-auto text-lg leading-relaxed px-6 font-medium">
                 No discussions found for{" "}
                 {selectedVillage === "All" ? "Alor" : selectedVillage}. Be the
                 one to start the conversation.
@@ -185,14 +190,14 @@ export default function DialoguePage() {
               {session ? (
                 <Link
                   href="/dialogue/create"
-                  className="inline-block bg-primary text-background px-6 py-3 rounded-xl font-bold text-sm hover:bg-primary/90 transition-all shadow-md active:scale-95"
+                  className="inline-block bg-primary text-background px-10 py-5 rounded-[2rem] font-black uppercase tracking-widest shadow-2xl hover:scale-105 active:scale-95 transition-all text-sm"
                 >
                   Start a Dialogue
                 </Link>
               ) : (
                 <Link
                   href="/login"
-                  className="text-primary font-bold hover:underline"
+                  className="text-primary font-black uppercase tracking-widest hover:text-secondary transition-colors text-sm"
                 >
                   Log in to participate
                 </Link>

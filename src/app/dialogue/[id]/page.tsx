@@ -96,209 +96,239 @@ export default function DiscussionDetailsPage({
 
   if (!discussion) return null;
 
-  const isAuthor = session?.user?.email === discussion.author.email;
+  const isAuthor =
+    !!session?.user && (session.user as any).id === discussion.authorId;
 
   return (
-    <div className="max-w-5xl mx-auto px-4 py-12 sm:px-6 lg:px-8 bg-background min-h-screen">
+    <div className="max-w-5xl mx-auto px-native py-native bg-background min-h-screen">
       <Link
         href="/dialogue"
-        className="inline-flex items-center space-x-2 text-primary font-bold mb-8 hover:text-primary/80 transition-colors"
+        className="inline-flex items-center space-x-3 text-primary font-black uppercase tracking-widest mb-10 hover:text-secondary transition-all active:scale-95 text-xs bg-primary/5 px-4 py-2 rounded-xl border border-primary/10 shadow-sm"
       >
         <ChevronLeft className="w-4 h-4" />
         <span>Return to Dialogue Board</span>
       </Link>
 
-      <div className="grid grid-cols-1 lg:grid-cols-4 gap-8">
+      <div className="grid grid-cols-1 lg:grid-cols-4 gap-12 sm:gap-16">
         {/* Discussion Content */}
-        <div className="lg:col-span-3 space-y-8">
-          <article className="bg-card border border-border rounded-2xl overflow-hidden shadow-lg">
-            <div className="p-8 md:p-10">
-              <div className="flex items-center justify-between mb-8 border-b border-border pb-6">
-                <div className="flex items-center space-x-4">
-                  <div className="w-12 h-12 bg-primary/10 rounded-xl flex items-center justify-center text-primary font-bold text-xl font-serif">
+        <div className="lg:col-span-3 space-y-12 sm:space-y-16">
+          <article className="card-premium overflow-hidden border-none shadow-2xl">
+            <div className="p-8 md:p-12 lg:p-16">
+              <div className="flex flex-wrap items-center justify-between gap-6 mb-12 border-b border-border/30 pb-10">
+                <div className="flex items-center space-x-5">
+                  <div className="w-14 h-14 bg-primary text-background rounded-2xl flex items-center justify-center font-bold text-2xl border border-primary/10 shadow-lg">
                     {discussion.author.name[0]}
                   </div>
                   <div>
-                    <div className="flex items-center space-x-2">
-                      <h3 className="font-serif font-bold text-primary">
+                    <div className="flex items-center space-x-3">
+                      <h3 className="font-serif font-bold text-primary text-lg">
                         {discussion.author.name}
                       </h3>
-                      <span className="bg-primary/5 text-primary text-[10px] font-bold px-2 py-0.5 rounded uppercase tracking-widest border border-primary/10">
+                      <span className="bg-primary/5 text-primary text-[9px] font-black px-2 py-0.5 rounded-lg uppercase tracking-[0.2em] border border-primary/10">
                         OP
                       </span>
                     </div>
-                    <div className="flex items-center space-x-3 text-[10px] uppercase font-bold tracking-widest text-foreground/40 mt-1">
-                      <span className="text-secondary">
-                        {discussion.village} VILLAGE
+                    <div className="flex flex-wrap items-center gap-3 text-[10px] uppercase font-black tracking-widest mt-2">
+                      <span className="text-secondary bg-secondary/10 px-3 py-1 rounded-lg border border-secondary/10">
+                        {discussion.village}
                       </span>
-                      <span className="text-accent">
-                        {discussion.author.ageGrade}
-                      </span>
+                      <div className="flex items-center space-x-2 text-accent bg-accent/10 px-3 py-1 rounded-lg border border-accent/10">
+                        <span>
+                          {formatAgeGrade(discussion.author.ageGrade).name}
+                        </span>
+                        <span className="text-[9px] opacity-40 lowercase font-medium tracking-normal italic">
+                          {formatAgeGrade(discussion.author.ageGrade).years}
+                        </span>
+                      </div>
                     </div>
                   </div>
                 </div>
-                <div className="flex items-center space-x-4">
+                <div className="flex items-center space-x-6 shrink-0">
                   {isAuthor && (
                     <button
                       onClick={handleDeleteDiscussion}
-                      className="p-2 text-red-500 hover:bg-red-50 rounded-lg transition-colors border border-red-100 shadow-sm"
+                      className="p-3 bg-red-50 text-red-500 hover:bg-red-500 hover:text-white rounded-xl transition-all border border-red-100 shadow-sm active:scale-95"
                       title="Delete Dialogue"
                     >
-                      <Trash2 className="w-4 h-4" />
+                      <Trash2 className="w-5 h-5" />
                     </button>
                   )}
-                  <div className="flex items-center space-x-2 text-[10px] text-foreground/30 font-bold uppercase tracking-widest">
-                    <Clock className="w-3 h-3" />
+                  <div className="flex items-center space-x-2 text-[10px] text-foreground/20 font-black uppercase tracking-widest italic">
+                    <Clock className="w-3.5 h-3.5" />
                     <span>
-                      STARTED{" "}
                       {new Date(discussion.createdAt).toLocaleDateString()}
                     </span>
                   </div>
                 </div>
               </div>
 
-              <h1 className="text-3xl font-serif font-bold text-primary mb-6 leading-tight">
+              <h1 className="text-primary mb-10 leading-tight tracking-tight">
                 {discussion.title}
               </h1>
 
-              <div className="text-lg leading-relaxed text-foreground/80 whitespace-pre-wrap italic border-l-4 border-secondary/20 pl-6 py-2">
+              <div className="text-lg sm:text-xl leading-relaxed text-foreground/80 whitespace-pre-wrap italic border-l-8 border-secondary/20 pl-8 sm:pl-12 py-2 font-serif selection:bg-secondary/10">
                 {discussion.content}
               </div>
             </div>
           </article>
 
           {/* Replies Section */}
-          <div className="space-y-6">
-            <h2 className="text-xl font-serif font-bold text-primary flex items-center space-x-2">
-              <MessageSquare className="w-5 h-5" />
-              <span>Community Consultation</span>
-              <span className="bg-primary/5 text-primary text-xs px-2 py-0.5 rounded ml-2">
-                {discussion.replies?.length || 0} REPLIES
-              </span>
-            </h2>
-
-            {discussion.replies?.map((r: any) => (
-              <div
-                key={r.id}
-                className="bg-card border border-border rounded-xl p-4 sm:p-6 shadow-sm flex flex-col sm:flex-row space-y-4 sm:space-y-0 sm:space-x-4 transition-all hover:shadow-md"
-              >
-                <div className="flex items-center sm:items-start sm:flex-shrink-0 space-x-3 sm:space-x-0">
-                  <div className="w-10 h-10 sm:w-12 sm:h-12 bg-secondary/10 rounded-xl flex items-center justify-center text-secondary font-bold border border-secondary/5">
-                    {r.author.name[0]}
-                  </div>
-                  <div className="sm:hidden">
-                    <span className="block font-serif font-bold text-primary leading-tight">
-                      {r.author.name}
-                    </span>
-                    <span className="block text-[10px] text-foreground/40 font-medium tracking-tight">
-                      {new Date(r.createdAt).toLocaleDateString()}
-                    </span>
-                  </div>
-                </div>
-                <div className="flex-grow">
-                  <div className="hidden sm:flex items-center justify-between mb-2">
-                    <div className="flex items-center space-x-3">
-                      <span className="font-serif font-bold text-primary text-base">
-                        {r.author.name}
-                      </span>
-                      <div className="flex items-center space-x-2 text-[9px] uppercase font-bold tracking-widest text-foreground/40 font-sans">
-                        <span className="text-secondary bg-secondary/5 px-2 py-0.5 rounded">
-                          {r.author.village}
-                        </span>
-                        <div className="flex items-center space-x-1 text-accent bg-accent/5 px-2 py-0.5 rounded">
-                          <span className="font-bold">
-                            {formatAgeGrade(r.author.ageGrade).name}
-                          </span>
-                          <span className="opacity-50 font-medium lowercase tracking-normal">
-                            {formatAgeGrade(r.author.ageGrade).years}
-                          </span>
-                        </div>
-                      </div>
-                    </div>
-                    <span className="text-[10px] text-foreground/30 font-medium">
-                      {new Date(r.createdAt).toLocaleDateString()}
-                    </span>
-                  </div>
-                  <div className="sm:hidden flex flex-wrap gap-2 mb-2">
-                    <span className="text-secondary bg-secondary/5 text-[8px] font-bold px-2 py-0.5 rounded uppercase tracking-widest">
-                      {r.author.village}
-                    </span>
-                    <div className="inline-flex items-center space-x-1 text-accent bg-accent/5 px-2 py-0.5 rounded uppercase tracking-widest">
-                      <span className="text-[8px] font-bold">
-                        {formatAgeGrade(r.author.ageGrade).name}
-                      </span>
-                      <span className="text-[7px] opacity-70 font-medium lowercase tracking-normal">
-                        {formatAgeGrade(r.author.ageGrade).years}
-                      </span>
-                    </div>
-                  </div>
-                  <p className="text-foreground/70 text-sm leading-relaxed sm:text-base">
-                    {r.content}
-                  </p>
-                </div>
+          <div className="space-y-10">
+            <div className="flex items-center space-x-4 text-primary">
+              <div className="w-12 h-12 bg-secondary/5 rounded-2xl flex items-center justify-center">
+                <MessageSquare className="w-6 h-6 text-secondary" />
               </div>
-            ))}
-
-            {discussion.replies?.length === 0 && (
-              <div className="text-center py-16 bg-primary/5 border border-dashed border-primary/20 rounded-2xl opacity-50">
-                <MessageSquare className="w-12 h-12 text-primary/20 mx-auto mb-4" />
-                <p className="text-primary font-serif italic">
-                  No contributions have been made to this dialogue yet.
+              <div>
+                <h2 className="font-serif font-bold tracking-tight">
+                  Community Consultation
+                </h2>
+                <p className="text-[10px] font-black uppercase tracking-[0.2em] text-foreground/30">
+                  {discussion.replies?.length || 0} contributions published
                 </p>
               </div>
-            )}
+            </div>
+
+            <div className="space-y-8">
+              {discussion.replies?.map((r: any) => (
+                <div
+                  key={r.id}
+                  className="card-premium p-6 sm:p-10 flex flex-col sm:flex-row space-y-6 sm:space-y-0 sm:space-x-8 transition-all hover:shadow-2xl border-none shadow-md"
+                >
+                  <div className="flex items-center sm:items-start sm:flex-shrink-0 space-x-4 sm:space-x-0">
+                    <div className="w-12 h-12 sm:w-16 sm:h-16 bg-secondary text-background rounded-2xl flex items-center justify-center font-bold text-xl border border-secondary/10 shadow-lg">
+                      {r.author.name[0]}
+                    </div>
+                    <div className="sm:hidden space-y-1">
+                      <span className="block font-serif font-bold text-primary leading-tight text-lg">
+                        {r.author.name}
+                      </span>
+                      <div className="flex items-center space-x-2 text-[8px] font-black uppercase tracking-[0.15em]">
+                        <span className="text-secondary">
+                          {r.author.village}
+                        </span>
+                        <span className="text-foreground/20 italic font-medium tracking-normal">
+                          {new Date(r.createdAt).toLocaleDateString()}
+                        </span>
+                      </div>
+                    </div>
+                  </div>
+                  <div className="flex-grow space-y-4">
+                    <div className="hidden sm:flex items-center justify-between mb-2">
+                      <div className="flex items-center space-x-4">
+                        <span className="font-serif font-bold text-primary text-xl">
+                          {r.author.name}
+                        </span>
+                        <div className="flex items-center space-x-3 bg-primary/5 px-3 py-1 rounded-lg border border-primary/10 uppercase font-black tracking-widest text-[9px]">
+                          <span className="text-secondary">
+                            {r.author.village}
+                          </span>
+                          <span className="text-foreground/20">•</span>
+                          <div className="flex items-center space-x-2 text-accent">
+                            <span>
+                              {formatAgeGrade(r.author.ageGrade).name}
+                            </span>
+                            <span className="opacity-40 lowercase font-medium tracking-normal italic">
+                              {formatAgeGrade(r.author.ageGrade).years}
+                            </span>
+                          </div>
+                        </div>
+                      </div>
+                      <span className="text-[10px] text-foreground/20 font-black uppercase tracking-widest italic ml-auto">
+                        {new Date(r.createdAt).toLocaleDateString()}
+                      </span>
+                    </div>
+                    <div className="sm:hidden">
+                      <div className="inline-flex items-center space-x-2 bg-accent/5 px-3 py-1 rounded-lg border border-accent/10 uppercase font-black tracking-widest text-[8px] text-accent">
+                        <span>{formatAgeGrade(r.author.ageGrade).name}</span>
+                        <span className="opacity-40 lowercase font-medium tracking-normal italic">
+                          {formatAgeGrade(r.author.ageGrade).years}
+                        </span>
+                      </div>
+                    </div>
+                    <p className="text-foreground/60 text-base leading-relaxed sm:text-lg font-medium italic border-l-2 border-secondary/10 pl-6">
+                      {r.content}
+                    </p>
+                  </div>
+                </div>
+              ))}
+
+              {discussion.replies?.length === 0 && (
+                <div className="text-center py-20 bg-secondary/5 border border-dashed border-secondary/20 rounded-[3rem] opacity-50">
+                  <MessageSquare className="w-16 h-16 text-secondary/20 mx-auto mb-6" />
+                  <p className="text-primary font-serif italic text-lg">
+                    No contributions have been made to this dialogue yet.
+                  </p>
+                </div>
+              )}
+            </div>
           </div>
         </div>
 
         {/* Action Sidebar */}
-        <div className="space-y-6">
-          <div className="bg-card border border-border rounded-xl p-6 shadow-sm sticky top-8">
-            <h3 className="text-sm font-bold text-primary uppercase tracking-widest mb-4 flex items-center space-x-2">
-              <Send className="w-4 h-4" />
+        <div className="space-y-8">
+          <div className="card-premium p-8 border-none shadow-xl sticky top-24">
+            <h3 className="text-[10px] font-black text-primary uppercase tracking-[0.25em] mb-8 flex items-center space-x-3">
+              <div className="w-8 h-8 bg-primary/5 rounded-xl flex items-center justify-center">
+                <Send className="w-4 h-4" />
+              </div>
               <span>Your Contribution</span>
             </h3>
 
             {session ? (
-              <form onSubmit={handleReplySubmit} className="space-y-4">
+              <form onSubmit={handleReplySubmit} className="space-y-6">
                 <textarea
                   placeholder="Share your perspective..."
-                  className="w-full bg-background border border-border rounded-lg p-3 text-sm focus:ring-2 focus:ring-primary/20 focus:border-primary outline-none min-h-[150px] resize-none leading-relaxed transition-all"
+                  className="w-full bg-primary/5 border border-primary/10 rounded-2xl p-4 text-base focus:ring-4 focus:ring-primary/5 focus:border-primary outline-none min-h-[180px] resize-none leading-relaxed transition-all font-medium italic"
                   value={reply}
                   onChange={(e) => setReply(e.target.value)}
                 />
                 <button
                   type="submit"
                   disabled={submittingReply || !reply.trim()}
-                  className="w-full bg-primary text-background py-3 rounded-lg font-bold text-sm hover:bg-primary/90 transition-all shadow-md active:scale-95 disabled:opacity-50 disabled:scale-100"
+                  className="w-full bg-primary text-background py-4 rounded-2xl font-black uppercase tracking-[0.2em] text-xs hover:bg-primary/90 transition-all shadow-xl active:scale-95 disabled:opacity-50 disabled:scale-100"
                 >
                   {submittingReply ? "Consulting..." : "Publish Contribution"}
                 </button>
               </form>
             ) : (
-              <div className="text-center py-4">
-                <p className="text-xs text-foreground/60 mb-4">
+              <div className="text-center py-6">
+                <p className="text-sm text-foreground/40 mb-6 font-serif italic">
                   You must be logged in to participate in village dialogue.
                 </p>
                 <Link
                   href="/login"
-                  className="text-primary font-bold text-sm hover:underline"
+                  className="inline-block bg-primary text-background px-8 py-3 rounded-xl font-black uppercase tracking-widest text-[10px] shadow-lg hover:scale-105 transition-all"
                 >
-                  Log in to join
+                  Enter the Hub
                 </Link>
               </div>
             )}
           </div>
 
-          <div className="bg-secondary/5 border border-secondary/10 rounded-xl p-6">
-            <h4 className="text-[10px] font-bold text-secondary uppercase tracking-widest mb-3 flex items-center space-x-2">
-              <Shield className="w-3 h-3" />
+          <div className="bg-accent/5 border border-accent/10 rounded-[2rem] p-8 shadow-inner">
+            <h4 className="text-[9px] font-black text-accent uppercase tracking-[0.3em] mb-6 flex items-center space-x-3">
+              <div className="w-6 h-6 bg-accent/10 rounded-lg flex items-center justify-center">
+                <Shield className="w-3 h-3" />
+              </div>
               <span>Village Protocol</span>
             </h4>
-            <ul className="text-[11px] text-foreground/60 space-y-3 leading-relaxed">
-              <li>• Always acknowledge your village roots.</li>
-              <li>• Respect the wisdom of your elders.</li>
-              <li>• Support the growth of our youth.</li>
-              <li>• Build through consensus and dialogue.</li>
+            <ul className="text-[11px] text-foreground/50 space-y-4 leading-relaxed font-black uppercase tracking-[0.1em]">
+              <li className="flex items-start space-x-3">
+                <span className="text-accent mt-1">•</span>
+                <span>Acknowledge your roots</span>
+              </li>
+              <li className="flex items-start space-x-3">
+                <span className="text-accent mt-1">•</span>
+                <span>Respect elder wisdom</span>
+              </li>
+              <li className="flex items-start space-x-3">
+                <span className="text-accent mt-1">•</span>
+                <span>Support youth growth</span>
+              </li>
+              <li className="flex items-start space-x-3">
+                <span className="text-accent mt-1">•</span>
+                <span>Seek consensus</span>
+              </li>
             </ul>
           </div>
         </div>

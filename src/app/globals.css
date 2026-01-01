@@ -21,10 +21,38 @@
 }
 
 @layer base {
+  :root {
+    --font-size-base: clamp(0.875rem, 0.8rem + 0.375vw, 1rem);
+    --font-size-lg: clamp(1rem, 0.95rem + 0.25vw, 1.125rem);
+    --font-size-xl: clamp(1.125rem, 1.05rem + 0.375vw, 1.25rem);
+    --font-size-2xl: clamp(1.25rem, 1.15rem + 0.5vw, 1.5rem);
+    --font-size-3xl: clamp(1.5rem, 1.25rem + 1.25vw, 2rem);
+    --font-size-4xl: clamp(2rem, 1.5rem + 2.5vw, 3rem);
+  }
+
   body {
     background: var(--background);
     color: var(--foreground);
+    font-size: var(--font-size-base);
+    line-height: 1.6;
     @apply antialiased transition-colors duration-300;
+  }
+
+  h1 {
+    font-size: var(--font-size-4xl);
+    line-height: 1.1;
+  }
+  h2 {
+    font-size: var(--font-size-3xl);
+    line-height: 1.2;
+  }
+  h3 {
+    font-size: var(--font-size-2xl);
+    line-height: 1.3;
+  }
+  h4 {
+    font-size: var(--font-size-xl);
+    line-height: 1.4;
   }
 
   /* Page Fade-in Animation */
@@ -60,12 +88,22 @@
   }
 }
 
-@layer components {
-  .btn-transition {
-    @apply transition-all duration-300 ease-[cubic-bezier(0.4,0,0.2,1)] active:scale-[0.98];
-  }
+@utility btn-transition {
+  @apply transition-all duration-300 ease-[cubic-bezier(0.4,0,0.2,1)] active:scale-[0.98];
+}
 
-  .glass-panel {
-    @apply bg-white/80 backdrop-blur-md border border-white/20 shadow-sm;
-  }
+@utility glass-panel {
+  @apply bg-white/80 backdrop-blur-md border border-white/20 shadow-sm;
+}
+
+@utility px-native {
+  @apply px-4 sm:px-6 lg:px-8;
+}
+
+@utility py-native {
+  @apply py-6 sm:py-10 lg:py-16;
+}
+
+@utility card-premium {
+  @apply bg-card rounded-2xl border border-border/50 shadow-sm hover:shadow-md transition-shadow active:scale-[0.99];
 }

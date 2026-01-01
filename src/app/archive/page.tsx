@@ -50,32 +50,32 @@ export default function ArchivePage() {
   );
 
   return (
-    <div className="max-w-7xl mx-auto px-4 py-8 sm:py-12 sm:px-6 lg:px-8 bg-background min-h-screen">
-      <div className="flex flex-col md:flex-row md:justify-between md:items-end mb-8 sm:mb-12 gap-6">
-        <div className="flex-grow">
-          <h1 className="text-3xl sm:text-4xl font-serif font-bold text-primary mb-2">
+    <div className="max-w-7xl mx-auto px-native py-native bg-background min-h-screen">
+      <div className="flex flex-col md:flex-row md:justify-between md:items-end mb-10 sm:mb-16 gap-8">
+        <div className="flex-grow space-y-4">
+          <h1 className="font-serif font-bold text-primary tracking-tight">
             Living Archive
           </h1>
-          <p className="text-foreground/70 max-w-2xl text-sm sm:text-base">
-            A collective memory of Alor. Explore the stories, biographies, and
+          <p className="text-foreground/70 max-w-2xl text-lg leading-relaxed">
+            A collective memory of Alor. Explore stories, biographies, and
             historical records preserved by our community.
           </p>
         </div>
         <div className="flex flex-col sm:flex-row items-stretch sm:items-center gap-4">
-          <div className="relative flex-grow sm:w-64">
+          <div className="relative flex-grow sm:w-72">
             <input
               type="text"
               placeholder="Search stories..."
-              className="w-full bg-card border border-border rounded-xl px-4 py-2.5 pl-10 text-sm focus:ring-2 focus:ring-primary/20 focus:border-primary outline-none transition-all"
+              className="w-full bg-card border border-border/50 rounded-2xl px-5 py-3 pl-12 text-sm focus:ring-4 focus:ring-primary/5 focus:border-primary outline-none transition-all shadow-sm"
               value={searchQuery}
               onChange={(e) => setSearchQuery(e.target.value)}
             />
-            <Filter className="w-4 h-4 text-foreground/30 absolute left-3 top-1/2 -translate-y-1/2" />
+            <Filter className="w-5 h-5 text-foreground/20 absolute left-4 top-1/2 -translate-y-1/2" />
           </div>
           {session && (
             <Link
               href="/archive/create"
-              className="flex items-center justify-center space-x-2 bg-primary text-background px-6 py-2.5 rounded-xl font-bold hover:bg-primary/90 transition-all shadow-md active:scale-95 text-sm sm:text-base"
+              className="flex items-center justify-center space-x-2 bg-primary text-background px-8 py-3 rounded-2xl font-black uppercase tracking-widest hover:bg-primary/90 transition-all shadow-lg active:scale-95 text-sm"
             >
               <Plus className="w-5 h-5" />
               <span>Contribute</span>
@@ -84,23 +84,23 @@ export default function ArchivePage() {
         </div>
       </div>
 
-      <div className="flex flex-col lg:flex-row gap-8 lg:gap-12">
+      <div className="flex flex-col lg:flex-row gap-10 lg:gap-16">
         {/* Sidebar Filters */}
-        <aside className="lg:w-64 space-y-6 lg:space-y-10 lg:sticky lg:top-32 h-fit">
-          <div className="sticky top-20 bg-background/80 backdrop-blur-md pt-2 pb-4 -mx-4 px-4 lg:relative lg:top-0 lg:p-0 lg:bg-transparent z-20">
+        <aside className="lg:w-72 space-y-10 lg:sticky lg:top-32 h-fit">
+          <div className="sticky top-20 bg-background/90 backdrop-blur-xl pt-2 pb-6 -mx-4 px-4 lg:relative lg:top-0 lg:p-0 lg:bg-transparent z-20 border-b border-border/10 lg:border-none">
             {/* Village Filter */}
-            <div className="mb-4 lg:mb-8">
-              <h3 className="flex items-center space-x-2 text-[10px] font-bold text-primary uppercase tracking-widest mb-3">
-                <Filter className="w-3.5 h-3.5" />
+            <div className="mb-8 lg:mb-12">
+              <h4 className="flex items-center space-x-3 text-[10px] font-black text-primary uppercase tracking-[0.2em] mb-5 opacity-60">
+                <Filter className="w-4 h-4" />
                 <span>By Village</span>
-              </h3>
-              <div className="flex overflow-x-auto lg:flex-col gap-2 pb-2 lg:pb-0 scrollbar-none snap-x">
+              </h4>
+              <div className="flex overflow-x-auto lg:flex-col gap-3 pb-2 lg:pb-0 scrollbar-none snap-x">
                 <button
                   onClick={() => setSelectedVillage("All")}
-                  className={`flex-shrink-0 px-4 py-2 rounded-xl text-[11px] sm:text-xs font-bold transition-all text-left snap-start ${
+                  className={`flex-shrink-0 px-6 py-3 rounded-2xl text-xs font-black uppercase tracking-widest transition-all text-left snap-start border ${
                     selectedVillage === "All"
-                      ? "bg-primary text-background shadow-md border border-primary"
-                      : "bg-card border border-border text-foreground/60 hover:border-primary/50"
+                      ? "bg-primary text-background shadow-xl border-primary scale-105"
+                      : "bg-card border-border/50 text-foreground/40 hover:border-primary/30"
                   }`}
                 >
                   All Alor
@@ -109,10 +109,10 @@ export default function ArchivePage() {
                   <button
                     key={village}
                     onClick={() => setSelectedVillage(village)}
-                    className={`flex-shrink-0 px-4 py-2 rounded-xl text-[11px] sm:text-xs font-bold transition-all text-left snap-start ${
+                    className={`flex-shrink-0 px-6 py-3 rounded-2xl text-xs font-black uppercase tracking-widest transition-all text-left snap-start border ${
                       selectedVillage === village
-                        ? "bg-primary text-background shadow-md border border-primary"
-                        : "bg-card border border-border text-foreground/60 hover:border-primary/50"
+                        ? "bg-primary text-background shadow-xl border-primary scale-105"
+                        : "bg-card border-border/50 text-foreground/40 hover:border-primary/30"
                     }`}
                   >
                     {village}
@@ -123,19 +123,19 @@ export default function ArchivePage() {
 
             {/* Entry Type Filter */}
             <div>
-              <h3 className="flex items-center space-x-2 text-[10px] font-bold text-primary uppercase tracking-widest mb-3">
-                <Filter className="w-3.5 h-3.5" />
+              <h4 className="flex items-center space-x-3 text-[10px] font-black text-primary uppercase tracking-[0.2em] mb-5 opacity-60">
+                <Filter className="w-4 h-4" />
                 <span>Entry Type</span>
-              </h3>
-              <div className="flex overflow-x-auto lg:flex-col gap-2 pb-2 lg:pb-0 scrollbar-none snap-x">
+              </h4>
+              <div className="flex overflow-x-auto lg:flex-col gap-3 pb-2 lg:pb-0 scrollbar-none snap-x">
                 {["All", "ARTICLE", "BIOGRAPHY"].map((type) => (
                   <button
                     key={type}
                     onClick={() => setSelectedType(type)}
-                    className={`flex-shrink-0 px-4 py-2 rounded-xl text-[11px] sm:text-xs font-bold transition-all text-left uppercase snap-start ${
+                    className={`flex-shrink-0 px-6 py-3 rounded-2xl text-xs font-black uppercase tracking-widest transition-all text-left snap-start border ${
                       selectedType === type
-                        ? "bg-accent text-primary shadow-md border border-accent"
-                        : "bg-card border border-border text-foreground/60 hover:border-accent/50"
+                        ? "bg-accent text-primary shadow-xl border-accent scale-105"
+                        : "bg-card border-border/50 text-foreground/40 hover:border-accent/30"
                     }`}
                   >
                     {type === "All" ? "All Types" : type}
@@ -149,73 +149,79 @@ export default function ArchivePage() {
         {/* Posts List */}
         <div className="flex-grow">
           {loading ? (
-            <div className="flex justify-center items-center py-20">
-              <div className="animate-spin rounded-full h-12 w-12 border-t-2 border-b-2 border-primary"></div>
+            <div className="flex justify-center items-center py-32">
+              <div className="relative w-16 h-16">
+                <div className="absolute inset-0 border-4 border-primary/10 rounded-full"></div>
+                <div className="absolute inset-0 border-4 border-primary rounded-full border-t-transparent animate-spin"></div>
+              </div>
             </div>
           ) : (
-            <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 sm:gap-6 lg:gap-8">
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-6 lg:gap-10">
               {filteredPosts.length > 0 ? (
                 filteredPosts.map((post) => (
                   <Link
                     key={post.id}
                     href={`/archive/${post.id}`}
-                    className="group bg-card rounded-2xl border border-border overflow-hidden hover:shadow-xl transition-all duration-300 flex flex-col active:scale-[0.98]"
+                    className="group card-premium overflow-hidden flex flex-col"
                   >
-                    <div className="h-40 sm:h-48 w-full relative overflow-hidden">
+                    <div className="h-56 sm:h-64 w-full relative overflow-hidden">
                       {post.imageUrl ? (
                         <img
                           src={post.imageUrl}
                           alt={post.title}
-                          className="object-cover w-full h-full group-hover:scale-105 transition-transform duration-500"
+                          className="object-cover w-full h-full group-hover:scale-110 transition-transform duration-700 ease-out"
                         />
                       ) : (
                         <div className="w-full h-full bg-primary/5 flex items-center justify-center">
-                          <BookOpen className="w-10 h-10 text-primary/10" />
+                          <BookOpen className="w-16 h-16 text-primary/10 group-hover:scale-110 transition-transform duration-700" />
                         </div>
                       )}
-                      <div className="absolute top-4 left-4">
-                        <span className="bg-accent/90 text-primary text-[10px] font-bold uppercase tracking-widest px-2 py-1 rounded-lg backdrop-blur-sm shadow-sm">
+                      <div className="absolute top-6 left-6">
+                        <span className="bg-accent text-primary text-[10px] font-black uppercase tracking-[0.2em] px-3 py-1.5 rounded-xl shadow-2xl backdrop-blur-md">
                           {post.type}
                         </span>
                       </div>
                     </div>
-                    <div className="p-4 sm:p-6 flex-grow flex flex-col">
-                      <div className="flex items-center space-x-2 text-[10px] text-secondary mb-3 font-bold uppercase tracking-wider">
-                        <span className="bg-primary/5 text-primary px-2 py-0.5 rounded border border-primary/10">
+                    <div className="p-6 sm:p-8 flex-grow flex flex-col">
+                      <div className="flex items-center space-x-3 text-[10px] font-black uppercase tracking-[0.15em] mb-4">
+                        <span className="text-secondary bg-secondary/5 px-2.5 py-1 rounded-lg border border-secondary/10">
                           {post.author.village}
                         </span>
-                        <span>•</span>
-                        <span className="text-foreground/40">
+                        <span className="text-foreground/20 italic font-medium tracking-normal">
                           {new Date(post.createdAt).toLocaleDateString()}
                         </span>
                       </div>
-                      <h3 className="text-base sm:text-xl font-serif font-bold text-primary mb-2 group-hover:text-secondary transition-colors line-clamp-2 leading-tight">
+                      <h3 className="text-primary mb-3 group-hover:text-secondary transition-colors line-clamp-2 leading-tight">
                         {post.title}
                       </h3>
-                      <p className="text-foreground/70 text-xs sm:text-sm line-clamp-3 mb-4 flex-grow italic">
+                      <p className="text-foreground/60 text-sm line-clamp-3 mb-6 flex-grow leading-relaxed font-medium italic">
                         {post.content}
                       </p>
-                      <div className="flex items-center justify-between pt-4 border-t border-border/50">
-                        <div className="flex items-center space-x-2">
-                          <div className="w-6 h-6 bg-primary/10 rounded-full flex items-center justify-center text-primary text-[10px] font-bold border border-primary/10">
+                      <div className="flex items-center justify-between pt-6 border-t border-border/30">
+                        <div className="flex items-center space-x-3">
+                          <div className="w-8 h-8 bg-primary text-background rounded-xl flex items-center justify-center font-bold shadow-md border border-primary/10 group-hover:scale-110 transition-transform">
                             {post.author.name[0]}
                           </div>
-                          <span className="text-[10px] sm:text-[11px] font-bold text-foreground/80">
+                          <span className="text-xs font-black uppercase tracking-wider text-foreground/80">
                             {post.author.name}
                           </span>
                         </div>
-                        <ChevronRight className="w-4 h-4 text-primary group-hover:translate-x-1 transition-transform" />
+                        <div className="w-8 h-8 rounded-full bg-primary/5 flex items-center justify-center group-hover:bg-primary group-hover:text-background transition-colors">
+                          <ChevronRight className="w-4 h-4 group-hover:translate-x-1 transition-transform" />
+                        </div>
                       </div>
                     </div>
                   </Link>
                 ))
               ) : (
-                <div className="col-span-full py-16 sm:py-24 text-center border-2 border-dashed border-border rounded-3xl bg-card/30">
-                  <BookOpen className="w-12 h-12 sm:w-16 sm:h-16 text-primary/20 mx-auto mb-4" />
-                  <h3 className="text-lg sm:text-xl font-serif font-bold text-primary mb-2 px-4">
+                <div className="col-span-full py-24 sm:py-32 text-center border-4 border-dashed border-border/30 rounded-[3rem] bg-card/20 backdrop-blur-sm">
+                  <div className="w-24 h-24 bg-primary/5 rounded-[2rem] flex items-center justify-center mx-auto mb-8 animate-pulse">
+                    <BookOpen className="w-12 h-12 text-primary/20" />
+                  </div>
+                  <h2 className="text-primary mb-4">
                     The archive awaits your story
-                  </h3>
-                  <p className="text-foreground/60 mb-8 max-w-sm mx-auto text-sm px-6">
+                  </h2>
+                  <p className="text-foreground/60 mb-12 max-w-sm mx-auto text-lg leading-relaxed px-6">
                     No entries have been published yet{" "}
                     {selectedVillage !== "All" && `for ${selectedVillage}`}. Be
                     the first to document our heritage.
@@ -223,14 +229,14 @@ export default function ArchivePage() {
                   {session ? (
                     <Link
                       href="/archive/create"
-                      className="inline-block bg-primary text-background px-6 py-3 rounded-xl font-bold text-sm hover:bg-primary/90 transition-all shadow-md active:scale-95"
+                      className="inline-block bg-primary text-background px-10 py-5 rounded-[2rem] font-black uppercase tracking-widest shadow-2xl hover:scale-105 active:scale-95 transition-all"
                     >
-                      Create the first entry
+                      Create first entry
                     </Link>
                   ) : (
                     <Link
                       href="/login"
-                      className="text-primary font-bold hover:underline"
+                      className="text-primary font-black uppercase tracking-widest hover:text-secondary transition-colors"
                     >
                       Log in to contribute
                     </Link>

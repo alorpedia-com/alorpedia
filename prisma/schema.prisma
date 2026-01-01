@@ -105,7 +105,7 @@ model Relationship {
   id        String     @id @default(cuid())
   fromId    String
   toId      String
-  type      String     // PARENT_CHILD, SPOUSE, SIBLING
+  type      String     // PARENT_CHILD, SPOUSE, SIBLING, GRANDPARENT_GRANDCHILD, AUNT_UNCLE_NIECE_NEPHEW, COUSIN
   isFlagged Boolean    @default(false)
   from      FamilyNode @relation("RelationshipFrom", fields: [fromId], references: [id])
   to        FamilyNode @relation("RelationshipTo", fields: [toId], references: [id])

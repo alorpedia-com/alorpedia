@@ -7,12 +7,15 @@ import {
   Plus,
   UserPlus,
   ShieldAlert,
+  Shield,
   Trash2,
   Heart,
   Users,
   ChevronRight,
   Search,
 } from "lucide-react";
+import TreeOnboardingModal from "@/components/TreeOnboardingModal";
+import TreeVisualization from "@/components/TreeVisualization";
 
 export default function TreeOfLife() {
   const { data: session } = useSession();
@@ -22,6 +25,8 @@ export default function TreeOfLife() {
 
   const [isAddNodeOpen, setIsAddNodeOpen] = useState(false);
   const [isRelateOpen, setIsRelateOpen] = useState(false);
+  const [showOnboarding, setShowOnboarding] = useState(false);
+  const [viewMode, setViewMode] = useState<"grid" | "tree">("tree"); // Default to tree view
 
   const [newNode, setNewNode] = useState({
     name: "",
@@ -33,6 +38,19 @@ export default function TreeOfLife() {
     toId: "",
     type: "PARENT_CHILD",
   });
+
+  // Check if user has seen onboarding
+  useEffect(() => {
+    const hasSeenOnboarding = localStorage.getItem("tree_onboarding_seen");
+    if (!hasSeenOnboarding) {
+      setShowOnboarding(true);
+    }
+  }, []);
+
+  const handleCloseOnboarding = () => {
+    localStorage.setItem("tree_onboarding_seen", "true");
+    setShowOnboarding(false);
+  };
 
   useEffect(() => {
     fetchFamily();
@@ -111,28 +129,36 @@ export default function TreeOfLife() {
   }
 
   return (
-    <div className="max-w-7xl mx-auto px-4 py-12 sm:px-6 lg:px-8 bg-background min-h-screen">
-      <div className="flex flex-col md:flex-row md:items-end justify-between mb-12 gap-6">
-        <div>
-          <h1 className="text-4xl font-serif font-bold text-primary mb-2">
+    <div className="max-w-7xl mx-auto px-native py-native bg-background min-h-screen">
+      <div className="flex flex-col md:flex-row md:items-end justify-between mb-12 sm:mb-20 gap-8">
+        <div className="space-y-4">
+          <h1 className="text-primary leading-tight tracking-tight">
             Osisi Ndụ
           </h1>
-          <p className="text-foreground/70 max-w-2xl text-lg">
+          <p className="text-foreground/70 max-w-2xl text-lg sm:text-xl font-medium italic border-l-4 border-primary/20 pl-6 py-2">
             "The Tree of Life." Map your lineage, preserve your roots, and
             connect with the living branches of your family.
           </p>
         </div>
-        <div className="flex space-x-4">
+        <div className="flex flex-col sm:flex-row gap-4 shrink-0">
+          <button
+            onClick={() => setShowOnboarding(true)}
+            className="flex items-center justify-center space-x-3 bg-accent/10 text-accent px-6 py-4 rounded-2xl font-black uppercase tracking-widest text-xs hover:bg-accent/20 transition-all border border-accent/20 active:scale-95"
+            title="Show Tutorial"
+          >
+            <Heart className="w-5 h-5" />
+            <span className="hidden sm:inline">Tutorial</span>
+          </button>
           <button
             onClick={() => setIsAddNodeOpen(true)}
-            className="flex items-center space-x-2 bg-primary text-background px-6 py-3 rounded-lg font-bold hover:bg-primary/90 transition-shadow shadow-md"
+            className="flex items-center justify-center space-x-3 bg-primary text-background px-8 py-4 rounded-2xl font-black uppercase tracking-widest text-xs hover:bg-primary/90 transition-all shadow-xl active:scale-95"
           >
             <UserPlus className="w-5 h-5" />
             <span>Add Member</span>
           </button>
           <button
             onClick={() => setIsRelateOpen(true)}
-            className="flex items-center space-x-2 bg-secondary text-background px-6 py-3 rounded-lg font-bold hover:bg-secondary/90 transition-shadow shadow-md"
+            className="flex items-center justify-center space-x-3 bg-secondary text-background px-8 py-4 rounded-2xl font-black uppercase tracking-widest text-xs hover:bg-secondary/90 transition-all shadow-xl active:scale-95"
           >
             <GitBranch className="w-5 h-5" />
             <span>Link Roots</span>
@@ -140,161 +166,251 @@ export default function TreeOfLife() {
         </div>
       </div>
 
-      <div className="grid grid-cols-1 lg:grid-cols-3 gap-12">
+      <div className="grid grid-cols-1 lg:grid-cols-3 gap-12 sm:gap-16">
         {/* Connection visualization / Tree Structure */}
-        <div className="lg:col-span-2 space-y-8">
-          <div className="bg-card border border-border rounded-3xl p-8 min-h-[500px] shadow-sm relative overflow-hidden">
+        <div className="lg:col-span-2 space-y-12 sm:space-y-16">
+          <div className="card-premium p-8 sm:p-12 min-h-[500px] border-none shadow-2xl relative overflow-hidden group">
             {/* Background pattern */}
-            <div className="absolute inset-0 opacity-[0.03] pointer-events-none bg-[url('https://www.transparenttextures.com/patterns/leaf.png')]" />
+            <div className="absolute inset-0 opacity-[0.05] pointer-events-none bg-[url('https://www.transparenttextures.com/patterns/leaf.png')] group-hover:scale-110 transition-transform duration-[10s] ease-linear" />
 
-            <h2 className="text-sm font-bold text-primary uppercase tracking-widest mb-8 flex items-center space-x-2">
-              <Users className="w-4 h-4" />
-              <span>Ancestral Branches</span>
-            </h2>
+            <div className="relative z-10">
+              <div className="flex items-center justify-between mb-12">
+                <h2 className="text-[10px] font-black text-primary uppercase tracking-[0.25em] flex items-center space-x-3">
+                  <div className="w-8 h-8 bg-primary/5 rounded-xl flex items-center justify-center">
+                    <Users className="w-4 h-4" />
+                  </div>
+                  <span>Ancestral Branches</span>
+                </h2>
 
-            {nodes.length === 0 ? (
-              <div className="flex flex-col items-center justify-center h-[400px] text-center">
-                <GitBranch className="w-16 h-16 text-primary/10 mb-4" />
-                <p className="text-primary font-serif italic max-w-xs">
-                  Your family tree is waiting for its first seed. Start by
-                  adding your parents or grandparents.
-                </p>
-              </div>
-            ) : (
-              <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-                {nodes.map((node) => (
-                  <div
-                    key={node.id}
-                    className={`p-6 rounded-2xl border-2 transition-all flex items-center justify-between group ${
-                      node.userId
-                        ? "border-primary/20 bg-primary/5"
-                        : "border-border bg-card"
+                {/* View Toggle */}
+                <div className="flex items-center space-x-2 bg-primary/5 rounded-xl p-1">
+                  <button
+                    onClick={() => setViewMode("tree")}
+                    className={`px-4 py-2 rounded-lg text-[10px] font-black uppercase tracking-widest transition-all ${
+                      viewMode === "tree"
+                        ? "bg-primary text-background shadow-lg"
+                        : "text-primary/40 hover:text-primary"
                     }`}
                   >
-                    <div>
-                      <h3 className="font-serif font-bold text-primary text-lg">
-                        {node.name}
-                      </h3>
-                      <div className="flex items-center space-x-2 mt-1">
-                        <span className="text-[10px] uppercase font-bold tracking-widest text-foreground/40">
-                          {node.gender}
-                        </span>
-                        {node.userId && (
-                          <span className="bg-primary text-background text-[8px] font-bold px-1.5 py-0.5 rounded uppercase">
-                            Linked User
-                          </span>
-                        )}
-                      </div>
-                    </div>
-                    <ChevronRight className="w-4 h-4 text-foreground/20 group-hover:text-primary transition-colors" />
-                  </div>
-                ))}
+                    Tree
+                  </button>
+                  <button
+                    onClick={() => setViewMode("grid")}
+                    className={`px-4 py-2 rounded-lg text-[10px] font-black uppercase tracking-widest transition-all ${
+                      viewMode === "grid"
+                        ? "bg-primary text-background shadow-lg"
+                        : "text-primary/40 hover:text-primary"
+                    }`}
+                  >
+                    Grid
+                  </button>
+                </div>
               </div>
-            )}
+
+              {nodes.length === 0 ? (
+                <div className="flex flex-col items-center justify-center h-[400px] text-center">
+                  <div className="w-24 h-24 bg-primary/5 rounded-[2rem] flex items-center justify-center mb-8 border border-primary/10">
+                    <GitBranch className="w-12 h-12 text-primary/20" />
+                  </div>
+                  <p className="text-primary font-serif italic text-xl max-w-xs leading-relaxed">
+                    Your family tree is waiting for its first seed. Start by
+                    adding your parents or grandparents.
+                  </p>
+                </div>
+              ) : viewMode === "tree" ? (
+                <TreeVisualization
+                  nodes={nodes}
+                  relationships={relationships}
+                />
+              ) : (
+                <div className="grid grid-cols-1 sm:grid-cols-2 gap-6">
+                  {nodes.map((node) => {
+                    const NodeWrapper = node.userId ? "a" : "div";
+                    const wrapperProps = node.userId
+                      ? { href: `/profile/${node.userId}` }
+                      : {};
+
+                    return (
+                      <NodeWrapper
+                        key={node.id}
+                        {...wrapperProps}
+                        className={`p-6 sm:p-8 rounded-[2rem] border-2 transition-all flex items-center justify-between group/node ${
+                          node.userId
+                            ? "border-primary/20 bg-primary/5 shadow-inner cursor-pointer hover:shadow-xl active:scale-95"
+                            : "border-border/30 bg-card shadow-sm cursor-default opacity-75"
+                        }`}
+                      >
+                        <div className="space-y-2">
+                          <h3 className="font-serif font-bold text-primary text-xl">
+                            {node.name}
+                          </h3>
+                          <div className="flex items-center space-x-3">
+                            <span className="text-[9px] uppercase font-black tracking-widest text-foreground/30 px-2 py-0.5 rounded-lg bg-foreground/5 border border-border/20">
+                              {node.gender}
+                            </span>
+                            {node.userId && (
+                              <span className="bg-primary text-background text-[8px] font-black px-2 py-1 rounded-lg uppercase tracking-widest shadow-lg">
+                                Linked
+                              </span>
+                            )}
+                          </div>
+                        </div>
+                        {node.userId && (
+                          <div className="w-10 h-10 bg-primary/5 rounded-xl flex items-center justify-center group-hover/node:bg-primary group-hover/node:text-background transition-all">
+                            <ChevronRight className="w-5 h-5 transition-transform group-hover/node:translate-x-1" />
+                          </div>
+                        )}
+                      </NodeWrapper>
+                    );
+                  })}
+                </div>
+              )}
+            </div>
           </div>
 
           {/* Relationships List / Disputes */}
-          <div className="bg-card border border-border rounded-3xl p-8 shadow-sm">
-            <h2 className="text-sm font-bold text-primary uppercase tracking-widest mb-8 flex items-center space-x-2">
-              <ShieldAlert className="w-4 h-4 text-accent" />
+          <div className="card-premium p-6 sm:p-8 lg:p-12 border-none shadow-xl">
+            <h2 className="text-[10px] font-black text-primary uppercase tracking-[0.25em] mb-6 sm:mb-8 lg:mb-12 flex items-center space-x-3">
+              <div className="w-8 h-8 bg-accent/5 rounded-xl flex items-center justify-center">
+                <ShieldAlert className="w-4 h-4 text-accent" />
+              </div>
               <span>Relationship Records</span>
             </h2>
 
-            <div className="space-y-4">
-              {relationships.map((rel) => {
-                const fromNode = nodes.find((n) => n.id === rel.fromId);
-                const toNode = nodes.find((n) => n.id === rel.toId);
-                if (!fromNode || !toNode) return null;
+            {/* Scrollable container */}
+            <div className="max-h-[600px] overflow-y-auto pr-2 -mr-2">
+              <div className="grid grid-cols-1 gap-3 sm:gap-4 lg:gap-6">
+                {relationships.map((rel) => {
+                  const fromNode = nodes.find((n) => n.id === rel.fromId);
+                  const toNode = nodes.find((n) => n.id === rel.toId);
+                  if (!fromNode || !toNode) return null;
 
-                return (
-                  <div
-                    key={rel.id}
-                    className={`flex items-center justify-between p-4 rounded-xl border transition-all ${
-                      rel.isFlagged
-                        ? "bg-red-50 border-red-200"
-                        : "bg-background/50 border-border/50"
-                    }`}
-                  >
-                    <div className="flex items-center space-x-4">
-                      <span className="font-serif font-bold text-primary">
-                        {fromNode.name}
-                      </span>
-                      <div className="flex flex-col items-center">
-                        <div className="h-px w-8 bg-foreground/20 relative">
-                          <Plus className="w-3 h-3 absolute -top-1.5 left-2.5 text-foreground/40 bg-background" />
-                        </div>
-                        <span className="text-[8px] font-bold text-foreground/40 mt-1 uppercase tracking-widest">
-                          {rel.type.replace("_", " ")}
-                        </span>
-                      </div>
-                      <span className="font-serif font-bold text-primary">
-                        {toNode.name}
-                      </span>
-                    </div>
-
-                    <button
-                      onClick={() => toggleFlag(rel.id, rel.isFlagged)}
-                      className={`p-2 rounded-lg transition-all ${
+                  return (
+                    <div
+                      key={rel.id}
+                      className={`flex flex-col sm:flex-row items-center justify-between p-4 sm:p-6 rounded-xl sm:rounded-2xl border transition-all gap-4 sm:gap-6 ${
                         rel.isFlagged
-                          ? "bg-red-600 text-white shadow-md shadow-red-200"
-                          : "text-foreground/20 hover:text-red-600 hover:bg-red-50"
+                          ? "bg-red-50/50 border-red-100 shadow-inner"
+                          : "bg-background/50 border-border/30 hover:shadow-md"
                       }`}
-                      title={
-                        rel.isFlagged ? "Uncheck Dispute" : "Report Dispute"
-                      }
                     >
-                      <ShieldAlert className="w-4 h-4" />
-                    </button>
+                      <div className="flex flex-col sm:flex-row items-center space-y-4 sm:space-y-0 sm:space-x-6 w-full sm:w-auto">
+                        <div className="text-center">
+                          <span className="block font-serif font-bold text-primary text-base sm:text-lg">
+                            {fromNode.name}
+                          </span>
+                          <span className="text-[8px] font-black text-foreground/30 uppercase tracking-widest italic">
+                            Branch A
+                          </span>
+                        </div>
+                        <div className="flex flex-col items-center shrink-0">
+                          <div className="h-px w-12 bg-primary/20 relative">
+                            <div className="w-2 h-2 rounded-full bg-primary absolute -top-[3.5px] -left-1 shadow-lg" />
+                            <div className="w-2 h-2 rounded-full bg-primary absolute -top-[3.5px] -right-1 shadow-lg" />
+                            <Plus className="w-4 h-4 absolute -top-2 left-4 text-primary bg-background rounded-full border border-primary/10" />
+                          </div>
+                          <span className="text-[9px] font-black text-primary mt-3 uppercase tracking-[0.2em] bg-primary/5 px-2 py-0.5 rounded-lg whitespace-nowrap">
+                            {rel.type.replace(/_/g, " ")}
+                          </span>
+                        </div>
+                        <div className="text-center">
+                          <span className="block font-serif font-bold text-primary text-base sm:text-lg">
+                            {toNode.name}
+                          </span>
+                          <span className="text-[8px] font-black text-foreground/30 uppercase tracking-widest italic">
+                            Branch B
+                          </span>
+                        </div>
+                      </div>
+
+                      <button
+                        onClick={() => toggleFlag(rel.id, rel.isFlagged)}
+                        className={`w-full sm:w-auto px-4 py-3 sm:p-4 rounded-xl transition-all flex items-center justify-center space-x-2 sm:space-x-3 ${
+                          rel.isFlagged
+                            ? "bg-red-600 text-white shadow-xl shadow-red-200 active:scale-95"
+                            : "text-foreground/20 hover:text-red-600 hover:bg-red-50 border border-transparent hover:border-red-100"
+                        }`}
+                        title={
+                          rel.isFlagged ? "Uncheck Dispute" : "Report Dispute"
+                        }
+                      >
+                        <ShieldAlert className="w-5 h-5" />
+                        <span className="font-black uppercase tracking-widest text-[10px]">
+                          {rel.isFlagged ? "Dispute Active" : "Report Issue"}
+                        </span>
+                      </button>
+                    </div>
+                  );
+                })}
+                {relationships.length === 0 && (
+                  <div className="text-center py-16 sm:py-20 bg-primary/5 border border-dashed border-primary/10 rounded-[2rem] opacity-50">
+                    <div className="w-16 h-16 bg-background rounded-2xl flex items-center justify-center mx-auto mb-6 shadow-sm">
+                      <GitBranch className="w-8 h-8 text-primary/20" />
+                    </div>
+                    <p className="text-primary font-serif italic text-lg">
+                      No relationships have been defined yet.
+                    </p>
                   </div>
-                );
-              })}
-              {relationships.length === 0 && (
-                <p className="text-center py-8 text-foreground/40 italic text-sm">
-                  No relationships defined yet.
-                </p>
-              )}
+                )}
+              </div>
             </div>
           </div>
         </div>
 
         {/* Info Sidebar */}
-        <aside className="space-y-6">
-          <div className="bg-primary text-background rounded-3xl p-8 shadow-xl">
-            <Heart className="w-10 h-10 text-accent mb-4" />
-            <h3 className="text-xl font-serif font-bold mb-4">
-              Preserving Heritage
-            </h3>
-            <p className="text-sm leading-relaxed opacity-90 italic">
-              "When an elder dies, a library burns to the ground." By mapping
-              our roots, we ensure that every branch of the Alor family tree is
-              remembered and celebrated.
-            </p>
+        <aside className="space-y-8">
+          <div className="bg-primary text-background rounded-[2.5rem] p-10 shadow-2xl relative overflow-hidden group">
+            <div className="absolute top-0 right-0 w-32 h-32 bg-accent/10 rounded-full -mr-16 -mt-16 blur-3xl group-hover:bg-accent/20 transition-all duration-1000" />
+
+            <div className="relative z-10">
+              <div className="w-16 h-16 bg-background/10 rounded-2xl flex items-center justify-center mb-8 backdrop-blur-xl border border-background/10">
+                <Heart className="w-8 h-8 text-accent shadow-xl" />
+              </div>
+              <h3 className="text-2xl font-serif font-bold mb-6 tracking-tight">
+                Preserving <br />
+                Heritage
+              </h3>
+              <p className="text-base leading-relaxed opacity-80 italic font-medium border-l-2 border-accent/30 pl-6 py-1">
+                "When an elder dies, a library burns to the ground." By mapping
+                our roots, we ensure that every branch of the Alor family tree
+                is remembered and celebrated.
+              </p>
+            </div>
           </div>
 
-          <div className="bg-card border border-border rounded-3xl p-8">
-            <h4 className="text-xs font-bold text-primary uppercase tracking-widest mb-4">
-              Dispute Guidelines
+          <div className="card-premium p-10 border-none shadow-xl bg-accent/5 backdrop-blur-sm">
+            <h4 className="text-[10px] font-black text-accent uppercase tracking-[0.3em] mb-8 flex items-center space-x-3">
+              <div className="w-6 h-6 bg-accent/10 rounded-lg flex items-center justify-center">
+                <Shield className="w-3 h-3" />
+              </div>
+              <span>Dispute Guidelines</span>
             </h4>
-            <div className="space-y-4">
-              <div className="flex items-start space-x-3">
-                <div className="w-5 h-5 bg-accent/10 rounded-full flex items-center justify-center flex-shrink-0">
-                  <span className="text-[10px] font-bold text-accent">!</span>
+            <ul className="space-y-6">
+              <li className="flex items-start space-x-4 group/item">
+                <div className="w-6 h-6 bg-accent/10 rounded-full flex items-center justify-center flex-shrink-0 group-hover/item:scale-110 transition-transform">
+                  <span className="text-[10px] font-black text-accent">!</span>
                 </div>
-                <p className="text-[11px] text-foreground/60 leading-relaxed">
-                  Flagged relationships are sent to the{" "}
-                  <strong>Council of Elders</strong> for verification.
+                <p className="text-[12px] text-foreground/50 leading-relaxed font-bold uppercase tracking-widest italic">
+                  Flagged links are reviewed by the{" "}
+                  <span className="text-accent underline decoration-accent/30">
+                    Council of Elders
+                  </span>
+                  .
                 </p>
-              </div>
-              <div className="flex items-start space-x-3">
-                <div className="w-5 h-5 bg-accent/10 rounded-full flex items-center justify-center flex-shrink-0">
-                  <span className="text-[10px] font-bold text-accent">!</span>
+              </li>
+              <li className="flex items-start space-x-4 group/item">
+                <div className="w-6 h-6 bg-accent/10 rounded-full flex items-center justify-center flex-shrink-0 group-hover/item:scale-110 transition-transform">
+                  <span className="text-[10px] font-black text-accent">!</span>
                 </div>
-                <p className="text-[11px] text-foreground/60 leading-relaxed">
-                  Avoid adding sensitive information about living relatives
-                  without consent.
+                <p className="text-[12px] text-foreground/50 leading-relaxed font-bold uppercase tracking-widest italic">
+                  Keep lineage details{" "}
+                  <span className="text-primary font-black not-italic">
+                    accurate & respectful
+                  </span>
+                  .
                 </p>
-              </div>
-            </div>
+              </li>
+            </ul>
           </div>
         </aside>
       </div>
@@ -437,6 +553,15 @@ export default function TreeOfLife() {
                     <option value="PARENT_CHILD">Parent-Child</option>
                     <option value="SPOUSE">Spouse</option>
                     <option value="SIBLING">Sibling</option>
+                    <optgroup label="Extended Family">
+                      <option value="GRANDPARENT_GRANDCHILD">
+                        Grandparent-Grandchild
+                      </option>
+                      <option value="AUNT_UNCLE_NIECE_NEPHEW">
+                        Aunt/Uncle-Niece/Nephew
+                      </option>
+                      <option value="COUSIN">Cousin</option>
+                    </optgroup>
                   </select>
                 </div>
                 <div className="flex space-x-3 pt-4">
@@ -458,6 +583,11 @@ export default function TreeOfLife() {
             </div>
           </div>
         </div>
+      )}
+
+      {/* Onboarding Modal */}
+      {showOnboarding && (
+        <TreeOnboardingModal onClose={handleCloseOnboarding} />
       )}
     </div>
   );

@@ -93,66 +93,68 @@ export default function PostPage({
 
   if (!post) return null;
 
-  const isAuthor = session?.user?.email === post.author.email;
+  const isAuthor =
+    !!session?.user && (session.user as any).id === post.authorId;
 
   return (
-    <div className="max-w-4xl mx-auto px-4 py-12 sm:px-6 lg:px-8 bg-background min-h-screen">
+    <div className="max-w-4xl mx-auto px-native py-native bg-background min-h-screen">
       <Link
         href="/archive"
-        className="inline-flex items-center space-x-2 text-primary font-bold mb-8 hover:text-primary/80 transition-colors"
+        className="inline-flex items-center space-x-3 text-primary font-black uppercase tracking-widest mb-10 hover:text-secondary transition-all active:scale-95 text-xs bg-primary/5 px-4 py-2 rounded-xl border border-primary/10 shadow-sm"
       >
         <ChevronLeft className="w-4 h-4" />
-        <span>Back to Archive</span>
+        <span>Return to Archive</span>
       </Link>
 
-      <article className="bg-card border border-border rounded-2xl overflow-hidden shadow-lg mb-8 sm:mb-12">
+      <article className="card-premium overflow-hidden border-none shadow-2xl mb-12 sm:mb-20">
         {post.imageUrl && (
-          <div className="h-48 sm:h-96 w-full relative">
+          <div className="h-64 sm:h-[32rem] w-full relative group">
             <img
               src={post.imageUrl}
               alt={post.title}
-              className="object-cover w-full h-full"
+              className="object-cover w-full h-full group-hover:scale-105 transition-transform duration-1000 ease-out"
             />
-            <div className="absolute top-4 left-4 sm:top-6 sm:left-6">
-              <span className="bg-accent/90 text-primary text-[10px] sm:text-xs font-bold uppercase tracking-widest px-2.5 py-1.5 sm:px-3 sm:py-2 rounded-lg backdrop-blur-sm shadow-sm">
+            <div className="absolute top-8 left-8">
+              <span className="bg-accent text-primary text-[10px] sm:text-xs font-black uppercase tracking-[0.2em] px-4 py-2 rounded-xl shadow-2xl backdrop-blur-xl">
                 {post.type}
               </span>
             </div>
           </div>
         )}
 
-        <div className="p-5 sm:p-8 md:p-12">
-          <div className="mb-6 sm:mb-8 border-b border-border pb-6 sm:pb-8">
-            <div className="grid grid-cols-2 lg:flex lg:flex-wrap items-center gap-4 sm:gap-6 text-xs sm:text-sm text-secondary">
-              <div className="flex items-center space-x-2 bg-primary/5 p-2 rounded-lg border border-primary/5 lg:bg-transparent lg:p-0 lg:border-none">
-                <User className="w-3.5 h-3.5 sm:w-4 sm:h-4 text-primary" />
-                <span className="font-bold truncate">{post.author.name}</span>
+        <div className="p-8 sm:p-12 md:p-16">
+          <div className="mb-10 sm:mb-16 border-b border-border/30 pb-10 sm:pb-16">
+            <div className="flex flex-wrap items-center gap-4 sm:gap-6 text-[10px] sm:text-xs uppercase font-black tracking-widest">
+              <div className="flex items-center space-x-3 bg-primary/5 px-4 py-2 rounded-xl border border-primary/10">
+                <div className="w-6 h-6 bg-primary text-background rounded-lg flex items-center justify-center font-bold text-[10px]">
+                  {post.author.name[0]}
+                </div>
+                <span className="text-primary">{post.author.name}</span>
               </div>
-              <div className="flex items-center space-x-2 bg-secondary/5 p-2 rounded-lg border border-secondary/5 lg:bg-transparent lg:p-0 lg:border-none">
-                <MapPin className="w-3.5 h-3.5 sm:w-4 sm:h-4 text-secondary" />
-                <span className="font-bold uppercase tracking-wider truncate">
-                  {post.author.village}
-                </span>
+              <div className="flex items-center space-x-2 bg-secondary/10 px-4 py-2 rounded-xl border border-secondary/10 text-secondary">
+                <MapPin className="w-3.5 h-3.5" />
+                <span>{post.author.village}</span>
               </div>
-              <div className="flex items-center space-x-2 bg-accent/5 p-2 rounded-lg border border-accent/5 lg:bg-transparent lg:p-0 lg:border-none">
-                <Shield className="w-3.5 h-3.5 sm:w-4 sm:h-4 text-accent" />
-                <span className="font-bold truncate">
-                  {post.author.ageGrade}
-                </span>
+              <div className="flex items-center space-x-2 bg-accent/10 px-4 py-2 rounded-xl border border-accent/10 text-accent">
+                <Shield className="w-3.5 h-3.5" />
+                <div className="flex items-baseline space-x-2">
+                  <span>{formatAgeGrade(post.author.ageGrade).name}</span>
+                  <span className="text-[10px] opacity-40 lowercase font-medium tracking-normal italic">
+                    {formatAgeGrade(post.author.ageGrade).years}
+                  </span>
+                </div>
               </div>
-              <div className="flex items-center space-x-2 bg-foreground/5 p-2 rounded-lg border border-foreground/5 lg:bg-transparent lg:p-0 lg:border-none">
-                <Calendar className="w-3.5 h-3.5 sm:w-4 sm:h-4 text-foreground/40" />
-                <span className="font-medium text-foreground/50 truncate">
-                  {new Date(post.createdAt).toLocaleDateString()}
-                </span>
+              <div className="flex items-center space-x-2 text-foreground/20 font-medium tracking-normal italic ml-auto">
+                <Calendar className="w-3.5 h-3.5" />
+                <span>{new Date(post.createdAt).toLocaleDateString()}</span>
               </div>
             </div>
 
             {isAuthor && (
-              <div className="mt-4 flex justify-end">
+              <div className="mt-8 flex justify-end">
                 <button
                   onClick={handleDeletePost}
-                  className="p-2 text-red-500 hover:bg-red-50 rounded-lg transition-colors border border-red-100 shadow-sm"
+                  className="p-3 bg-red-50 text-red-500 hover:bg-red-500 hover:text-white rounded-xl transition-all border border-red-100 shadow-sm active:scale-95"
                   title="Delete Story"
                 >
                   <Trash2 className="w-5 h-5" />
@@ -161,40 +163,44 @@ export default function PostPage({
             )}
           </div>
 
-          <h1 className="text-2xl sm:text-4xl md:text-5xl font-serif font-bold text-primary mb-6 sm:mb-10 leading-tight">
+          <h1 className="text-primary mb-10 leading-tight tracking-tight">
             {post.title}
           </h1>
 
-          <div className="text-base sm:text-lg leading-relaxed text-foreground/80 space-y-6 whitespace-pre-wrap font-serif italic selection:bg-accent/20">
+          <div className="text-lg sm:text-xl leading-relaxed text-foreground/80 space-y-10 whitespace-pre-wrap font-serif italic selection:bg-accent/20 border-l-8 border-primary/5 pl-8 sm:pl-12">
             {post.content}
           </div>
         </div>
       </article>
 
       {/* Comments Section */}
-      <section className="mt-12">
-        <div className="flex items-center space-x-2 text-primary mb-8">
-          <MessageSquare className="w-6 h-6" />
-          <h2 className="text-2xl font-serif font-bold">Dialogue</h2>
-          <span className="bg-primary/10 text-primary px-2 py-0.5 rounded text-sm font-bold">
-            {post.comments?.length || 0}
-          </span>
+      <section className="mt-20 sm:mt-32">
+        <div className="flex items-center space-x-4 text-primary mb-12">
+          <div className="w-12 h-12 bg-primary/5 rounded-2xl flex items-center justify-center">
+            <MessageSquare className="w-6 h-6" />
+          </div>
+          <div>
+            <h2 className="font-serif font-bold tracking-tight">Dialogue</h2>
+            <p className="text-[10px] font-black uppercase tracking-[0.2em] text-foreground/30">
+              {post.comments?.length || 0} contributions shared
+            </p>
+          </div>
         </div>
 
         {session ? (
-          <form onSubmit={handleCommentSubmit} className="mb-12">
-            <div className="bg-card border border-border rounded-xl p-4 shadow-sm">
+          <form onSubmit={handleCommentSubmit} className="mb-16">
+            <div className="card-premium p-6 sm:p-8 border-none shadow-xl">
               <textarea
                 placeholder="Share your thoughts or add to this account..."
-                className="w-full bg-transparent border-none focus:ring-0 text-foreground/80 leading-relaxed min-h-[100px] resize-none"
+                className="w-full bg-transparent border-none focus:ring-0 text-foreground/70 leading-relaxed min-h-[150px] resize-none text-lg font-medium italic"
                 value={comment}
                 onChange={(e) => setComment(e.target.value)}
               />
-              <div className="flex justify-end pt-4 border-t border-border/50">
+              <div className="flex justify-end pt-6 border-t border-border/30">
                 <button
                   type="submit"
                   disabled={submittingComment || !comment.trim()}
-                  className="bg-primary text-background px-6 py-2 rounded-lg font-bold text-sm hover:bg-primary/90 transition-all disabled:opacity-50"
+                  className="bg-primary text-background px-10 py-4 rounded-2xl font-black uppercase tracking-widest text-xs hover:bg-primary/90 transition-all shadow-lg active:scale-95 disabled:opacity-50"
                 >
                   {submittingComment ? "Sharing..." : "Share Thought"}
                 </button>
@@ -202,65 +208,71 @@ export default function PostPage({
             </div>
           </form>
         ) : (
-          <div className="bg-primary/5 border border-primary/20 rounded-xl p-8 text-center mb-12">
-            <p className="text-primary font-medium mb-4">
+          <div className="bg-primary/5 border border-dashed border-primary/20 rounded-[2rem] p-12 text-center mb-16">
+            <p className="text-primary font-serif text-lg italic mb-6">
               Log in to join the dialogue and contribute to this archive.
             </p>
-            <Link href="/login" className="text-accent underline font-bold">
-              Log in to your account
+            <Link
+              href="/login"
+              className="inline-block bg-primary text-background px-8 py-3 rounded-xl font-black uppercase tracking-widest text-xs shadow-lg hover:scale-105 transition-all"
+            >
+              Enter the Hub
             </Link>
           </div>
         )}
 
-        <div className="space-y-6">
+        <div className="space-y-8">
           {post.comments?.map((c: any) => (
             <div
               key={c.id}
-              className="bg-card border border-border rounded-xl p-4 sm:p-6 shadow-sm flex flex-col sm:flex-row space-y-4 sm:space-y-0 sm:space-x-4 transition-all hover:shadow-md"
+              className="card-premium p-6 sm:p-10 flex flex-col sm:flex-row space-y-6 sm:space-y-0 sm:space-x-8 transition-all hover:shadow-2xl border-none shadow-md"
             >
-              <div className="flex items-center sm:items-start sm:flex-shrink-0 space-x-3 sm:space-x-0">
-                <div className="w-10 h-10 sm:w-12 sm:h-12 bg-primary/10 rounded-xl flex items-center justify-center text-primary font-bold border border-primary/5">
+              <div className="flex items-center sm:items-start sm:flex-shrink-0 space-x-4 sm:space-x-0">
+                <div className="w-12 h-12 sm:w-16 sm:h-16 bg-primary text-background rounded-2xl flex items-center justify-center font-bold text-xl border border-primary/10 shadow-lg">
                   {c.author.name[0]}
                 </div>
-                <div className="sm:hidden">
-                  <span className="block font-serif font-bold text-primary leading-tight">
+                <div className="sm:hidden space-y-1">
+                  <span className="block font-serif font-bold text-primary leading-tight text-lg">
                     {c.author.name}
                   </span>
-                  <span className="block text-[10px] text-foreground/40 font-medium">
-                    {new Date(c.createdAt).toLocaleDateString()}
-                  </span>
+                  <div className="flex items-center space-x-2 text-[8px] font-black uppercase tracking-[0.15em]">
+                    <span className="text-secondary">{c.author.village}</span>
+                    <span className="text-foreground/20 italic font-medium tracking-normal">
+                      {new Date(c.createdAt).toLocaleDateString()}
+                    </span>
+                  </div>
                 </div>
               </div>
-              <div className="flex-grow">
+              <div className="flex-grow space-y-4">
                 <div className="hidden sm:flex items-center justify-between mb-2">
-                  <div className="flex items-center space-x-2">
-                    <span className="font-serif font-bold text-primary text-base">
+                  <div className="flex items-center space-x-4">
+                    <span className="font-serif font-bold text-primary text-xl">
                       {c.author.name}
                     </span>
-                    <div className="flex items-center space-x-1 bg-secondary/10 px-2 py-0.5 rounded uppercase font-sans tracking-tight">
-                      <span className="text-secondary text-[9px] font-bold">
-                        {formatAgeGrade(c.author.ageGrade).name}
-                      </span>
-                      <span className="text-secondary text-[8px] opacity-50 font-medium">
-                        {formatAgeGrade(c.author.ageGrade).years}
-                      </span>
+                    <div className="flex items-center space-x-3 bg-secondary/5 px-3 py-1 rounded-lg border border-secondary/10 uppercase font-black tracking-widest text-[9px]">
+                      <span className="text-secondary">{c.author.village}</span>
+                      <span className="text-foreground/20">•</span>
+                      <div className="flex items-center space-x-2 text-accent">
+                        <span>{formatAgeGrade(c.author.ageGrade).name}</span>
+                        <span className="opacity-40 lowercase font-medium tracking-normal italic">
+                          {formatAgeGrade(c.author.ageGrade).years}
+                        </span>
+                      </div>
                     </div>
                   </div>
-                  <span className="text-[10px] text-foreground/40 font-medium">
+                  <span className="text-[10px] text-foreground/20 font-black uppercase tracking-widest italic ml-auto">
                     {new Date(c.createdAt).toLocaleDateString()}
                   </span>
                 </div>
-                <div className="sm:hidden mb-2">
-                  <div className="inline-flex items-center space-x-1 bg-secondary/10 px-2 py-0.5 rounded uppercase font-sans tracking-tight">
-                    <span className="text-secondary text-[9px] font-bold">
-                      {formatAgeGrade(c.author.ageGrade).name}
-                    </span>
-                    <span className="text-secondary text-[8px] opacity-50 font-medium">
+                <div className="sm:hidden">
+                  <div className="inline-flex items-center space-x-2 bg-accent/5 px-3 py-1 rounded-lg border border-accent/10 uppercase font-black tracking-widest text-[8px] text-accent">
+                    <span>{formatAgeGrade(c.author.ageGrade).name}</span>
+                    <span className="opacity-40 lowercase font-medium tracking-normal italic">
                       {formatAgeGrade(c.author.ageGrade).years}
                     </span>
                   </div>
                 </div>
-                <p className="text-foreground/70 text-sm leading-relaxed sm:text-base">
+                <p className="text-foreground/60 text-base leading-relaxed sm:text-lg font-medium italic border-l-2 border-primary/10 pl-6">
                   {c.content}
                 </p>
               </div>
@@ -268,8 +280,11 @@ export default function PostPage({
           ))}
 
           {post.comments?.length === 0 && (
-            <div className="text-center py-12 text-foreground/40 italic">
-              No thoughts shared yet. Be the first to start the dialogue.
+            <div className="text-center py-20 bg-primary/5 border border-dashed border-primary/20 rounded-[3rem] opacity-50">
+              <MessageSquare className="w-16 h-16 text-primary/20 mx-auto mb-6" />
+              <p className="text-primary font-serif italic text-lg">
+                The dialogue awaits its first contribution.
+              </p>
             </div>
           )}
         </div>
