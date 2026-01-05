@@ -1,227 +1,302 @@
 "use client";
 
+import { signIn } from "next-auth/react";
 import { useState } from "react";
 import { useRouter } from "next/navigation";
-import { VILLAGES, calculateAgeGrade } from "@/lib/utils";
-import { Trees } from "lucide-react";
+import Image from "next/image";
+import { Mail, ArrowLeft } from "lucide-react";
 import Link from "next/link";
 
 export default function Register() {
   const router = useRouter();
+  const [showEmailForm, setShowEmailForm] = useState(false);
   const [formData, setFormData] = useState({
-    name: "",
     email: "",
     password: "",
-    village: VILLAGES[0],
-    birthDate: "",
   });
   const [error, setError] = useState("");
   const [loading, setLoading] = useState(false);
 
-  const handleSubmit = async (e: React.FormEvent) => {
+  const handleGoogleSignIn = async () => {
+    await signIn("google", { callbackUrl: "/onboarding" });
+  };
+
+  const handleEmailSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setLoading(true);
     setError("");
 
     try {
+      // Create account with email/password
       const response = await fetch("/api/register", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
-          ...formData,
-          birthDate: new Date(formData.birthDate).toISOString(),
+          email: formData.email,
+          password: formData.password,
+          provider: "credentials",
         }),
       });
 
+      const data = await response.json();
+
       if (response.ok) {
-        router.push("/login?registered=true");
+        console.log("Registration successful, attempting sign in...");
+        // Sign in and redirect to onboarding
+        const result = await signIn("credentials", {
+          redirect: false,
+          email: formData.email,
+          password: formData.password,
+        });
+
+        console.log("Sign in result:", result);
+
+        if (result?.ok) {
+          console.log("Sign in successful, redirecting to onboarding...");
+          router.refresh();
+          router.push("/onboarding");
+        } else {
+          console.error("Sign in failed:", result?.error);
+          setError(
+            `Failed to sign in after registration: ${
+              result?.error || "Unknown error"
+            }. Please try logging in.`
+          );
+        }
       } else {
-        const data = await response.json();
-        setError(data.message || "Something went wrong");
+        // Display user-friendly error message
+        const errorMessage =
+          data.message || "Registration failed. Please try again.";
+        setError(errorMessage);
+        console.error("Registration error:", data);
       }
     } catch (err) {
-      setError("Failed to register. Please try again.");
+      console.error("Registration exception:", err);
+      setError(
+        "An unexpected error occurred. Please check your connection and try again."
+      );
     } finally {
       setLoading(false);
     }
   };
 
-  const ageGrade = formData.birthDate
-    ? calculateAgeGrade(new Date(formData.birthDate))
-    : "Pending selection";
+  if (showEmailForm) {
+    return (
+      <div className="min-h-screen flex flex-col justify-center py-12 px-5 bg-background">
+        {/* Subtle Home Link */}
+        <Link
+          href="/"
+          className="absolute top-6 left-6 flex items-center space-x-2 text-foreground/40 hover:text-foreground/70 transition-colors group"
+        >
+          <div className="relative w-5 h-5">
+            <Image
+              src="/logo.jpg"
+              alt="Alorpedia"
+              fill
+              className="object-contain"
+            />
+          </div>
+          <span className="text-sm font-medium">Alorpedia</span>
+        </Link>
 
-  return (
-    <div className="min-h-full flex flex-col justify-center py-12 sm:px-6 lg:px-8 bg-background">
-      <div className="sm:mx-auto sm:w-full sm:max-w-md">
-        <div className="flex justify-center">
-          <Trees className="w-12 h-12 text-primary" />
-        </div>
-        <h2 className="mt-6 text-center text-3xl font-serif font-extrabold text-primary">
-          Join the Alor Community
-        </h2>
-        <p className="mt-2 text-center text-sm text-secondary">
-          Secure your heritage and connect with your roots.
-        </p>
-      </div>
+        <div className="w-full max-w-md mx-auto">
+          {/* Back Button */}
+          <button
+            onClick={() => setShowEmailForm(false)}
+            className="flex items-center space-x-2 text-foreground/60 hover:text-foreground mb-6 transition-colors"
+          >
+            <ArrowLeft className="w-5 h-5" />
+            <span className="text-sm font-medium">Back</span>
+          </button>
 
-      <div className="mt-8 sm:mx-auto sm:w-full sm:max-w-md">
-        <div className="bg-card py-8 px-4 border border-border sm:rounded-lg sm:px-10 shadow-sm">
-          <form className="space-y-6" onSubmit={handleSubmit}>
+          {/* Header */}
+          <div className="text-center space-y-3 mb-8">
+            <div className="flex justify-center">
+              <div className="relative w-16 h-16">
+                <Image
+                  src="/logo.jpg"
+                  alt="Alorpedia"
+                  fill
+                  className="object-contain"
+                />
+              </div>
+            </div>
+            <h2 className="text-2xl md:text-3xl font-serif font-bold text-primary">
+              Create Account
+            </h2>
+            <p className="text-sm text-foreground/60">
+              Enter your email to get started
+            </p>
+          </div>
+
+          {/* Email Form */}
+          <form onSubmit={handleEmailSubmit} className="space-y-5">
             {error && (
-              <div className="bg-red-50 border border-red-200 text-red-600 px-4 py-3 rounded text-sm">
+              <div className="bg-red-50 border border-red-200 text-red-600 px-4 py-3 rounded-xl text-sm">
                 {error}
               </div>
             )}
 
             <div>
-              <label
-                htmlFor="name"
-                className="block text-sm font-medium text-foreground"
-              >
-                Full Name
-              </label>
-              <div className="mt-1">
-                <input
-                  id="name"
-                  name="name"
-                  type="text"
-                  required
-                  className="appearance-none block w-full px-3 py-2 border border-border rounded shadow-sm placeholder-gray-400 focus:outline-none focus:ring-primary focus:border-primary sm:text-sm"
-                  value={formData.name}
-                  onChange={(e) =>
-                    setFormData({ ...formData, name: e.target.value })
-                  }
-                />
-              </div>
+              <input
+                type="email"
+                placeholder="Email address"
+                value={formData.email}
+                onChange={(e) =>
+                  setFormData({ ...formData, email: e.target.value })
+                }
+                className="w-full px-4 py-4 text-base border-2 border-border rounded-2xl focus:outline-none focus:ring-2 focus:ring-primary/20 focus:border-primary transition-all"
+                required
+              />
             </div>
 
             <div>
-              <label
-                htmlFor="email"
-                className="block text-sm font-medium text-foreground"
-              >
-                Email address
-              </label>
-              <div className="mt-1">
-                <input
-                  id="email"
-                  name="email"
-                  type="email"
-                  required
-                  className="appearance-none block w-full px-3 py-2 border border-border rounded shadow-sm placeholder-gray-400 focus:outline-none focus:ring-primary focus:border-primary sm:text-sm"
-                  value={formData.email}
-                  onChange={(e) =>
-                    setFormData({ ...formData, email: e.target.value })
-                  }
-                />
-              </div>
+              <input
+                type="password"
+                placeholder="Password (min. 8 characters)"
+                value={formData.password}
+                onChange={(e) =>
+                  setFormData({ ...formData, password: e.target.value })
+                }
+                className="w-full px-4 py-4 text-base border-2 border-border rounded-2xl focus:outline-none focus:ring-2 focus:ring-primary/20 focus:border-primary transition-all"
+                required
+                minLength={8}
+              />
             </div>
 
-            <div>
-              <label
-                htmlFor="village"
-                className="block text-sm font-medium text-foreground"
-              >
-                Village
-              </label>
-              <div className="mt-1">
-                <select
-                  id="village"
-                  name="village"
-                  className="block w-full px-3 py-2 border border-border rounded shadow-sm focus:outline-none focus:ring-primary focus:border-primary sm:text-sm"
-                  value={formData.village}
-                  onChange={(e) =>
-                    setFormData({ ...formData, village: e.target.value })
-                  }
-                >
-                  {VILLAGES.map((v) => (
-                    <option key={v} value={v}>
-                      {v}
-                    </option>
-                  ))}
-                </select>
-              </div>
-            </div>
-
-            <div className="grid grid-cols-2 gap-4">
-              <div>
-                <label
-                  htmlFor="birthDate"
-                  className="block text-sm font-medium text-foreground"
-                >
-                  Date of Birth
-                </label>
-                <div className="mt-1">
-                  <input
-                    id="birthDate"
-                    name="birthDate"
-                    type="date"
-                    required
-                    className="appearance-none block w-full px-3 py-2 border border-border rounded shadow-sm focus:outline-none focus:ring-primary focus:border-primary sm:text-sm"
-                    value={formData.birthDate}
-                    onChange={(e) =>
-                      setFormData({ ...formData, birthDate: e.target.value })
-                    }
-                  />
-                </div>
-              </div>
-              <div>
-                <label className="block text-sm font-medium text-foreground/60">
-                  Assigned Age Grade
-                </label>
-                <div className="mt-1">
-                  <div className="px-3 py-2 border border-border/50 bg-background/50 rounded text-sm text-foreground/70 font-medium">
-                    {ageGrade}
-                  </div>
-                </div>
-              </div>
-            </div>
-
-            <div>
-              <label
-                htmlFor="password"
-                className="block text-sm font-medium text-foreground"
-              >
-                Password
-              </label>
-              <div className="mt-1">
-                <input
-                  id="password"
-                  name="password"
-                  type="password"
-                  required
-                  className="appearance-none block w-full px-3 py-2 border border-border rounded shadow-sm focus:outline-none focus:ring-primary focus:border-primary sm:text-sm"
-                  value={formData.password}
-                  onChange={(e) =>
-                    setFormData({ ...formData, password: e.target.value })
-                  }
-                />
-              </div>
-            </div>
-
-            <div>
-              <button
-                type="submit"
-                disabled={loading}
-                className="w-full flex justify-center py-2 px-4 border border-transparent rounded shadow-sm text-sm font-medium text-background bg-primary hover:bg-primary/90 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-primary disabled:opacity-50"
-              >
-                {loading ? "Registering..." : "Create Account"}
-              </button>
-            </div>
+            <button
+              type="submit"
+              disabled={loading}
+              className="w-full px-6 py-4 bg-primary text-background rounded-2xl font-semibold hover:bg-primary/90 transition-all active:scale-[0.98] disabled:opacity-50 shadow-md"
+            >
+              {loading ? "Creating Account..." : "Continue"}
+            </button>
           </form>
 
-          <div className="mt-6 text-center">
-            <p className="text-sm text-secondary">
-              Already have an account?{" "}
-              <Link
-                href="/login"
-                className="font-medium text-primary hover:text-primary/80"
-              >
-                Log in
-              </Link>
-            </p>
-          </div>
+          {/* Login Link */}
+          <p className="text-center text-sm text-foreground/60 mt-6">
+            Already have an account?{" "}
+            <Link
+              href="/login"
+              className="font-semibold text-primary hover:text-primary/80"
+            >
+              Log in
+            </Link>
+          </p>
         </div>
+      </div>
+    );
+  }
+
+  return (
+    <div className="min-h-screen flex flex-col justify-center py-12 px-5 bg-background">
+      {/* Subtle Home Link */}
+      <Link
+        href="/"
+        className="absolute top-6 left-6 flex items-center space-x-2 text-foreground/40 hover:text-foreground/70 transition-colors group"
+      >
+        <div className="relative w-5 h-5">
+          <Image
+            src="/logo.jpg"
+            alt="Alorpedia"
+            fill
+            className="object-contain"
+          />
+        </div>
+        <span className="text-sm font-medium">Alorpedia</span>
+      </Link>
+
+      <div className="w-full max-w-md mx-auto space-y-8">
+        {/* Logo and Welcome */}
+        <div className="text-center space-y-4">
+          <div className="flex justify-center">
+            <div className="relative w-20 h-20">
+              <Image
+                src="/logo.jpg"
+                alt="Alorpedia"
+                fill
+                className="object-contain"
+              />
+            </div>
+          </div>
+          <h1 className="text-3xl md:text-4xl font-serif font-bold text-primary">
+            Join Alorpedia
+          </h1>
+          <p className="text-base text-foreground/70 leading-relaxed">
+            Connect with your roots and preserve your heritage
+          </p>
+        </div>
+
+        {/* Authentication Options */}
+        <div className="space-y-4 pt-4">
+          {/* Google OAuth */}
+          <button
+            onClick={handleGoogleSignIn}
+            className="w-full flex items-center justify-center space-x-3 px-6 py-4 bg-background border-2 border-border rounded-2xl hover:border-primary/30 hover:bg-primary/5 transition-all active:scale-[0.98] shadow-sm"
+          >
+            <svg className="w-5 h-5" viewBox="0 0 24 24">
+              <path
+                fill="#4285F4"
+                d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92c-.26 1.37-1.04 2.53-2.21 3.31v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.09z"
+              />
+              <path
+                fill="#34A853"
+                d="M12 23c2.97 0 5.46-.98 7.28-2.66l-3.57-2.77c-.98.66-2.23 1.06-3.71 1.06-2.86 0-5.29-1.93-6.16-4.53H2.18v2.84C3.99 20.53 7.7 23 12 23z"
+              />
+              <path
+                fill="#FBBC05"
+                d="M5.84 14.09c-.22-.66-.35-1.36-.35-2.09s.13-1.43.35-2.09V7.07H2.18C1.43 8.55 1 10.22 1 12s.43 3.45 1.18 4.93l2.85-2.22.81-.62z"
+              />
+              <path
+                fill="#EA4335"
+                d="M12 5.38c1.62 0 3.06.56 4.21 1.64l3.15-3.15C17.45 2.09 14.97 1 12 1 7.7 1 3.99 3.47 2.18 7.07l3.66 2.84c.87-2.6 3.3-4.53 6.16-4.53z"
+              />
+            </svg>
+            <span className="font-semibold text-foreground">
+              Continue with Google
+            </span>
+          </button>
+
+          {/* Divider */}
+          <div className="relative">
+            <div className="absolute inset-0 flex items-center">
+              <div className="w-full border-t border-border"></div>
+            </div>
+            <div className="relative flex justify-center text-xs uppercase">
+              <span className="bg-background px-2 text-foreground/50 font-medium">
+                Or
+              </span>
+            </div>
+          </div>
+
+          {/* Email/Password */}
+          <button
+            onClick={() => setShowEmailForm(true)}
+            className="w-full flex items-center justify-center space-x-3 px-6 py-4 bg-background border-2 border-border rounded-2xl hover:border-primary/30 hover:bg-primary/5 transition-all active:scale-[0.98] shadow-sm"
+          >
+            <Mail className="w-5 h-5 text-primary" />
+            <span className="font-semibold text-foreground">
+              Continue with Email
+            </span>
+          </button>
+        </div>
+
+        {/* Login Link */}
+        <p className="text-center text-sm text-foreground/60">
+          Already have an account?{" "}
+          <Link
+            href="/login"
+            className="font-semibold text-primary hover:text-primary/80"
+          >
+            Log in
+          </Link>
+        </p>
+
+        {/* Terms */}
+        <p className="text-xs text-center text-foreground/50 leading-relaxed px-4">
+          By continuing, you agree to Alorpedia's Terms of Service and Privacy
+          Policy
+        </p>
       </div>
     </div>
   );

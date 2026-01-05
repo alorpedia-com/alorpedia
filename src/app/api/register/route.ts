@@ -5,11 +5,13 @@ import { calculateAgeGrade } from "@/lib/utils";
 
 export async function POST(req: Request) {
   try {
-    const { name, email, password, village, birthDate } = await req.json();
+    const { name, email, password, village, birthDate, provider } =
+      await req.json();
 
-    if (!email || !password || !village || !birthDate) {
+    // For phased registration, only email and password are required initially
+    if (!email || !password) {
       return NextResponse.json(
-        { message: "Missing required fields" },
+        { message: "Email and password are required" },
         { status: 400 }
       );
     }
@@ -26,18 +28,29 @@ export async function POST(req: Request) {
     }
 
     const hashedPassword = await bcrypt.hash(password, 10);
-    const birthDateObj = new Date(birthDate);
-    const ageGrade = calculateAgeGrade(birthDateObj);
+
+    // Prepare user data
+    const userData: any = {
+      email,
+      password: hashedPassword,
+      provider: provider || "credentials",
+      onboardingCompleted: false,
+      onboardingStep: 2, // Start at step 2 (name collection)
+    };
+
+    // Add optional fields if provided
+    if (name) userData.name = name;
+    if (village) userData.village = village;
+    if (birthDate) {
+      const birthDateObj = new Date(birthDate);
+      userData.birthDate = birthDateObj;
+      userData.ageGrade = calculateAgeGrade(birthDateObj);
+      userData.onboardingCompleted = true;
+      userData.onboardingStep = 5;
+    }
 
     const user = await prisma.user.create({
-      data: {
-        name,
-        email,
-        password: hashedPassword,
-        village,
-        birthDate: birthDateObj,
-        ageGrade,
-      },
+      data: userData,
     });
 
     // Automatically create a profile for the user
@@ -48,13 +61,17 @@ export async function POST(req: Request) {
     });
 
     return NextResponse.json(
-      { message: "User registered successfully" },
+      {
+        message: "User registered successfully",
+        userId: user.id,
+        onboardingCompleted: user.onboardingCompleted,
+      },
       { status: 201 }
     );
   } catch (error: any) {
     console.error("Registration error:", error);
     return NextResponse.json(
-      { message: "Internal server error" },
+      { message: error.message || "Internal server error" },
       { status: 500 }
     );
   }

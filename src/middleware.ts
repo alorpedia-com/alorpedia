@@ -3,25 +3,45 @@ import { NextResponse } from "next/server";
 
 export default withAuth(
   function middleware(req) {
-    // console.log("middleware query", req.nextUrl.pathname);
+    const token = req.nextauth.token;
+    const path = req.nextUrl.pathname;
+
+    // Allow access to auth pages
+    const authPages = ["/login", "/register"];
+    if (authPages.some((page) => path.startsWith(page))) {
+      return NextResponse.next();
+    }
+
+    // Allow access to onboarding page
+    if (path.startsWith("/onboarding")) {
+      return NextResponse.next();
+    }
+
+    // Check if user has completed onboarding
+    if (token && !token.onboardingCompleted) {
+      // Redirect to onboarding if not completed
+      return NextResponse.redirect(new URL("/onboarding", req.url));
+    }
+
     return NextResponse.next();
   },
   {
     callbacks: {
       authorized: ({ token }) => !!token,
     },
-    pages: {
-      signIn: "/login",
-    },
   }
 );
 
 export const config = {
   matcher: [
-    "/profile/:path*",
-    "/archive/create",
-    "/dialogue/create",
-    "/tree/:path*",
-    // Add other protected routes here
+    /*
+     * Match all request paths except:
+     * - api routes
+     * - _next/static (static files)
+     * - _next/image (image optimization files)
+     * - favicon.ico, logo files
+     * - public files
+     */
+    "/((?!api|_next/static|_next/image|favicon.ico|logo|.*\\.jpg|.*\\.png|.*\\.svg).*)",
   ],
 };

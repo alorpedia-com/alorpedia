@@ -1,11 +1,22 @@
 "use client";
 
 import Link from "next/link";
+import Image from "next/image";
 import { useSession, signOut } from "next-auth/react";
-import { Trees, User } from "lucide-react";
+import { usePathname } from "next/navigation";
+import { User } from "lucide-react";
 
 export default function Navbar() {
   const { data: session } = useSession();
+  const pathname = usePathname();
+
+  // Hide navbar on auth pages
+  const authPages = ["/login", "/register", "/onboarding"];
+  const isAuthPage = authPages.some((page) => pathname?.startsWith(page));
+
+  if (isAuthPage) {
+    return null;
+  }
 
   const navLinks = [
     { href: "/archive", label: "Archive" },
@@ -15,16 +26,23 @@ export default function Navbar() {
   ];
 
   return (
-    <nav className="bg-primary text-background border-b border-border/10 sticky top-0 z-50">
+    <nav className="bg-primary text-background border-b border-border/10 sticky top-0 z-50 shadow-sm">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-        <div className="flex justify-between h-20 items-center">
+        <div className="flex justify-between md:h-20 h-14 items-center">
           <div className="flex items-center">
             <Link
               href="/"
               className="flex items-center space-x-2 active:scale-95 transition-transform"
             >
-              <Trees className="w-10 h-10 text-accent" />
-              <span className="text-2xl font-serif font-bold tracking-tight">
+              <div className="relative md:w-10 md:h-10 w-7 h-7">
+                <Image
+                  src="/logo.jpg"
+                  alt="Alorpedia Logo"
+                  fill
+                  className="object-contain"
+                />
+              </div>
+              <span className="md:text-2xl text-lg font-serif font-bold tracking-tight">
                 Alorpedia
               </span>
             </Link>
@@ -78,19 +96,19 @@ export default function Navbar() {
             )}
           </div>
 
-          {/* Mobile Auth/Profile Icon - Keep it simple as a native app header */}
+          {/* Mobile Auth/Profile Icon - Native app header */}
           <div className="md:hidden">
             {session ? (
               <Link
                 href="/profile"
-                className="w-10 h-10 bg-accent text-primary rounded-full flex items-center justify-center font-bold shadow-sm active:scale-90 transition-transform"
+                className="w-9 h-9 bg-accent text-primary rounded-full flex items-center justify-center font-bold text-sm shadow-md active:scale-90 transition-transform"
               >
-                {session.user?.name?.[0] || <User className="w-5 h-5" />}
+                {session.user?.name?.[0] || <User className="w-4 h-4" />}
               </Link>
             ) : (
               <Link
                 href="/login"
-                className="text-xs font-bold uppercase tracking-widest text-accent border border-accent/30 px-3 py-1.5 rounded-lg active:scale-95"
+                className="text-[11px] font-bold uppercase tracking-wider text-accent bg-accent/10 border border-accent/30 px-3 py-2 rounded-lg active:scale-95 transition-all"
               >
                 Login
               </Link>

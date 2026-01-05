@@ -42,6 +42,14 @@ const navItems = [
 export default function MobileNav() {
   const pathname = usePathname();
 
+  // Hide mobile nav on auth pages
+  const authPages = ["/login", "/register", "/onboarding"];
+  const isAuthPage = authPages.some((page) => pathname?.startsWith(page));
+
+  if (isAuthPage) {
+    return null;
+  }
+
   return (
     <div className="md:hidden fixed bottom-0 left-0 right-0 z-50 bg-background/80 backdrop-blur-xl border-t border-border/50 pb-safe">
       <div className="flex justify-around items-center h-16 px-2">

@@ -10,28 +10,33 @@ generator client {
 }
 
 datasource db {
-  provider = "postgresql"
+  provider  = "postgresql"
 }
 
 model User {
-  id            String    @id @default(cuid())
-  name          String?
-  email         String    @unique
-  password      String
-  village       String
-  birthDate     DateTime
-  ageGrade      String
-  createdAt     DateTime  @default(now())
-  updatedAt     DateTime  @updatedAt
+  id                String    @id @default(cuid())
+  name              String?
+  email             String?   @unique
+  phoneNumber       String?   @unique
+  password          String?
+  provider          String    @default("credentials") // credentials, google, phone
+  profileImage      String?
+  village           String?
+  birthDate         DateTime?
+  ageGrade          String?
+  onboardingCompleted Boolean @default(false)
+  onboardingStep    Int       @default(1)
+  createdAt         DateTime  @default(now())
+  updatedAt         DateTime  @updatedAt
   
-  profile       Profile?
-  posts         Post[]
-  comments      Comment[]
-  discussions   Discussion[]
-  replies       DiscussionReply[]
-  familyNodes   FamilyNode[]
-  ownedFamilyNodes FamilyNode[] @relation("UserOwnedNodes")
-  invitations   Invitation[]
+  profile           Profile?
+  posts             Post[]
+  comments          Comment[]
+  discussions       Discussion[]
+  replies           DiscussionReply[]
+  familyNodes       FamilyNode[]
+  ownedFamilyNodes  FamilyNode[] @relation("UserOwnedNodes")
+  invitations       Invitation[]
 }
 
 model Profile {
