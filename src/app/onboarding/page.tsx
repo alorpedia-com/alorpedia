@@ -13,8 +13,14 @@ import Step5Complete from "@/components/onboarding/Step5Complete";
 interface OnboardingData {
   name?: string;
   profileImage?: string;
+  userType?: "INDIGENE" | "NDI_OGO";
   village?: string;
+  kindred?: string;
+  hostVillage?: string;
   birthDate?: string;
+  birthYear?: number;
+  ageGrade?: string;
+  generationalRole?: string;
 }
 
 export default function OnboardingPage() {
@@ -98,8 +104,13 @@ export default function OnboardingPage() {
   };
 
   const handleStep4Next = async (stepData: {
-    village: string;
-    birthDate: string;
+    userType: "INDIGENE" | "NDI_OGO";
+    village?: string;
+    kindred?: string;
+    hostVillage?: string;
+    birthYear: number;
+    ageGrade?: string;
+    generationalRole?: string;
   }) => {
     setData((prev) => ({ ...prev, ...stepData }));
     await updateOnboarding(4, stepData);
@@ -122,7 +133,7 @@ export default function OnboardingPage() {
 
   if (loading) {
     return (
-      <div className="flex items-center justify-center min-h-screen bg-background">
+      <div className="flex justify-center items-center h-screen bg-background text-primary">
         <div className="animate-spin rounded-full h-12 w-12 border-t-2 border-b-2 border-primary"></div>
       </div>
     );

@@ -6,6 +6,11 @@ export default withAuth(
     const token = req.nextauth.token;
     const path = req.nextUrl.pathname;
 
+    // Allow access to homepage
+    if (path === "/") {
+      return NextResponse.next();
+    }
+
     // Allow access to auth pages
     const authPages = ["/login", "/register"];
     if (authPages.some((page) => path.startsWith(page))) {
@@ -27,7 +32,19 @@ export default withAuth(
   },
   {
     callbacks: {
-      authorized: ({ token }) => !!token,
+      authorized: ({ token, req }) => {
+        const path = req.nextUrl.pathname;
+        // Allow unauthenticated access to homepage and auth pages
+        if (
+          path === "/" ||
+          path.startsWith("/login") ||
+          path.startsWith("/register")
+        ) {
+          return true;
+        }
+        // Require authentication for all other routes
+        return !!token;
+      },
     },
   }
 );

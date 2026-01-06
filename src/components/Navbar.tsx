@@ -4,15 +4,37 @@ import Link from "next/link";
 import Image from "next/image";
 import { useSession, signOut } from "next-auth/react";
 import { usePathname } from "next/navigation";
-import { User } from "lucide-react";
+import { User, LogOut, UserCircle } from "lucide-react";
+import { useState, useRef, useEffect } from "react";
+import { getUserInitials } from "@/lib/utils";
 
 export default function Navbar() {
   const { data: session } = useSession();
   const pathname = usePathname();
+  const [showDropdown, setShowDropdown] = useState(false);
+  const dropdownRef = useRef<HTMLDivElement>(null);
 
   // Hide navbar on auth pages
   const authPages = ["/login", "/register", "/onboarding"];
   const isAuthPage = authPages.some((page) => pathname?.startsWith(page));
+
+  // Close dropdown when clicking outside
+  useEffect(() => {
+    function handleClickOutside(event: MouseEvent) {
+      if (
+        dropdownRef.current &&
+        !dropdownRef.current.contains(event.target as Node)
+      ) {
+        setShowDropdown(false);
+      }
+    }
+
+    if (showDropdown) {
+      document.addEventListener("mousedown", handleClickOutside);
+      return () =>
+        document.removeEventListener("mousedown", handleClickOutside);
+    }
+  }, [showDropdown]);
 
   if (isAuthPage) {
     return null;
@@ -22,8 +44,16 @@ export default function Navbar() {
     { href: "/archive", label: "Archive" },
     { href: "/dialogue", label: "Dialogue" },
     { href: "/directory", label: "Directory" },
+    { href: "/messages", label: "Messages" },
     { href: "/tree", label: "Osisi Ndụ" },
   ];
+
+  const handleSignOut = async () => {
+    await signOut({ redirect: false });
+    window.location.href = "/";
+  };
+
+  const userInitials = getUserInitials(session?.user?.name);
 
   return (
     <nav className="bg-primary text-background border-b border-border/10 sticky top-0 z-50 shadow-sm">
@@ -34,12 +64,12 @@ export default function Navbar() {
               href="/"
               className="flex items-center space-x-2 active:scale-95 transition-transform"
             >
-              <div className="relative md:w-10 md:h-10 w-7 h-7">
+              <div className="relative md:w-10 md:h-10 w-7 h-7 overflow-hidden rounded-full">
                 <Image
                   src="/logo.jpg"
                   alt="Alorpedia Logo"
                   fill
-                  className="object-contain"
+                  className="object-cover"
                 />
               </div>
               <span className="md:text-2xl text-lg font-serif font-bold tracking-tight">
@@ -64,20 +94,44 @@ export default function Navbar() {
           {/* Desktop Auth */}
           <div className="hidden md:flex items-center space-x-4">
             {session ? (
-              <>
-                <Link
-                  href="/profile"
-                  className="text-sm font-bold uppercase tracking-widest hover:text-accent"
-                >
-                  {session.user?.name || "Profile"}
-                </Link>
+              <div className="relative" ref={dropdownRef}>
                 <button
-                  onClick={() => signOut()}
-                  className="bg-secondary px-5 py-2.5 rounded-xl text-sm font-bold uppercase tracking-widest hover:bg-secondary/90 transition-all active:scale-95 shadow-md"
+                  onClick={() => setShowDropdown(!showDropdown)}
+                  className="flex items-center space-x-3 hover:bg-background/10 px-3 py-2 rounded-xl transition-all active:scale-95"
                 >
-                  Sign Out
+                  <div className="w-9 h-9 bg-accent text-primary rounded-full flex items-center justify-center font-bold text-sm shadow-md">
+                    {userInitials}
+                  </div>
+                  <span className="text-sm font-bold">
+                    {session.user?.name || "Profile"}
+                  </span>
                 </button>
-              </>
+
+                {/* Dropdown Menu */}
+                {showDropdown && (
+                  <div className="absolute right-0 mt-2 w-56 bg-card border border-border rounded-2xl shadow-2xl overflow-hidden">
+                    <Link
+                      href="/profile"
+                      onClick={() => setShowDropdown(false)}
+                      className="flex items-center space-x-3 px-4 py-3 hover:bg-primary/5 transition-colors border-b border-border/50"
+                    >
+                      <UserCircle className="w-5 h-5 text-primary" />
+                      <span className="text-sm font-semibold text-foreground">
+                        View Profile
+                      </span>
+                    </Link>
+                    <button
+                      onClick={handleSignOut}
+                      className="w-full flex items-center space-x-3 px-4 py-3 hover:bg-red-50 transition-colors text-left"
+                    >
+                      <LogOut className="w-5 h-5 text-red-500" />
+                      <span className="text-sm font-semibold text-red-500">
+                        Sign Out
+                      </span>
+                    </button>
+                  </div>
+                )}
+              </div>
             ) : (
               <>
                 <Link
@@ -96,15 +150,42 @@ export default function Navbar() {
             )}
           </div>
 
-          {/* Mobile Auth/Profile Icon - Native app header */}
+          {/* Mobile Auth/Profile Icon */}
           <div className="md:hidden">
             {session ? (
-              <Link
-                href="/profile"
-                className="w-9 h-9 bg-accent text-primary rounded-full flex items-center justify-center font-bold text-sm shadow-md active:scale-90 transition-transform"
-              >
-                {session.user?.name?.[0] || <User className="w-4 h-4" />}
-              </Link>
+              <div className="relative" ref={dropdownRef}>
+                <button
+                  onClick={() => setShowDropdown(!showDropdown)}
+                  className="w-9 h-9 bg-accent text-primary rounded-full flex items-center justify-center font-bold text-sm shadow-md active:scale-90 transition-transform"
+                >
+                  {userInitials}
+                </button>
+
+                {/* Mobile Dropdown */}
+                {showDropdown && (
+                  <div className="absolute right-0 mt-2 w-48 bg-card border border-border rounded-2xl shadow-2xl overflow-hidden">
+                    <Link
+                      href="/profile"
+                      onClick={() => setShowDropdown(false)}
+                      className="flex items-center space-x-3 px-4 py-3 hover:bg-primary/5 transition-colors border-b border-border/50"
+                    >
+                      <UserCircle className="w-4 h-4 text-primary" />
+                      <span className="text-sm font-semibold text-foreground">
+                        Profile
+                      </span>
+                    </Link>
+                    <button
+                      onClick={handleSignOut}
+                      className="w-full flex items-center space-x-3 px-4 py-3 hover:bg-red-50 transition-colors text-left"
+                    >
+                      <LogOut className="w-4 h-4 text-red-500" />
+                      <span className="text-sm font-semibold text-red-500">
+                        Sign Out
+                      </span>
+                    </button>
+                  </div>
+                )}
+              </div>
             ) : (
               <Link
                 href="/login"

@@ -21,9 +21,17 @@ model User {
   password          String?
   provider          String    @default("credentials") // credentials, google, phone
   profileImage      String?
-  village           String?
+  
+  // Cultural Identity Fields
+  userType          UserType  @default(INDIGENE)
+  village           String?   // For indigenes: their home village
+  kindred           String?   // For indigenes: their umunna/clan
+  hostVillage       String?   // For Ndi Ogo: village they associate with
   birthDate         DateTime?
-  ageGrade          String?
+  birthYear         Int?      // For accurate age grade calculation
+  ageGrade          String?   // Authentic Alor age grade name
+  generationalRole  String?   // "The Elders" or "The Workforce"
+  
   onboardingCompleted Boolean @default(false)
   onboardingStep    Int       @default(1)
   createdAt         DateTime  @default(now())
@@ -37,6 +45,8 @@ model User {
   familyNodes       FamilyNode[]
   ownedFamilyNodes  FamilyNode[] @relation("UserOwnedNodes")
   invitations       Invitation[]
+  conversations     Conversation[] @relation("ConversationParticipants")
+  sentMessages      Message[] @relation("SentMessages")
 }
 
 model Profile {
@@ -124,4 +134,35 @@ model Invitation {
   relationshipType String
   status           String   @default("PENDING") // PENDING, ACCEPTED
   createdAt        DateTime @default(now())
+}
+
+model Conversation {
+  id            String    @id @default(cuid())
+  participantIds String[]
+  participants  User[]    @relation("ConversationParticipants")
+  messages      Message[]
+  createdAt     DateTime  @default(now())
+  updatedAt     DateTime  @updatedAt
+  
+  @@index([participantIds])
+}
+
+model Message {
+  id             String       @id @default(cuid())
+  content        String       @db.Text
+  senderId       String
+  sender         User         @relation("SentMessages", fields: [senderId], references: [id], onDelete: Cascade)
+  conversationId String
+  conversation   Conversation @relation(fields: [conversationId], references: [id], onDelete: Cascade)
+  read           Boolean      @default(false)
+  createdAt      DateTime     @default(now())
+  
+  @@index([conversationId])
+  @@index([senderId])
+}
+
+enum UserType {
+  INDIGENE  // Ndi Alor - full members with village and kindred
+  NDI_OGO   // Inlaws - married into Alor families
+  FRIEND    // Friends of Alor - associates and supporters
 }

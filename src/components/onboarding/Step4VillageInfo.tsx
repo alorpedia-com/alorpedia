@@ -1,13 +1,26 @@
 "use client";
 
 import { useState } from "react";
-import { MapPin, Calendar } from "lucide-react";
-import { VILLAGES, calculateAgeGrade } from "@/lib/utils";
+import { MapPin, Calendar, Users, Shield } from "lucide-react";
+import {
+  VILLAGES,
+  KINDREDS,
+  calculateAgeGrade,
+  getKindredsForVillage,
+} from "@/lib/utils";
 
 interface Step4VillageInfoProps {
   initialVillage?: string;
   initialBirthDate?: string;
-  onNext: (data: { village: string; birthDate: string }) => void;
+  onNext: (data: {
+    userType: "INDIGENE" | "NDI_OGO";
+    village?: string;
+    kindred?: string;
+    hostVillage?: string;
+    birthYear: number;
+    ageGrade?: string;
+    generationalRole?: string;
+  }) => void;
   onBack: () => void;
 }
 
@@ -17,19 +30,55 @@ export default function Step4VillageInfo({
   onNext,
   onBack,
 }: Step4VillageInfoProps) {
+  const [userType, setUserType] = useState<"INDIGENE" | "NDI_OGO">("INDIGENE");
   const [village, setVillage] = useState(initialVillage);
-  const [birthDate, setBirthDate] = useState(initialBirthDate);
+  const [kindred, setKindred] = useState("");
+  const [birthYear, setBirthYear] = useState(
+    initialBirthDate ? new Date(initialBirthDate).getFullYear().toString() : ""
+  );
 
-  const ageGrade = birthDate
-    ? calculateAgeGrade(new Date(birthDate))
-    : "Select your birth date";
+  // Calculate age grade from birth year
+  const ageGradeData = birthYear
+    ? calculateAgeGrade(parseInt(birthYear))
+    : null;
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
-    if (village && birthDate) {
-      onNext({ village, birthDate });
+    if (!birthYear) return;
+
+    const year = parseInt(birthYear);
+
+    if (userType === "INDIGENE") {
+      // Indigenes must have village and kindred
+      if (!village || !kindred) return;
+      onNext({
+        userType: "INDIGENE",
+        village,
+        kindred,
+        birthYear: year,
+        ageGrade: ageGradeData?.name,
+        generationalRole: ageGradeData?.role,
+      });
+    } else {
+      // Ndi Ogo only need host village
+      if (!village) return;
+      onNext({
+        userType: "NDI_OGO",
+        hostVillage: village,
+        birthYear: year,
+        ageGrade: ageGradeData?.name,
+        generationalRole: ageGradeData?.role,
+      });
     }
   };
+
+  // Reset kindred when village changes
+  const handleVillageChange = (newVillage: string) => {
+    setVillage(newVillage);
+    setKindred(""); // Reset kindred selection
+  };
+
+  const availableKindreds = getKindredsForVillage(village);
 
   return (
     <div className="flex flex-col min-h-[70vh] px-5 py-8">
@@ -42,25 +91,61 @@ export default function Step4VillageInfo({
             </div>
           </div>
           <h2 className="text-2xl md:text-3xl font-serif font-bold text-primary">
-            Your Village & Age-Grade
+            Your Identity & Roots
           </h2>
           <p className="text-sm text-foreground/60">
-            Connect with your community and age-grade
+            Connect with your community and heritage
           </p>
         </div>
 
         {/* Form */}
         <form onSubmit={handleSubmit} className="space-y-6">
+          {/* User Type Switcher */}
+          <div className="space-y-2">
+            <label className="block text-sm font-semibold text-foreground/80">
+              I am...
+            </label>
+            <div className="grid grid-cols-2 gap-3 bg-background/50 p-1.5 rounded-2xl border-2 border-border">
+              <button
+                type="button"
+                onClick={() => setUserType("INDIGENE")}
+                className={`px-4 py-3 rounded-xl font-semibold text-sm transition-all ${
+                  userType === "INDIGENE"
+                    ? "bg-primary text-background shadow-md"
+                    : "text-foreground/60 hover:text-foreground"
+                }`}
+              >
+                Alor Indigene
+              </button>
+              <button
+                type="button"
+                onClick={() => setUserType("NDI_OGO")}
+                className={`px-4 py-3 rounded-xl font-semibold text-sm transition-all ${
+                  userType === "NDI_OGO"
+                    ? "bg-secondary text-background shadow-md"
+                    : "text-foreground/60 hover:text-foreground"
+                }`}
+              >
+                Ndi Ogo & Friends
+              </button>
+            </div>
+            <p className="text-xs text-foreground/50 italic">
+              {userType === "INDIGENE"
+                ? "Born into an Alor family"
+                : "Inlaw, friend, or associate of Alor"}
+            </p>
+          </div>
+
           {/* Village Selection */}
           <div className="space-y-2">
             <label className="block text-sm font-semibold text-foreground/80">
-              Village
+              {userType === "INDIGENE" ? "Your Village (Ebo)" : "Host Village"}
             </label>
             <div className="relative">
               <MapPin className="absolute left-4 top-1/2 -translate-y-1/2 w-5 h-5 text-foreground/40" />
               <select
                 value={village}
-                onChange={(e) => setVillage(e.target.value)}
+                onChange={(e) => handleVillageChange(e.target.value)}
                 className="w-full pl-12 pr-4 py-4 text-base border-2 border-border rounded-2xl focus:outline-none focus:ring-2 focus:ring-primary/20 focus:border-primary transition-all appearance-none bg-background"
                 required
               >
@@ -71,19 +156,55 @@ export default function Step4VillageInfo({
                 ))}
               </select>
             </div>
+            {userType === "NDI_OGO" && (
+              <p className="text-xs text-foreground/50 italic">
+                Which village do you live in or have ties to?
+              </p>
+            )}
           </div>
 
-          {/* Birth Date */}
+          {/* Kindred Selection - Only for Indigenes */}
+          {userType === "INDIGENE" && (
+            <div className="space-y-2">
+              <label className="block text-sm font-semibold text-foreground/80">
+                Your Kindred (Umunna)
+              </label>
+              <div className="relative">
+                <Users className="absolute left-4 top-1/2 -translate-y-1/2 w-5 h-5 text-foreground/40" />
+                <select
+                  value={kindred}
+                  onChange={(e) => setKindred(e.target.value)}
+                  className="w-full pl-12 pr-4 py-4 text-base border-2 border-border rounded-2xl focus:outline-none focus:ring-2 focus:ring-primary/20 focus:border-primary transition-all appearance-none bg-background"
+                  required
+                >
+                  <option value="">Select your kindred...</option>
+                  {availableKindreds.map((k) => (
+                    <option key={k} value={k}>
+                      {k}
+                    </option>
+                  ))}
+                </select>
+              </div>
+              <p className="text-xs text-foreground/50 italic">
+                Your clan within {village}
+              </p>
+            </div>
+          )}
+
+          {/* Birth Year */}
           <div className="space-y-2">
             <label className="block text-sm font-semibold text-foreground/80">
-              Date of Birth
+              Year of Birth
             </label>
             <div className="relative">
               <Calendar className="absolute left-4 top-1/2 -translate-y-1/2 w-5 h-5 text-foreground/40" />
               <input
-                type="date"
-                value={birthDate}
-                onChange={(e) => setBirthDate(e.target.value)}
+                type="number"
+                min="1920"
+                max={new Date().getFullYear()}
+                placeholder="e.g., 1990"
+                value={birthYear}
+                onChange={(e) => setBirthYear(e.target.value)}
                 className="w-full pl-12 pr-4 py-4 text-base border-2 border-border rounded-2xl focus:outline-none focus:ring-2 focus:ring-primary/20 focus:border-primary transition-all"
                 required
               />
@@ -91,16 +212,33 @@ export default function Step4VillageInfo({
           </div>
 
           {/* Age Grade Display */}
-          <div className="bg-accent/10 border-2 border-accent/20 rounded-2xl p-4">
-            <div className="flex items-center justify-between">
-              <span className="text-sm font-semibold text-foreground/70">
-                Your Age-Grade:
-              </span>
-              <span className="text-base font-bold text-accent">
-                {ageGrade}
-              </span>
+          {ageGradeData && (
+            <div className="bg-accent/10 border-2 border-accent/20 rounded-2xl p-5 space-y-2">
+              <div className="flex items-center space-x-2 mb-2">
+                <Shield className="w-5 h-5 text-accent" />
+                <span className="text-sm font-bold text-foreground/70 uppercase tracking-wide">
+                  Your Age Grade
+                </span>
+              </div>
+              <div className="space-y-1">
+                <p className="text-2xl font-serif font-bold text-accent">
+                  {ageGradeData.name}
+                </p>
+                <p className="text-sm text-foreground/60">
+                  {ageGradeData.role} • {ageGradeData.start}-{ageGradeData.end}
+                </p>
+              </div>
             </div>
-          </div>
+          )}
+
+          {!ageGradeData && birthYear && (
+            <div className="bg-red-50 border-2 border-red-200 rounded-2xl p-4">
+              <p className="text-sm text-red-600">
+                Birth year {birthYear} is outside the age grade system
+                (1800-1997). Please verify your birth year.
+              </p>
+            </div>
+          )}
 
           {/* Action Buttons */}
           <div className="flex gap-3 pt-4">
@@ -113,7 +251,12 @@ export default function Step4VillageInfo({
             </button>
             <button
               type="submit"
-              disabled={!village || !birthDate}
+              disabled={
+                !birthYear ||
+                !ageGradeData ||
+                (userType === "INDIGENE" && (!village || !kindred)) ||
+                (userType === "NDI_OGO" && !village)
+              }
               className="flex-1 px-6 py-4 bg-primary text-background rounded-2xl font-semibold hover:bg-primary/90 transition-all active:scale-[0.98] disabled:opacity-50 disabled:cursor-not-allowed shadow-md"
             >
               Complete

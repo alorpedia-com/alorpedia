@@ -2,7 +2,6 @@ import { NextRequest, NextResponse } from "next/server";
 import { getServerSession } from "next-auth";
 import { authOptions } from "@/lib/auth";
 import prisma from "@/lib/prisma";
-import { calculateAgeGrade } from "@/lib/utils";
 
 export async function POST(request: NextRequest) {
   try {
@@ -29,31 +28,51 @@ export async function POST(request: NextRequest) {
       updateData.profileImage = data.profileImage;
     }
 
-    if (step === 4 && data.village && data.birthDate) {
-      const birthDate = new Date(data.birthDate);
-      updateData.village = data.village;
-      updateData.birthDate = birthDate;
-      updateData.ageGrade = calculateAgeGrade(birthDate);
+    if (step === 4) {
+      // Handle cultural identity data
+      updateData.userType = data.userType;
+      updateData.birthYear = data.birthYear;
+      updateData.ageGrade = data.ageGrade;
+      updateData.generationalRole = data.generationalRole;
+
+      if (data.userType === "INDIGENE") {
+        // Indigenes have village and kindred
+        updateData.village = data.village;
+        updateData.kindred = data.kindred;
+        updateData.hostVillage = null;
+      } else {
+        // Ndi Ogo have host village only
+        updateData.hostVillage = data.hostVillage;
+        updateData.village = null;
+        updateData.kindred = null;
+      }
+
       updateData.onboardingCompleted = true;
     }
 
     const updatedUser = await prisma.user.update({
       where: { id: userId },
       data: updateData,
+      select: {
+        id: true,
+        name: true,
+        email: true,
+        profileImage: true,
+        userType: true,
+        village: true,
+        kindred: true,
+        hostVillage: true,
+        birthYear: true,
+        ageGrade: true,
+        generationalRole: true,
+        onboardingCompleted: true,
+        onboardingStep: true,
+      },
     });
 
     return NextResponse.json({
       success: true,
-      user: {
-        id: updatedUser.id,
-        name: updatedUser.name,
-        email: updatedUser.email,
-        profileImage: updatedUser.profileImage,
-        village: updatedUser.village,
-        ageGrade: updatedUser.ageGrade,
-        onboardingCompleted: updatedUser.onboardingCompleted,
-        onboardingStep: updatedUser.onboardingStep,
-      },
+      user: updatedUser,
     });
   } catch (error) {
     console.error("Onboarding update error:", error);

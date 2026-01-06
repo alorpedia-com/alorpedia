@@ -5,7 +5,7 @@ import { useRouter } from "next/navigation";
 import { useEffect, useState } from "react";
 import Link from "next/link";
 import { User, MapPin, Calendar, Shield, Save, X } from "lucide-react";
-import { formatAgeGrade } from "@/lib/utils";
+import { formatAgeGrade, getUserInitials } from "@/lib/utils";
 
 export default function ProfilePage() {
   const { data: session, status } = useSession();
@@ -71,6 +71,7 @@ export default function ProfilePage() {
   }
 
   const user = session?.user as any;
+  const userInitials = getUserInitials(user?.name);
 
   return (
     <div className="max-w-4xl mx-auto px-native py-native bg-background min-h-screen">
@@ -78,19 +79,35 @@ export default function ProfilePage() {
         {/* Header/Cover Placeholder */}
         <div className="h-32 sm:h-48 bg-primary/10 relative">
           <div className="absolute -bottom-12 sm:-bottom-16 left-8 sm:left-12">
-            <div className="w-24 h-24 sm:w-32 sm:h-32 bg-card rounded-3xl border-8 border-card flex items-center justify-center shadow-2xl">
-              <User className="w-12 h-12 sm:w-16 sm:h-16 text-primary" />
+            <div className="w-24 h-24 sm:w-32 sm:h-32 bg-primary text-background rounded-3xl border-8 border-card flex items-center justify-center shadow-2xl">
+              <span className="text-3xl sm:text-4xl font-bold">
+                {userInitials}
+              </span>
             </div>
           </div>
         </div>
 
         <div className="pt-20 sm:pt-24 pb-8 sm:pb-12 px-8 sm:px-12">
           <div className="flex flex-col sm:flex-row sm:justify-between sm:items-start gap-6">
-            <div className="space-y-2">
-              <h1 className="font-serif font-bold text-primary tracking-tight">
+            <div className="space-y-3">
+              <h1 className="text-2xl sm:text-4xl font-serif font-bold text-primary tracking-tight">
                 {user?.name || "Member Name"}
               </h1>
-              <p className="text-secondary font-black text-xs uppercase tracking-[0.2em] opacity-80">
+              {/* User Type Badge */}
+              <div className="flex items-center space-x-2">
+                {user?.userType === "INDIGENE" ? (
+                  <span className="inline-flex items-center px-3 py-1.5 bg-primary/10 text-primary text-[10px] font-black uppercase tracking-[0.15em] rounded-xl border border-primary/20">
+                    <Shield className="w-3 h-3 mr-1.5" />
+                    Alor Indigene
+                  </span>
+                ) : user?.userType === "NDI_OGO" ? (
+                  <span className="inline-flex items-center px-3 py-1.5 bg-secondary/10 text-secondary text-[10px] font-black uppercase tracking-[0.15em] rounded-xl border border-secondary/20">
+                    <User className="w-3 h-3 mr-1.5" />
+                    Ndi Ogo
+                  </span>
+                ) : null}
+              </div>
+              <p className="text-secondary font-bold text-xs sm:text-sm uppercase tracking-wider opacity-80">
                 alor.pedia/u/{user?.id?.substring(0, 8)}
               </p>
             </div>
@@ -104,27 +121,55 @@ export default function ProfilePage() {
             )}
           </div>
 
-          <div className="mt-12 grid grid-cols-1 sm:grid-cols-3 gap-6 sm:gap-8 border-t border-border/30 pt-12">
+          {/* Cultural Identity Cards */}
+          <div className="mt-12 grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6 sm:gap-8 border-t border-border/30 pt-12">
+            {/* Village or Host Village */}
             <div className="flex items-center space-x-4 bg-primary/5 p-5 rounded-2xl border border-primary/10 shadow-sm">
               <div className="p-3 bg-secondary text-background rounded-xl flex-shrink-0 shadow-lg">
                 <MapPin className="w-6 h-6" />
               </div>
               <div className="space-y-1">
                 <p className="text-[10px] font-black uppercase tracking-[0.2em] text-primary/40">
-                  Village
+                  {user?.userType === "INDIGENE" ? "Village" : "Host Village"}
                 </p>
                 <p className="font-serif font-bold text-base text-primary leading-none">
-                  {user?.village || "Not set"}
+                  {user?.userType === "INDIGENE"
+                    ? user?.village || "Not set"
+                    : user?.hostVillage || "Not set"}
                 </p>
                 <div className="flex items-center space-x-1">
                   <span className="w-1 h-1 rounded-full bg-secondary animate-pulse"></span>
                   <p className="text-[9px] text-secondary font-black uppercase tracking-widest">
-                    Identity
+                    {user?.userType === "INDIGENE" ? "Ebo" : "Community"}
                   </p>
                 </div>
               </div>
             </div>
 
+            {/* Kindred - Only for Indigenes */}
+            {user?.userType === "INDIGENE" && (
+              <div className="flex items-center space-x-4 bg-primary/5 p-5 rounded-2xl border border-primary/10 shadow-sm">
+                <div className="p-3 bg-primary text-background rounded-xl flex-shrink-0 shadow-lg">
+                  <User className="w-6 h-6" />
+                </div>
+                <div className="space-y-1">
+                  <p className="text-[10px] font-black uppercase tracking-[0.2em] text-primary/40">
+                    Kindred
+                  </p>
+                  <p className="font-serif font-bold text-base text-primary leading-none">
+                    {user?.kindred || "Not set"}
+                  </p>
+                  <div className="flex items-center space-x-1">
+                    <span className="w-1 h-1 rounded-full bg-primary animate-pulse"></span>
+                    <p className="text-[9px] text-primary font-black uppercase tracking-widest">
+                      Umunna
+                    </p>
+                  </div>
+                </div>
+              </div>
+            )}
+
+            {/* Age Grade */}
             <div className="flex items-center space-x-4 bg-primary/5 p-5 rounded-2xl border border-primary/10 shadow-sm">
               <div className="p-3 bg-accent text-primary rounded-xl flex-shrink-0 shadow-lg">
                 <Shield className="w-6 h-6" />
@@ -135,15 +180,23 @@ export default function ProfilePage() {
                 </p>
                 <div className="flex flex-col">
                   <p className="font-serif font-bold text-base text-primary leading-none">
-                    {formatAgeGrade(user?.ageGrade).name || "Calculating..."}
+                    {formatAgeGrade(user?.ageGrade).name || "Not set"}
                   </p>
-                  <p className="text-[10px] text-foreground/40 font-black uppercase tracking-widest mt-1">
-                    {formatAgeGrade(user?.ageGrade).years}
-                  </p>
+                  {user?.generationalRole && (
+                    <p className="text-[10px] text-accent font-black uppercase tracking-widest mt-1">
+                      {user.generationalRole}
+                    </p>
+                  )}
+                  {formatAgeGrade(user?.ageGrade).years && (
+                    <p className="text-[9px] text-foreground/40 font-medium mt-0.5">
+                      {formatAgeGrade(user?.ageGrade).years}
+                    </p>
+                  )}
                 </div>
               </div>
             </div>
 
+            {/* Joined Date */}
             <div className="flex items-center space-x-4 bg-primary/5 p-5 rounded-2xl border border-primary/10 shadow-sm">
               <div className="p-3 bg-primary text-background rounded-xl flex-shrink-0 shadow-lg">
                 <Calendar className="w-6 h-6" />
