@@ -217,8 +217,8 @@ function LoginForm() {
 
         {/* Authentication Options */}
         <div className="space-y-4 pt-4">
-          {/* Google OAuth */}
-          <button
+          {/* Google OAuth - Temporarily Disabled */}
+          {/* <button
             onClick={handleGoogleSignIn}
             className="w-full flex items-center justify-center space-x-3 px-6 py-4 bg-background border-2 border-border rounded-2xl hover:border-primary/30 hover:bg-primary/5 transition-all active:scale-[0.98] shadow-sm"
           >
@@ -243,10 +243,10 @@ function LoginForm() {
             <span className="font-semibold text-foreground">
               Continue with Google
             </span>
-          </button>
+          </button> */}
 
           {/* Divider */}
-          <div className="relative">
+          {/* <div className="relative">
             <div className="absolute inset-0 flex items-center">
               <div className="w-full border-t border-border"></div>
             </div>
@@ -255,17 +255,15 @@ function LoginForm() {
                 Or
               </span>
             </div>
-          </div>
+          </div> */}
 
           {/* Email/Password */}
           <button
             onClick={() => setShowEmailForm(true)}
-            className="w-full flex items-center justify-center space-x-3 px-6 py-4 bg-background border-2 border-border rounded-2xl hover:border-primary/30 hover:bg-primary/5 transition-all active:scale-[0.98] shadow-sm"
+            className="w-full flex items-center justify-center space-x-3 px-6 py-4 bg-primary text-background rounded-2xl hover:bg-primary/90 transition-all active:scale-[0.98] shadow-md"
           >
-            <Mail className="w-5 h-5 text-primary" />
-            <span className="font-semibold text-foreground">
-              Continue with Email
-            </span>
+            <Mail className="w-5 h-5" />
+            <span className="font-semibold">Continue with Email</span>
           </button>
         </div>
 

@@ -8,6 +8,7 @@ import {
   calculateAgeGrade,
   getKindredsForVillage,
 } from "@/lib/utils";
+import StyledDropdown from "@/components/StyledDropdown";
 
 interface Step4VillageInfoProps {
   initialVillage?: string;
@@ -80,6 +81,10 @@ export default function Step4VillageInfo({
 
   const availableKindreds = getKindredsForVillage(village);
 
+  // Prepare dropdown options
+  const villageOptions = VILLAGES.map((v) => ({ value: v, label: v }));
+  const kindredOptions = availableKindreds.map((k) => ({ value: k, label: k }));
+
   return (
     <div className="flex flex-col min-h-[70vh] px-5 py-8">
       <div className="w-full max-w-md mx-auto flex-1 flex flex-col justify-center">
@@ -141,21 +146,13 @@ export default function Step4VillageInfo({
             <label className="block text-sm font-semibold text-foreground/80">
               {userType === "INDIGENE" ? "Your Village (Ebo)" : "Host Village"}
             </label>
-            <div className="relative">
-              <MapPin className="absolute left-4 top-1/2 -translate-y-1/2 w-5 h-5 text-foreground/40" />
-              <select
-                value={village}
-                onChange={(e) => handleVillageChange(e.target.value)}
-                className="w-full pl-12 pr-4 py-4 text-base border-2 border-border rounded-2xl focus:outline-none focus:ring-2 focus:ring-primary/20 focus:border-primary transition-all appearance-none bg-background"
-                required
-              >
-                {VILLAGES.map((v) => (
-                  <option key={v} value={v}>
-                    {v}
-                  </option>
-                ))}
-              </select>
-            </div>
+            <StyledDropdown
+              label={userType === "INDIGENE" ? "Village" : "Host Village"}
+              value={village}
+              onChange={handleVillageChange}
+              options={villageOptions}
+              icon={<MapPin className="w-5 h-5 text-primary/60" />}
+            />
             {userType === "NDI_OGO" && (
               <p className="text-xs text-foreground/50 italic">
                 Which village do you live in or have ties to?
@@ -169,22 +166,15 @@ export default function Step4VillageInfo({
               <label className="block text-sm font-semibold text-foreground/80">
                 Your Kindred (Umunna)
               </label>
-              <div className="relative">
-                <Users className="absolute left-4 top-1/2 -translate-y-1/2 w-5 h-5 text-foreground/40" />
-                <select
-                  value={kindred}
-                  onChange={(e) => setKindred(e.target.value)}
-                  className="w-full pl-12 pr-4 py-4 text-base border-2 border-border rounded-2xl focus:outline-none focus:ring-2 focus:ring-primary/20 focus:border-primary transition-all appearance-none bg-background"
-                  required
-                >
-                  <option value="">Select your kindred...</option>
-                  {availableKindreds.map((k) => (
-                    <option key={k} value={k}>
-                      {k}
-                    </option>
-                  ))}
-                </select>
-              </div>
+              <StyledDropdown
+                label="Kindred"
+                value={kindred}
+                onChange={setKindred}
+                options={kindredOptions}
+                icon={<Users className="w-5 h-5 text-primary/60" />}
+                disabled={kindredOptions.length === 0}
+                disabledMessage="Select village first"
+              />
               <p className="text-xs text-foreground/50 italic">
                 Your clan within {village}
               </p>
@@ -231,11 +221,20 @@ export default function Step4VillageInfo({
             </div>
           )}
 
-          {!ageGradeData && birthYear && (
+          {!ageGradeData && birthYear && parseInt(birthYear) < 1800 && (
             <div className="bg-red-50 border-2 border-red-200 rounded-2xl p-4">
               <p className="text-sm text-red-600">
-                Birth year {birthYear} is outside the age grade system
-                (1800-1997). Please verify your birth year.
+                Birth year {birthYear} is before 1800. Please verify your birth
+                year.
+              </p>
+            </div>
+          )}
+
+          {!ageGradeData && birthYear && parseInt(birthYear) > 2030 && (
+            <div className="bg-red-50 border-2 border-red-200 rounded-2xl p-4">
+              <p className="text-sm text-red-600">
+                Birth year {birthYear} is in the future. Please verify your
+                birth year.
               </p>
             </div>
           )}
@@ -253,7 +252,8 @@ export default function Step4VillageInfo({
               type="submit"
               disabled={
                 !birthYear ||
-                !ageGradeData ||
+                parseInt(birthYear) < 1800 ||
+                parseInt(birthYear) > 2030 ||
                 (userType === "INDIGENE" && (!village || !kindred)) ||
                 (userType === "NDI_OGO" && !village)
               }

@@ -42,12 +42,12 @@ export interface AgeGrade {
   name: string;
   start: number;
   end: number;
-  role: "The Elders" | "The Workforce";
+  role: "The Elders" | "The Workforce" | "The New Generation";
 }
 
 /**
- * Complete Alor Age Grade system (1800-1997)
- * 22 age grades spanning nearly 200 years
+ * Authentic Alor Age Grades
+ * 23 age grades spanning over 200 years
  */
 export const AGE_GRADES: AgeGrade[] = [
   // The Elders (1800-1967)
@@ -75,6 +75,9 @@ export const AGE_GRADES: AgeGrade[] = [
   { name: "Ikukuoma", start: 1989, end: 1991, role: "The Workforce" },
   { name: "Obinwanne", start: 1992, end: 1994, role: "The Workforce" },
   { name: "Ifedimma", start: 1995, end: 1997, role: "The Workforce" },
+
+  // The New Generation (1998-present)
+  { name: "Ndi Ọhụrụ", start: 1998, end: 2030, role: "The New Generation" },
 ];
 
 // ============================================
