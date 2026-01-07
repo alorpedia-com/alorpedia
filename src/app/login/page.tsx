@@ -44,9 +44,20 @@ function LoginForm() {
       if (result?.error) {
         setError("Invalid email or password");
       } else {
-        const callbackUrl = searchParams.get("callbackUrl") || "/profile";
-        router.push(callbackUrl);
+        // Refresh the page to get the updated session
         router.refresh();
+
+        // Small delay to ensure session is updated
+        await new Promise((resolve) => setTimeout(resolve, 500));
+
+        // Check if there's a callback URL
+        const callbackUrl = searchParams.get("callbackUrl");
+        if (callbackUrl) {
+          router.push(callbackUrl);
+        } else {
+          // Default redirect - let the proxy handle onboarding redirect
+          router.push("/profile");
+        }
       }
     } catch (err) {
       setError("An error occurred. Please try again.");

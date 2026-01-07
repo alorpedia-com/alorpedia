@@ -4,7 +4,6 @@ import { useState, useEffect } from "react";
 import { useSession } from "next-auth/react";
 import { useRouter } from "next/navigation";
 import StepIndicator from "@/components/onboarding/StepIndicator";
-import Step1Welcome from "@/components/onboarding/Step1Welcome";
 import Step2BasicInfo from "@/components/onboarding/Step2BasicInfo";
 import Step3ProfileImage from "@/components/onboarding/Step3ProfileImage";
 import Step4VillageInfo from "@/components/onboarding/Step4VillageInfo";
@@ -24,14 +23,19 @@ interface OnboardingData {
 }
 
 export default function OnboardingPage() {
-  const { data: session, update } = useSession();
+  const { data: session, status, update } = useSession();
   const router = useRouter();
-  const [currentStep, setCurrentStep] = useState(1);
+  const [currentStep, setCurrentStep] = useState(2); // Start at Step 2 (Basic Info) since user is already authenticated
   const [data, setData] = useState<OnboardingData>({});
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
-    if (!session) {
+    // Wait for session to load
+    if (status === "loading") {
+      return;
+    }
+
+    if (status === "unauthenticated" || !session) {
       router.push("/register");
       return;
     }
@@ -44,9 +48,11 @@ export default function OnboardingPage() {
       return;
     }
 
-    // Set current step based on user's progress
-    if (user.onboardingStep) {
+    // Set current step based on user's progress (minimum step 2)
+    if (user.onboardingStep && user.onboardingStep > 1) {
       setCurrentStep(user.onboardingStep);
+    } else {
+      setCurrentStep(2); // Default to step 2 for new users
     }
 
     // Pre-fill data from session
@@ -58,7 +64,7 @@ export default function OnboardingPage() {
     });
 
     setLoading(false);
-  }, [session, router]);
+  }, [session, status, router]);
 
   const updateOnboarding = async (
     step: number,
@@ -141,22 +147,32 @@ export default function OnboardingPage() {
 
   const totalSteps = 4; // Excluding welcome screen
 
+  // Show loading while checking session
+  if (loading || status === "loading") {
+    return (
+      <div className="flex justify-center items-center h-screen bg-background">
+        <div className="text-center space-y-4">
+          <div className="animate-spin rounded-full h-12 w-12 border-t-2 border-b-2 border-primary mx-auto"></div>
+          <p className="text-foreground/60">Loading your profile...</p>
+        </div>
+      </div>
+    );
+  }
+
   return (
     <div className="min-h-screen bg-background">
-      {/* Progress Indicator - Hide on welcome and complete screens */}
-      {currentStep > 1 && currentStep < 5 && (
+      {/* Progress Indicator - Hide on complete screen */}
+      {currentStep < 5 && (
         <StepIndicator currentStep={currentStep - 1} totalSteps={totalSteps} />
       )}
 
       {/* Step Content */}
       <div className="container mx-auto">
-        {currentStep === 1 && <Step1Welcome onNext={handleStep1Next} />}
-
         {currentStep === 2 && (
           <Step2BasicInfo
             initialName={data.name}
             onNext={handleStep2Next}
-            onBack={handleBack}
+            onBack={() => router.push("/profile")} // Go back to profile instead of step 1
           />
         )}
 

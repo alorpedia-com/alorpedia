@@ -42,6 +42,10 @@ export default withAuth(
         ) {
           return true;
         }
+        // Allow authenticated users to access onboarding
+        if (path.startsWith("/onboarding")) {
+          return !!token;
+        }
         // Require authentication for all other routes
         return !!token;
       },
