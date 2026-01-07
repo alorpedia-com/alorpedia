@@ -11,6 +11,7 @@ import {
   Clock,
 } from "lucide-react";
 import { VILLAGES, formatAgeGrade } from "@/lib/utils";
+import StyledDropdown from "@/components/StyledDropdown";
 
 export default function DialoguePage() {
   const { data: session } = useSession();
@@ -45,10 +46,10 @@ export default function DialoguePage() {
     <div className="max-w-7xl mx-auto px-native py-native bg-background min-h-screen">
       <div className="flex flex-col md:flex-row md:items-end justify-between mb-12 gap-8">
         <div className="space-y-4">
-          <h1 className="font-serif font-bold text-primary tracking-tight">
+          <h1 className="text-xl md:text-3xl lg:text-4xl font-semibold md:font-bold font-serif text-primary tracking-tight">
             Village Dialogue
           </h1>
-          <p className="text-foreground/70 max-w-2xl text-lg leading-relaxed font-medium">
+          <p className="text-xs md:text-lg text-foreground/70 max-w-2xl leading-relaxed font-normal md:font-medium">
             A sacred space for consultation and community dialogue. Connect with
             kin, share wisdom, and shape our collective future.
           </p>
@@ -68,46 +69,27 @@ export default function DialoguePage() {
         {/* Sidebar Filters */}
         <aside className="lg:w-72 space-y-10 lg:sticky lg:top-32 h-fit">
           <div className="sticky top-20 bg-background/90 backdrop-blur-xl pt-2 pb-6 -mx-4 px-4 lg:relative lg:top-0 lg:p-0 lg:bg-transparent z-20 border-b border-border/10 lg:border-none">
-            <h4 className="flex items-center space-x-3 text-[10px] font-black text-primary uppercase tracking-[0.2em] mb-5 opacity-60">
+            <h4 className="flex items-center space-x-2 text-xs font-bold text-primary uppercase tracking-wide mb-3 opacity-60">
               <Filter className="w-4 h-4" />
               <span>By Village</span>
             </h4>
-            <div className="flex overflow-x-auto lg:flex-col gap-3 pb-2 lg:pb-0 scrollbar-none snap-x">
-              <button
-                onClick={() => setSelectedVillage("All")}
-                className={`flex-shrink-0 px-6 py-3 rounded-2xl text-xs font-black uppercase tracking-widest transition-all text-left snap-start border ${
-                  selectedVillage === "All"
-                    ? "bg-primary text-background shadow-xl border-primary scale-105"
-                    : "bg-card border-border/50 text-foreground/40 hover:border-primary/30"
-                }`}
-              >
-                All Alor
-              </button>
-              {VILLAGES.map((village) => (
-                <button
-                  key={village}
-                  onClick={() => setSelectedVillage(village)}
-                  className={`flex-shrink-0 px-6 py-3 rounded-2xl text-xs font-black uppercase tracking-widest transition-all text-left snap-start border ${
-                    selectedVillage === village
-                      ? "bg-primary text-background shadow-xl border-primary scale-105"
-                      : "bg-card border-border/50 text-foreground/40 hover:border-primary/30"
-                  }`}
-                >
-                  {village}
-                </button>
-              ))}
-            </div>
+            <StyledDropdown
+              label="Filter by village"
+              value={selectedVillage}
+              onChange={setSelectedVillage}
+              options={[
+                { value: "All", label: "All Alor" },
+                ...VILLAGES.map((v) => ({ value: v, label: v })),
+              ]}
+            />
           </div>
         </aside>
 
         {/* Discussions List */}
         <div className="flex-grow space-y-6">
           {loading ? (
-            <div className="flex justify-center items-center py-32">
-              <div className="relative w-16 h-16">
-                <div className="absolute inset-0 border-4 border-primary/10 rounded-full"></div>
-                <div className="absolute inset-0 border-4 border-primary rounded-full border-t-transparent animate-spin"></div>
-              </div>
+            <div className="flex justify-center items-center py-20">
+              <div className="animate-spin rounded-full h-12 w-12 border-t-2 border-b-2 border-primary"></div>
             </div>
           ) : discussions.length > 0 ? (
             discussions.map((discussion) => (
@@ -122,7 +104,7 @@ export default function DialoguePage() {
                       {discussion.author.name[0]}
                     </div>
                     <div className="space-y-2">
-                      <h3 className="text-primary group-hover:text-secondary transition-colors leading-tight line-clamp-2">
+                      <h3 className="text-base md:text-lg lg:text-xl font-semibold md:font-bold text-primary group-hover:text-secondary transition-colors leading-tight line-clamp-2">
                         {discussion.title}
                       </h3>
                       <div className="flex flex-wrap items-center gap-x-4 gap-y-2 text-[10px] uppercase font-black tracking-[0.15em]">
@@ -181,8 +163,10 @@ export default function DialoguePage() {
               <div className="w-24 h-24 bg-primary/5 rounded-[2rem] flex items-center justify-center mx-auto mb-8 animate-pulse text-primary/20">
                 <MessageSquare className="w-12 h-12" />
               </div>
-              <h2 className="text-primary mb-4">Silence is not dialogue</h2>
-              <p className="text-foreground/60 mb-12 max-w-sm mx-auto text-lg leading-relaxed px-6 font-medium">
+              <h2 className="text-lg md:text-xl lg:text-2xl font-semibold md:font-bold text-primary mb-4">
+                Silence is not dialogue
+              </h2>
+              <p className="text-xs md:text-base text-foreground/60 mb-12 max-w-sm mx-auto leading-relaxed px-6 font-normal md:font-medium">
                 No discussions found for{" "}
                 {selectedVillage === "All" ? "Alor" : selectedVillage}. Be the
                 one to start the conversation.

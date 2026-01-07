@@ -25,7 +25,7 @@ export const metadata: Metadata = {
   title: "Alorpedia",
   description: "Preserving Alor heritage and culture",
   icons: {
-    icon: "/favicon.ico",
+    icon: "/logo.jpg",
     apple: "/logo.jpg",
   },
   openGraph: {

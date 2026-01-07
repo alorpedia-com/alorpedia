@@ -122,7 +122,7 @@ export default function TreeOfLife() {
 
   if (loading) {
     return (
-      <div className="flex justify-center items-center h-screen bg-background">
+      <div className="flex justify-center items-center h-screen bg-background text-primary">
         <div className="animate-spin rounded-full h-12 w-12 border-t-2 border-b-2 border-primary"></div>
       </div>
     );
@@ -132,10 +132,10 @@ export default function TreeOfLife() {
     <div className="max-w-7xl mx-auto px-native py-native bg-background min-h-screen">
       <div className="flex flex-col md:flex-row md:items-end justify-between mb-12 sm:mb-20 gap-8">
         <div className="space-y-4">
-          <h1 className="text-primary leading-tight tracking-tight">
+          <h1 className="text-xl md:text-3xl lg:text-4xl font-semibold md:font-bold text-primary leading-tight tracking-tight">
             Osisi Ndụ
           </h1>
-          <p className="text-foreground/70 max-w-2xl text-lg sm:text-xl font-medium italic border-l-4 border-primary/20 pl-6 py-2">
+          <p className="text-xs md:text-lg sm:text-xl text-foreground/70 max-w-2xl font-normal md:font-medium italic border-l-4 border-primary/20 pl-6 py-2">
             "The Tree of Life." Map your lineage, preserve your roots, and
             connect with the living branches of your family.
           </p>

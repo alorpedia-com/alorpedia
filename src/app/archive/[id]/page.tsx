@@ -163,11 +163,11 @@ export default function PostPage({
             )}
           </div>
 
-          <h1 className="text-primary mb-10 leading-tight tracking-tight">
+          <h1 className="text-2xl md:text-3xl lg:text-4xl font-bold md:font-black text-primary mb-10 leading-tight tracking-tight">
             {post.title}
           </h1>
 
-          <div className="text-lg sm:text-xl leading-relaxed text-foreground/80 space-y-10 whitespace-pre-wrap font-serif italic selection:bg-accent/20 border-l-8 border-primary/5 pl-8 sm:pl-12">
+          <div className="text-base md:text-lg lg:text-xl text-justify leading-relaxed text-foreground/80 space-y-10 whitespace-pre-wrap font-serif selection:bg-accent/20 border-l-8 border-primary/5 pl-8 sm:pl-12">
             {post.content}
           </div>
         </div>

@@ -11,6 +11,7 @@ import {
   Filter,
 } from "lucide-react";
 import { VILLAGES } from "@/lib/utils";
+import StyledDropdown from "@/components/StyledDropdown";
 
 export default function ArchivePage() {
   const { data: session } = useSession();
@@ -53,10 +54,10 @@ export default function ArchivePage() {
     <div className="max-w-7xl mx-auto px-native py-native bg-background min-h-screen">
       <div className="flex flex-col md:flex-row md:justify-between md:items-end mb-10 sm:mb-16 gap-8">
         <div className="flex-grow space-y-4">
-          <h1 className="font-serif font-bold text-primary tracking-tight">
+          <h1 className="text-xl md:text-3xl lg:text-4xl font-semibold md:font-bold font-serif text-primary tracking-tight">
             Living Archive
           </h1>
-          <p className="text-foreground/70 max-w-2xl text-lg leading-relaxed">
+          <p className="text-xs md:text-lg text-foreground/70 max-w-2xl leading-relaxed font-normal md:font-medium">
             A collective memory of Alor. Explore stories, biographies, and
             historical records preserved by our community.
           </p>
@@ -86,62 +87,41 @@ export default function ArchivePage() {
 
       <div className="flex flex-col lg:flex-row gap-10 lg:gap-16">
         {/* Sidebar Filters */}
-        <aside className="lg:w-72 space-y-10 lg:sticky lg:top-32 h-fit">
+        <aside className="lg:w-64 xl:w-72 flex-shrink-0 space-y-10 lg:sticky lg:top-32 lg:self-start">
           <div className="sticky top-20 bg-background/90 backdrop-blur-xl pt-2 pb-6 -mx-4 px-4 lg:relative lg:top-0 lg:p-0 lg:bg-transparent z-20 border-b border-border/10 lg:border-none">
             {/* Village Filter */}
-            <div className="mb-8 lg:mb-12">
-              <h4 className="flex items-center space-x-3 text-[10px] font-black text-primary uppercase tracking-[0.2em] mb-5 opacity-60">
+            <div className="mb-6">
+              <h4 className="flex items-center space-x-2 text-xs font-bold text-primary uppercase tracking-wide mb-3 opacity-60">
                 <Filter className="w-4 h-4" />
                 <span>By Village</span>
               </h4>
-              <div className="flex overflow-x-auto lg:flex-col gap-3 pb-2 lg:pb-0 scrollbar-none snap-x">
-                <button
-                  onClick={() => setSelectedVillage("All")}
-                  className={`flex-shrink-0 px-6 py-3 rounded-2xl text-xs font-black uppercase tracking-widest transition-all text-left snap-start border ${
-                    selectedVillage === "All"
-                      ? "bg-primary text-background shadow-xl border-primary scale-105"
-                      : "bg-card border-border/50 text-foreground/40 hover:border-primary/30"
-                  }`}
-                >
-                  All Alor
-                </button>
-                {VILLAGES.map((village) => (
-                  <button
-                    key={village}
-                    onClick={() => setSelectedVillage(village)}
-                    className={`flex-shrink-0 px-6 py-3 rounded-2xl text-xs font-black uppercase tracking-widest transition-all text-left snap-start border ${
-                      selectedVillage === village
-                        ? "bg-primary text-background shadow-xl border-primary scale-105"
-                        : "bg-card border-border/50 text-foreground/40 hover:border-primary/30"
-                    }`}
-                  >
-                    {village}
-                  </button>
-                ))}
-              </div>
+              <StyledDropdown
+                label="Filter by village"
+                value={selectedVillage}
+                onChange={setSelectedVillage}
+                options={[
+                  { value: "All", label: "All Alor" },
+                  ...VILLAGES.map((v) => ({ value: v, label: v })),
+                ]}
+              />
             </div>
 
             {/* Entry Type Filter */}
             <div>
-              <h4 className="flex items-center space-x-3 text-[10px] font-black text-primary uppercase tracking-[0.2em] mb-5 opacity-60">
+              <h4 className="flex items-center space-x-2 text-xs font-bold text-primary uppercase tracking-wide mb-3 opacity-60">
                 <Filter className="w-4 h-4" />
                 <span>Entry Type</span>
               </h4>
-              <div className="flex overflow-x-auto lg:flex-col gap-3 pb-2 lg:pb-0 scrollbar-none snap-x">
-                {["All", "ARTICLE", "BIOGRAPHY"].map((type) => (
-                  <button
-                    key={type}
-                    onClick={() => setSelectedType(type)}
-                    className={`flex-shrink-0 px-6 py-3 rounded-2xl text-xs font-black uppercase tracking-widest transition-all text-left snap-start border ${
-                      selectedType === type
-                        ? "bg-accent text-primary shadow-xl border-accent scale-105"
-                        : "bg-card border-border/50 text-foreground/40 hover:border-accent/30"
-                    }`}
-                  >
-                    {type === "All" ? "All Types" : type}
-                  </button>
-                ))}
-              </div>
+              <StyledDropdown
+                label="Filter by entry type"
+                value={selectedType}
+                onChange={setSelectedType}
+                options={[
+                  { value: "All", label: "All Types" },
+                  { value: "ARTICLE", label: "Article" },
+                  { value: "BIOGRAPHY", label: "Biography" },
+                ]}
+              />
             </div>
           </div>
         </aside>
@@ -149,11 +129,8 @@ export default function ArchivePage() {
         {/* Posts List */}
         <div className="flex-grow">
           {loading ? (
-            <div className="flex justify-center items-center py-32">
-              <div className="relative w-16 h-16">
-                <div className="absolute inset-0 border-4 border-primary/10 rounded-full"></div>
-                <div className="absolute inset-0 border-4 border-primary rounded-full border-t-transparent animate-spin"></div>
-              </div>
+            <div className="flex justify-center items-center h-screen bg-background text-primary">
+              <div className="animate-spin rounded-full h-12 w-12 border-t-2 border-b-2 border-primary"></div>
             </div>
           ) : (
             <div className="grid grid-cols-1 sm:grid-cols-2 gap-6 lg:gap-10">
@@ -191,10 +168,12 @@ export default function ArchivePage() {
                           {new Date(post.createdAt).toLocaleDateString()}
                         </span>
                       </div>
-                      <h3 className="text-primary mb-3 group-hover:text-secondary transition-colors line-clamp-2 leading-tight">
+                      <h3 className="text-base md:text-lg lg:text-xl font-semibold md:font-bold text-primary mb-3 group-hover:text-secondary transition-colors line-clamp-2 leading-tight">
+                        {" "}
                         {post.title}
                       </h3>
-                      <p className="text-foreground/60 text-sm line-clamp-3 mb-6 flex-grow leading-relaxed font-medium italic">
+                      <p className="text-xs md:text-sm text-foreground/60 line-clamp-3 mb-6 flex-grow leading-relaxed font-normal md:font-medium italic">
+                        {" "}
                         {post.content}
                       </p>
                       <div className="flex items-center justify-between pt-6 border-t border-border/30">

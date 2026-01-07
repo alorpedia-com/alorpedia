@@ -8,6 +8,7 @@ import {
   Users,
   User,
   TreeDeciduous,
+  MessageCircle,
 } from "lucide-react";
 import { cn } from "@/lib/utils";
 
@@ -18,8 +19,8 @@ const navItems = [
     icon: Archive,
   },
   {
-    label: "Dialogue",
-    href: "/dialogue",
+    label: "Community",
+    href: "/community",
     icon: MessageSquare,
   },
   {

@@ -225,7 +225,9 @@ export default function CreatePostPage() {
                 className="flex items-center space-x-2 bg-primary text-background px-8 py-3 rounded-lg font-bold hover:bg-primary/90 transition-all shadow-lg active:scale-95 disabled:opacity-50 disabled:scale-100"
               >
                 {loading ? (
-                  <div className="animate-spin rounded-full h-4 w-4 border-t-2 border-background"></div>
+                  <div className="flex justify-center py-1">
+                    <div className="animate-spin rounded-full h-5 w-5 border-t-2 border-b-2 border-background"></div>
+                  </div>
                 ) : (
                   <>
                     <Send className="w-4 h-4" />

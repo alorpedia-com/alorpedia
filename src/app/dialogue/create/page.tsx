@@ -53,10 +53,29 @@ export default function CreateDiscussionPage() {
   return (
     <div className="max-w-3xl mx-auto px-4 py-12 sm:px-6 lg:px-8 bg-background min-h-screen">
       <div className="mb-10">
-        <h1 className="text-3xl font-serif font-bold text-primary mb-2">
+        <button
+          onClick={() => router.back()}
+          className="flex items-center space-x-2 text-foreground/60 hover:text-primary transition-colors mb-4"
+        >
+          <svg
+            className="w-5 h-5"
+            fill="none"
+            stroke="currentColor"
+            viewBox="0 0 24 24"
+          >
+            <path
+              strokeLinecap="round"
+              strokeLinejoin="round"
+              strokeWidth={2}
+              d="M15 19l-7-7 7-7"
+            />
+          </svg>
+          <span className="text-sm font-medium">Back</span>
+        </button>
+        <h1 className="text-xl md:text-3xl font-semibold md:font-bold font-serif text-primary mb-2">
           Start a Dialogue
         </h1>
-        <p className="text-foreground/60">
+        <p className="text-xs md:text-base text-foreground/60">
           Your conversation will be tagged with{" "}
           <span className="text-primary font-bold">
             {user?.village} Village
@@ -135,7 +154,9 @@ export default function CreateDiscussionPage() {
                 className="flex items-center space-x-2 bg-primary text-background px-8 py-3 rounded-lg font-bold hover:bg-primary/90 transition-all shadow-lg active:scale-95 disabled:opacity-50"
               >
                 {loading ? (
-                  <div className="animate-spin rounded-full h-4 w-4 border-t-2 border-background"></div>
+                  <div className="flex justify-center py-1">
+                    <div className="animate-spin rounded-full h-5 w-5 border-t-2 border-b-2 border-background"></div>
+                  </div>
                 ) : (
                   <>
                     <MessageSquare className="w-4 h-4" />
