@@ -7,6 +7,7 @@ import { usePathname } from "next/navigation";
 import { User, LogOut, UserCircle } from "lucide-react";
 import { useState, useRef, useEffect } from "react";
 import { getUserInitials } from "@/lib/utils";
+import NotificationBell from "@/components/NotificationBell";
 
 export default function Navbar() {
   const { data: session } = useSession();
@@ -93,14 +94,24 @@ export default function Navbar() {
 
           {/* Desktop Auth */}
           <div className="hidden md:flex items-center space-x-4">
+            {session && !isAuthPage && <NotificationBell />}
             {session ? (
               <div className="relative" ref={dropdownRef}>
                 <button
                   onClick={() => setShowDropdown(!showDropdown)}
                   className="flex items-center space-x-3 hover:bg-background/10 px-3 py-2 rounded-xl transition-all active:scale-95"
                 >
-                  <div className="w-9 h-9 bg-accent text-primary rounded-full flex items-center justify-center font-bold text-sm shadow-md">
-                    {userInitials}
+                  <div className="w-9 h-9 bg-accent text-primary rounded-full flex items-center justify-center font-bold text-sm shadow-md overflow-hidden relative">
+                    {session.user?.image ? (
+                      <Image
+                        src={session.user.image}
+                        alt={session.user.name || "User"}
+                        fill
+                        className="object-cover"
+                      />
+                    ) : (
+                      userInitials
+                    )}
                   </div>
                   <span className="text-sm font-bold">
                     {session.user?.name || "Profile"}
@@ -156,9 +167,18 @@ export default function Navbar() {
               <div className="relative" ref={dropdownRef}>
                 <button
                   onClick={() => setShowDropdown(!showDropdown)}
-                  className="w-9 h-9 bg-accent text-primary rounded-full flex items-center justify-center font-bold text-sm shadow-md active:scale-90 transition-transform"
+                  className="w-9 h-9 bg-accent text-primary rounded-full flex items-center justify-center font-bold text-sm shadow-md active:scale-90 transition-transform overflow-hidden relative"
                 >
-                  {userInitials}
+                  {session.user?.image ? (
+                    <Image
+                      src={session.user.image}
+                      alt={session.user.name || "User"}
+                      fill
+                      className="object-cover"
+                    />
+                  ) : (
+                    userInitials
+                  )}
                 </button>
 
                 {/* Mobile Dropdown */}

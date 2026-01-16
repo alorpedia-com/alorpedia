@@ -15,7 +15,9 @@ export default function CreatePostPage() {
     imageUrl: "",
   });
   const [imagePreview, setImagePreview] = useState<string | null>(null);
+  const [selectedFile, setSelectedFile] = useState<File | null>(null);
   const [loading, setLoading] = useState(false);
+  const [uploading, setUploading] = useState(false);
   const [error, setError] = useState("");
 
   const handleImageChange = (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -26,11 +28,10 @@ export default function CreatePostPage() {
         return;
       }
 
+      setSelectedFile(file);
       const reader = new FileReader();
       reader.onloadend = () => {
-        const base64String = reader.result as string;
-        setImagePreview(base64String);
-        setFormData({ ...formData, imageUrl: base64String });
+        setImagePreview(reader.result as string);
       };
       reader.readAsDataURL(file);
     }
@@ -38,6 +39,7 @@ export default function CreatePostPage() {
 
   const removeImage = () => {
     setImagePreview(null);
+    setSelectedFile(null);
     setFormData({ ...formData, imageUrl: "" });
   };
 
@@ -52,10 +54,37 @@ export default function CreatePostPage() {
     setError("");
 
     try {
+      let imageUrl = "";
+
+      // Upload image to Cloudinary if selected
+      if (selectedFile) {
+        setUploading(true);
+        const uploadFormData = new FormData();
+        uploadFormData.append("file", selectedFile);
+        uploadFormData.append("folder", "alorpedia/posts");
+
+        const uploadResponse = await fetch("/api/upload", {
+          method: "POST",
+          body: uploadFormData,
+        });
+
+        if (uploadResponse.ok) {
+          const uploadData = await uploadResponse.json();
+          imageUrl = uploadData.url;
+        } else {
+          throw new Error("Failed to upload image");
+        }
+        setUploading(false);
+      }
+
+      // Create post with Cloudinary URL
       const response = await fetch("/api/posts", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify(formData),
+        body: JSON.stringify({
+          ...formData,
+          imageUrl: imageUrl || formData.imageUrl,
+        }),
       });
 
       if (response.ok) {
@@ -65,9 +94,12 @@ export default function CreatePostPage() {
         setError(data.message || "Failed to create post");
       }
     } catch (err) {
-      setError("An unexpected error occurred");
+      setError(
+        err instanceof Error ? err.message : "An unexpected error occurred"
+      );
     } finally {
       setLoading(false);
+      setUploading(false);
     }
   };
 
@@ -221,12 +253,15 @@ export default function CreatePostPage() {
             <div className="flex justify-end pt-4 border-t border-border">
               <button
                 type="submit"
-                disabled={loading}
+                disabled={loading || uploading}
                 className="flex items-center space-x-2 bg-primary text-background px-8 py-3 rounded-lg font-bold hover:bg-primary/90 transition-all shadow-lg active:scale-95 disabled:opacity-50 disabled:scale-100"
               >
-                {loading ? (
-                  <div className="flex justify-center py-1">
+                {loading || uploading ? (
+                  <div className="flex items-center space-x-2">
                     <div className="animate-spin rounded-full h-5 w-5 border-t-2 border-b-2 border-background"></div>
+                    <span>
+                      {uploading ? "Uploading image..." : "Publishing..."}
+                    </span>
                   </div>
                 ) : (
                   <>

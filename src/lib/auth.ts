@@ -46,6 +46,8 @@ export const authOptions: NextAuthOptions = {
           village: user.village,
           ageGrade: user.ageGrade,
           onboardingCompleted: user.onboardingCompleted,
+          onboardingStep: user.onboardingStep,
+          userType: user.userType,
         };
       },
     }),
@@ -75,24 +77,39 @@ export const authOptions: NextAuthOptions = {
       return true;
     },
     async jwt({ token, user, account, trigger, session }) {
+      // 1. Initial Sign In - Populate token with initial data
       if (user) {
         token.id = user.id;
         token.village = (user as any).village;
         token.ageGrade = (user as any).ageGrade;
         token.onboardingCompleted = (user as any).onboardingCompleted;
+        token.onboardingStep = (user as any).onboardingStep;
+        token.userType = (user as any).userType;
       }
 
-      // Handle session updates (e.g., after onboarding completion)
-      if (trigger === "update" && session) {
-        const updatedUser = await prisma.user.findUnique({
-          where: { id: token.id as string },
+      // 2. Ensure we have the correct Database CUID
+      // For OAuth users, user.id might be the Provider ID, not our database CUID.
+      // We always sync with the database based on email or current ID.
+      if (
+        !token.id ||
+        trigger === "update" ||
+        (user && account?.provider === "google")
+      ) {
+        const dbUser = await prisma.user.findUnique({
+          where: token.email
+            ? { email: token.email }
+            : { id: token.id as string },
         });
-        if (updatedUser) {
-          token.village = updatedUser.village;
-          token.ageGrade = updatedUser.ageGrade;
-          token.onboardingCompleted = updatedUser.onboardingCompleted;
-          token.name = updatedUser.name;
-          token.picture = updatedUser.profileImage;
+
+        if (dbUser) {
+          token.id = dbUser.id; // Corrects Google ID to database CUID
+          token.village = dbUser.village;
+          token.ageGrade = dbUser.ageGrade;
+          token.onboardingCompleted = dbUser.onboardingCompleted;
+          token.onboardingStep = dbUser.onboardingStep;
+          token.userType = dbUser.userType;
+          token.name = dbUser.name;
+          token.picture = dbUser.profileImage;
         }
       }
 
@@ -104,6 +121,9 @@ export const authOptions: NextAuthOptions = {
         (session.user as any).village = token.village;
         (session.user as any).ageGrade = token.ageGrade;
         (session.user as any).onboardingCompleted = token.onboardingCompleted;
+        (session.user as any).onboardingStep = token.onboardingStep;
+        (session.user as any).userType = token.userType;
+        session.user.image = token.picture as string;
       }
       return session;
     },

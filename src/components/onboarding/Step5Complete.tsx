@@ -8,9 +8,13 @@ import { useEffect, useState } from "react";
 
 interface Step5CompleteProps {
   userName?: string;
+  userType?: "INDIGENE" | "NDI_OGO";
 }
 
-export default function Step5Complete({ userName }: Step5CompleteProps) {
+export default function Step5Complete({
+  userName,
+  userType,
+}: Step5CompleteProps) {
   const router = useRouter();
   const { update } = useSession();
   const [isNavigating, setIsNavigating] = useState(false);
@@ -29,10 +33,40 @@ export default function Step5Complete({ userName }: Step5CompleteProps) {
 
     setIsNavigating(true);
 
-    // Navigate directly - onboarding was already marked complete in Step 4
-    router.push("/profile");
-    router.refresh();
+    try {
+      // Update session to reflect onboarding completion
+      await update();
+
+      // Small delay to ensure session is updated
+      await new Promise((resolve) => setTimeout(resolve, 500));
+
+      // Navigate to profile
+      router.push("/profile");
+    } catch (error) {
+      console.error("Navigation error:", error);
+      setIsNavigating(false);
+    }
   };
+
+  const isNdiOgo = userType === "NDI_OGO";
+
+  const welcomeMessage = isNdiOgo
+    ? "You're now part of the Alorpedia community as Ndi Ogo. Connect with your host village, explore Alor heritage, and build meaningful relationships with the community."
+    : "You're now part of the Alorpedia community. Start exploring your heritage, connect with your village, and preserve your family's legacy.";
+
+  const features = isNdiOgo
+    ? [
+        "Connect with your host village",
+        "Join village dialogues",
+        "Explore the living archive",
+        "Build relationships with the community",
+      ]
+    : [
+        "Build your family tree (Osisi Ndụ)",
+        "Join village dialogues",
+        "Explore the living archive",
+        "Connect with your age-grade",
+      ];
 
   return (
     <div className="flex flex-col items-center justify-center min-h-[70vh] px-5 py-8">
@@ -55,9 +89,7 @@ export default function Step5Complete({ userName }: Step5CompleteProps) {
             Welcome{userName ? `, ${userName.split(" ")[0]}` : ""}!
           </h1>
           <p className="text-base text-foreground/70 leading-relaxed">
-            You're now part of the Alorpedia community. Start exploring your
-            heritage, connect with your village, and preserve your family's
-            legacy.
+            {welcomeMessage}
           </p>
         </div>
 
@@ -67,12 +99,7 @@ export default function Step5Complete({ userName }: Step5CompleteProps) {
             What you can do now:
           </h3>
           <div className="space-y-3">
-            {[
-              "Build your family tree (Osisi Ndụ)",
-              "Join village dialogues",
-              "Explore the living archive",
-              "Connect with your age-grade",
-            ].map((feature, i) => (
+            {features.map((feature, i) => (
               <div key={i} className="flex items-start space-x-3">
                 <div className="w-5 h-5 mt-0.5 rounded-full bg-primary/20 flex items-center justify-center shrink-0">
                   <div className="w-2 h-2 rounded-full bg-primary" />

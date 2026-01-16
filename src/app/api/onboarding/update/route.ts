@@ -50,6 +50,8 @@ export async function POST(request: NextRequest) {
       updateData.onboardingCompleted = true;
     }
 
+    console.log(`Updating user ${userId} for step ${step}:`, updateData);
+
     const updatedUser = await prisma.user.update({
       where: { id: userId },
       data: updateData,
@@ -69,6 +71,10 @@ export async function POST(request: NextRequest) {
         onboardingStep: true,
       },
     });
+
+    console.log(
+      `User ${userId} updated successfully. onboardingCompleted: ${updatedUser.onboardingCompleted}`
+    );
 
     return NextResponse.json({
       success: true,

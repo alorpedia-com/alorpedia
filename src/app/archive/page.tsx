@@ -9,9 +9,11 @@ import {
   Plus,
   ChevronRight,
   Filter,
+  Calendar,
 } from "lucide-react";
 import { VILLAGES } from "@/lib/utils";
 import StyledDropdown from "@/components/StyledDropdown";
+import { useDebounce } from "@/hooks/useDebounce";
 
 export default function ArchivePage() {
   const { data: session } = useSession();
@@ -20,6 +22,9 @@ export default function ArchivePage() {
   const [selectedVillage, setSelectedVillage] = useState<string>("All");
   const [selectedType, setSelectedType] = useState<string>("All");
   const [searchQuery, setSearchQuery] = useState("");
+  const [dateFrom, setDateFrom] = useState("");
+  const [dateTo, setDateTo] = useState("");
+  const debouncedSearch = useDebounce(searchQuery, 500);
 
   useEffect(() => {
     fetchPosts();
@@ -44,11 +49,19 @@ export default function ArchivePage() {
     }
   };
 
-  const filteredPosts = posts.filter(
-    (post) =>
-      post.title.toLowerCase().includes(searchQuery.toLowerCase()) ||
-      post.content.toLowerCase().includes(searchQuery.toLowerCase())
-  );
+  const filteredPosts = posts.filter((post) => {
+    const matchesSearch =
+      debouncedSearch === "" ||
+      post.title.toLowerCase().includes(debouncedSearch.toLowerCase()) ||
+      post.content.toLowerCase().includes(debouncedSearch.toLowerCase()) ||
+      post.author.name.toLowerCase().includes(debouncedSearch.toLowerCase());
+
+    const postDate = new Date(post.createdAt);
+    const matchesDateFrom = !dateFrom || postDate >= new Date(dateFrom);
+    const matchesDateTo = !dateTo || postDate <= new Date(dateTo + "T23:59:59");
+
+    return matchesSearch && matchesDateFrom && matchesDateTo;
+  });
 
   return (
     <div className="max-w-7xl mx-auto px-native py-native bg-background min-h-screen">
@@ -122,6 +135,49 @@ export default function ArchivePage() {
                   { value: "BIOGRAPHY", label: "Biography" },
                 ]}
               />
+            </div>
+
+            {/* Date Range Filter */}
+            <div className="mt-6">
+              <h4 className="flex items-center space-x-2 text-xs font-bold text-primary uppercase tracking-wide mb-3 opacity-60">
+                <Calendar className="w-4 h-4" />
+                <span>Date Range</span>
+              </h4>
+              <div className="space-y-3">
+                <div>
+                  <label className="text-xs text-foreground/60 mb-1 block">
+                    From
+                  </label>
+                  <input
+                    type="date"
+                    value={dateFrom}
+                    onChange={(e) => setDateFrom(e.target.value)}
+                    className="w-full px-3 py-2 border border-border/50 rounded-xl text-sm focus:ring-2 focus:ring-primary/20 focus:border-primary outline-none"
+                  />
+                </div>
+                <div>
+                  <label className="text-xs text-foreground/60 mb-1 block">
+                    To
+                  </label>
+                  <input
+                    type="date"
+                    value={dateTo}
+                    onChange={(e) => setDateTo(e.target.value)}
+                    className="w-full px-3 py-2 border border-border/50 rounded-xl text-sm focus:ring-2 focus:ring-primary/20 focus:border-primary outline-none"
+                  />
+                </div>
+                {(dateFrom || dateTo) && (
+                  <button
+                    onClick={() => {
+                      setDateFrom("");
+                      setDateTo("");
+                    }}
+                    className="text-xs text-secondary hover:text-secondary/80 font-bold"
+                  >
+                    Clear dates
+                  </button>
+                )}
+              </div>
             </div>
           </div>
         </aside>

@@ -2,9 +2,9 @@
 
 import { useSession } from "next-auth/react";
 import { useRouter } from "next/navigation";
-import { useEffect, useState } from "react";
+import { useRef, useEffect, useState } from "react";
 import Link from "next/link";
-import { User, MapPin, Calendar, Shield, Save, X } from "lucide-react";
+import { User, MapPin, Calendar, Shield, Save, X, Check } from "lucide-react";
 import { formatAgeGrade, getUserInitials } from "@/lib/utils";
 
 export default function ProfilePage() {
@@ -18,6 +18,8 @@ export default function ProfilePage() {
   const [activeTab, setActiveTab] = useState<"stories" | "dialogues">(
     "stories"
   );
+  const [justSaved, setJustSaved] = useState(false);
+  const bioRef = useRef<HTMLTextAreaElement>(null);
 
   useEffect(() => {
     if (status === "unauthenticated") {
@@ -43,6 +45,7 @@ export default function ProfilePage() {
   };
 
   const handleUpdateBio = async () => {
+    if (newBio.length > 500) return;
     setSavingBio(true);
     try {
       const response = await fetch("/api/user/profile/update", {
@@ -54,6 +57,8 @@ export default function ProfilePage() {
       if (response.ok) {
         setProfileData({ ...profileData, bio: newBio });
         setIsEditingBio(false);
+        setJustSaved(true);
+        setTimeout(() => setJustSaved(false), 3000);
       }
     } catch (error) {
       console.error("Failed to update bio:", error);
@@ -61,6 +66,15 @@ export default function ProfilePage() {
       setSavingBio(false);
     }
   };
+
+  useEffect(() => {
+    if (isEditingBio && bioRef.current) {
+      bioRef.current.focus();
+      // Move cursor to end
+      const length = bioRef.current.value.length;
+      bioRef.current.setSelectionRange(length, length);
+    }
+  }, [isEditingBio]);
 
   if (loading || status === "loading") {
     return (
@@ -79,10 +93,18 @@ export default function ProfilePage() {
         {/* Header/Cover Placeholder */}
         <div className="h-32 sm:h-48 bg-primary/10 relative">
           <div className="absolute -bottom-12 sm:-bottom-16 left-8 sm:left-12">
-            <div className="w-24 h-24 sm:w-32 sm:h-32 bg-primary text-background rounded-3xl border-8 border-card flex items-center justify-center shadow-2xl">
-              <span className="text-3xl sm:text-4xl font-bold">
-                {userInitials}
-              </span>
+            <div className="w-24 h-24 sm:w-32 sm:h-32 bg-primary text-background rounded-3xl border-8 border-card flex items-center justify-center shadow-2xl overflow-hidden relative">
+              {user?.image ? (
+                <img
+                  src={user.image}
+                  alt={user.name || "User"}
+                  className="w-full h-full object-cover"
+                />
+              ) : (
+                <span className="text-3xl sm:text-4xl font-bold">
+                  {userInitials}
+                </span>
+              )}
             </div>
           </div>
         </div>
@@ -237,19 +259,74 @@ export default function ProfilePage() {
                 </div>
               )}
             </h3>
-            <div className="bg-primary/5 border border-primary/10 rounded-[2rem] p-8 transition-all min-h-[120px] shadow-inner">
+            <div
+              className={`bg-primary/5 border border-primary/10 rounded-2xl sm:rounded-[2rem] p-6 sm:p-8 transition-all min-h-[120px] shadow-inner relative group ${
+                !isEditingBio ? "cursor-pointer hover:bg-primary/10" : ""
+              }`}
+              onClick={() => !isEditingBio && setIsEditingBio(true)}
+            >
+              {justSaved && (
+                <div className="absolute top-4 right-8 flex items-center space-x-2 text-green-600 animate-in fade-in slide-in-from-top-2">
+                  <Check className="w-4 h-4" />
+                  <span className="text-[10px] font-black uppercase tracking-widest">
+                    Saved!
+                  </span>
+                </div>
+              )}
+
               {isEditingBio ? (
-                <textarea
-                  className="w-full bg-card border border-border/50 rounded-2xl p-5 text-base focus:ring-4 focus:ring-primary/5 focus:border-primary outline-none min-h-[200px] resize-none leading-relaxed transition-all italic text-foreground/80 font-medium"
-                  placeholder="Tell the community about your journey and contributions..."
-                  value={newBio}
-                  onChange={(e) => setNewBio(e.target.value)}
-                />
+                <div className="space-y-4">
+                  <textarea
+                    ref={bioRef}
+                    className="w-full bg-card border border-border/50 rounded-xl sm:rounded-2xl p-4 sm:p-5 text-sm sm:text-base focus:ring-4 focus:ring-primary/5 focus:border-primary outline-none min-h-[180px] sm:min-h-[200px] resize-none leading-relaxed transition-all italic text-foreground/80 font-medium"
+                    placeholder="Tell the community about your journey and contributions..."
+                    value={newBio}
+                    onChange={(e) => setNewBio(e.target.value)}
+                    maxLength={500}
+                  />
+                  <div className="flex justify-between items-center bg-background/50 p-3 rounded-xl sm:bg-transparent sm:p-0">
+                    <p
+                      className={`text-[10px] font-black uppercase tracking-widest ${
+                        newBio.length > 450
+                          ? "text-red-500"
+                          : "text-foreground/30"
+                      }`}
+                    >
+                      {newBio.length} / 500
+                    </p>
+                    <div className="md:hidden flex space-x-2">
+                      <button
+                        onClick={(e) => {
+                          e.stopPropagation();
+                          setIsEditingBio(false);
+                        }}
+                        className="p-2 px-4 border border-border/50 text-foreground/40 rounded-xl text-[10px] font-black uppercase tracking-widest"
+                      >
+                        Cancel
+                      </button>
+                      <button
+                        onClick={(e) => {
+                          e.stopPropagation();
+                          handleUpdateBio();
+                        }}
+                        disabled={savingBio}
+                        className="p-2 px-4 bg-primary text-background rounded-xl text-[10px] font-black uppercase tracking-widest disabled:opacity-50"
+                      >
+                        {savingBio ? "..." : "Save"}
+                      </button>
+                    </div>
+                  </div>
+                </div>
               ) : (
-                <p className="text-foreground/70 text-lg leading-relaxed italic font-medium">
-                  {profileData?.bio ||
-                    "No biography provided yet. Tell the community about your journey and contributions."}
-                </p>
+                <div className="relative">
+                  <p className="text-foreground/70 text-lg leading-relaxed italic font-medium pr-8">
+                    {profileData?.bio ||
+                      "No biography provided yet. Tell the community about your journey and contributions."}
+                  </p>
+                  <div className="absolute top-0 right-0 opacity-0 group-hover:opacity-100 transition-opacity">
+                    <Save className="w-4 h-4 text-primary/30" />
+                  </div>
+                </div>
               )}
             </div>
           </div>

@@ -60,6 +60,7 @@ export default function OnboardingPage() {
       name: user.name || "",
       profileImage: user.image || "",
       village: user.village || "",
+      userType: user.userType || "",
       birthDate: "",
     });
 
@@ -71,6 +72,12 @@ export default function OnboardingPage() {
     stepData: Partial<OnboardingData>
   ) => {
     try {
+      console.log(
+        `Sending onboarding update for User ${
+          (session?.user as any)?.id
+        } (Step ${step}):`,
+        stepData
+      );
       const response = await fetch("/api/onboarding/update", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
@@ -78,13 +85,16 @@ export default function OnboardingPage() {
       });
 
       if (!response.ok) {
-        throw new Error("Failed to update onboarding");
+        const errorData = await response.json();
+        console.error("Onboarding API error response:", errorData);
+        throw new Error(errorData.error || "Failed to update onboarding");
       }
 
       const result = await response.json();
+      console.log("Onboarding API success response:", result);
 
-      // Update session with new data
-      await update();
+      // Don't update session here - it causes page refresh
+      // Session will be updated when onboarding is complete
 
       return result;
     } catch (error) {
@@ -98,9 +108,15 @@ export default function OnboardingPage() {
   };
 
   const handleStep2Next = async (stepData: { name: string }) => {
-    setData((prev) => ({ ...prev, ...stepData }));
-    await updateOnboarding(2, stepData);
-    setCurrentStep(3);
+    try {
+      setData((prev) => ({ ...prev, ...stepData }));
+      await updateOnboarding(2, stepData);
+      setCurrentStep(3);
+    } catch (error) {
+      console.error("Failed to proceed to next step:", error);
+      // Don't change step if there's an error
+      alert("Failed to save your information. Please try again.");
+    }
   };
 
   const handleStep3Next = async (stepData: { profileImage?: string }) => {
@@ -118,17 +134,16 @@ export default function OnboardingPage() {
     ageGrade?: string;
     generationalRole?: string;
   }) => {
-    setData((prev) => ({ ...prev, ...stepData }));
-    await updateOnboarding(4, stepData);
+    try {
+      setData((prev) => ({ ...prev, ...stepData }));
+      await updateOnboarding(4, stepData);
 
-    // Force session refresh to get updated onboardingCompleted status
-    // This is critical - wait for it to complete before moving to Step 5
-    await update();
-
-    // Small delay to ensure session propagates
-    await new Promise((resolve) => setTimeout(resolve, 300));
-
-    setCurrentStep(5);
+      // Don't update session here - it will be updated in Step5Complete
+      setCurrentStep(5);
+    } catch (error) {
+      console.error("Failed to complete onboarding:", error);
+      alert("Failed to complete onboarding. Please try again.");
+    }
   };
 
   const handleBack = () => {
@@ -193,7 +208,9 @@ export default function OnboardingPage() {
           />
         )}
 
-        {currentStep === 5 && <Step5Complete userName={data.name} />}
+        {currentStep === 5 && (
+          <Step5Complete userName={data.name} userType={data.userType} />
+        )}
       </div>
     </div>
   );

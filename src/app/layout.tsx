@@ -35,6 +35,8 @@ export const metadata: Metadata = {
   },
 };
 
+import Providers from "@/components/Providers";
+
 export default function RootLayout({
   children,
 }: Readonly<{
@@ -45,11 +47,11 @@ export default function RootLayout({
       <body
         className={`${inter.variable} ${outfit.variable} ${playfair.variable} antialiased min-h-screen flex flex-col`}
       >
-        <NextAuthSessionProvider>
+        <Providers>
           <Navbar />
           <MainContent>{children}</MainContent>
           <MobileNav />
-        </NextAuthSessionProvider>
+        </Providers>
       </body>
     </html>
   );

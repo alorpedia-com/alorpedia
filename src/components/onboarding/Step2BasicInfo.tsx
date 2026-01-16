@@ -15,11 +15,19 @@ export default function Step2BasicInfo({
   onBack,
 }: Step2BasicInfoProps) {
   const [name, setName] = useState(initialName);
+  const [loading, setLoading] = useState(false);
 
-  const handleSubmit = (e: React.FormEvent) => {
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    if (name.trim()) {
-      onNext({ name: name.trim() });
+    if (name.trim() && !loading) {
+      setLoading(true);
+      try {
+        await onNext({ name: name.trim() });
+      } catch (error) {
+        console.error("Error in handleSubmit:", error);
+      } finally {
+        setLoading(false);
+      }
     }
   };
 
@@ -52,6 +60,7 @@ export default function Step2BasicInfo({
               className="w-full px-4 py-4 text-base border-2 border-border rounded-2xl focus:outline-none focus:ring-2 focus:ring-primary/20 focus:border-primary transition-all"
               autoFocus
               required
+              disabled={loading}
             />
           </div>
 
@@ -59,16 +68,17 @@ export default function Step2BasicInfo({
             <button
               type="button"
               onClick={onBack}
-              className="flex-1 px-6 py-4 border-2 border-border text-foreground rounded-2xl font-semibold hover:bg-background/50 transition-all active:scale-[0.98]"
+              disabled={loading}
+              className="flex-1 px-6 py-4 border-2 border-border text-foreground rounded-2xl font-semibold hover:bg-background/50 transition-all active:scale-[0.98] disabled:opacity-50 disabled:cursor-not-allowed"
             >
               Back
             </button>
             <button
               type="submit"
-              disabled={!name.trim()}
+              disabled={!name.trim() || loading}
               className="flex-1 px-6 py-4 bg-primary text-background rounded-2xl font-semibold hover:bg-primary/90 transition-all active:scale-[0.98] disabled:opacity-50 disabled:cursor-not-allowed shadow-md"
             >
-              Continue
+              {loading ? "Saving..." : "Continue"}
             </button>
           </div>
         </form>
