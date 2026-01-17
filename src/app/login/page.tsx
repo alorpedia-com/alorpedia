@@ -1,15 +1,16 @@
 "use client";
 
 import { Suspense, useState, useEffect } from "react";
-import { signIn } from "next-auth/react";
 import { useRouter, useSearchParams } from "next/navigation";
 import Image from "next/image";
 import { Mail, ArrowLeft } from "lucide-react";
 import Link from "next/link";
+import { createClient } from "@/lib/supabase/client";
 
 function LoginForm() {
   const router = useRouter();
   const searchParams = useSearchParams();
+  const supabase = createClient();
   const [showEmailForm, setShowEmailForm] = useState(false);
   const [formData, setFormData] = useState({
     email: "",
@@ -26,7 +27,22 @@ function LoginForm() {
   }, [searchParams]);
 
   const handleGoogleSignIn = async () => {
-    await signIn("google", { callbackUrl: "/profile" });
+    setLoading(true);
+    try {
+      const { error } = await supabase.auth.signInWithOAuth({
+        provider: "google",
+        options: {
+          redirectTo: `${window.location.origin}/auth/callback`,
+        },
+      });
+      if (error) {
+        setError(error.message);
+      }
+    } catch (err) {
+      setError("An error occurred. Please try again.");
+    } finally {
+      setLoading(false);
+    }
   };
 
   const handleEmailSubmit = async (e: React.FormEvent) => {
@@ -35,29 +51,17 @@ function LoginForm() {
     setError("");
 
     try {
-      const result = await signIn("credentials", {
-        redirect: false,
+      const { data, error } = await supabase.auth.signInWithPassword({
         email: formData.email,
         password: formData.password,
       });
 
-      if (result?.error) {
-        setError("Invalid email or password");
-      } else {
-        // Refresh the page to get the updated session
-        router.refresh();
-
-        // Small delay to ensure session is updated
-        await new Promise((resolve) => setTimeout(resolve, 500));
-
-        // Check if there's a callback URL
+      if (error) {
+        setError(error.message || "Invalid email or password");
+      } else if (data.user) {
+        // Successful login - redirect to profile or callback URL
         const callbackUrl = searchParams.get("callbackUrl");
-        if (callbackUrl) {
-          router.push(callbackUrl);
-        } else {
-          // Default redirect - let the proxy handle onboarding redirect
-          router.push("/profile");
-        }
+        router.push(callbackUrl || "/profile");
       }
     } catch (err) {
       setError("An error occurred. Please try again.");
@@ -151,7 +155,7 @@ function LoginForm() {
                 onChange={(e) =>
                   setFormData({ ...formData, password: e.target.value })
                 }
-                className="w-full px-4 py-4 text-base border-2 border-border rounded-2xl focus:outline-none focus:ring-2 focus:ring-primary/20 focus:border-primary transition-all"
+                className="w-full px-4 py-4 text-base border-2 border-border rounded-2xl focus:outline-none focus:ring-2 focus:ring-primary/20 focus:border-primary transition-all "
                 required
               />
             </div>
@@ -228,10 +232,11 @@ function LoginForm() {
 
         {/* Authentication Options */}
         <div className="space-y-4 pt-4">
-          {/* Google OAuth - Temporarily Disabled */}
-          {/* <button
+          {/* Google OAuth */}
+          <button
             onClick={handleGoogleSignIn}
-            className="w-full flex items-center justify-center space-x-3 px-6 py-4 bg-background border-2 border-border rounded-2xl hover:border-primary/30 hover:bg-primary/5 transition-all active:scale-[0.98] shadow-sm"
+            disabled={loading}
+            className="w-full flex items-center justify-center space-x-3 px-6 py-4 bg-background border-2 border-border rounded-2xl hover:border-primary/30 hover:bg-primary/5 transition-all active:scale-[0.98] shadow-sm disabled:opacity-50"
           >
             <svg className="w-5 h-5" viewBox="0 0 24 24">
               <path
@@ -252,12 +257,12 @@ function LoginForm() {
               />
             </svg>
             <span className="font-semibold text-foreground">
-              Continue with Google
+              {loading ? "Loading..." : "Continue with Google"}
             </span>
-          </button> */}
+          </button>
 
           {/* Divider */}
-          {/* <div className="relative">
+          <div className="relative">
             <div className="absolute inset-0 flex items-center">
               <div className="w-full border-t border-border"></div>
             </div>
@@ -266,7 +271,7 @@ function LoginForm() {
                 Or
               </span>
             </div>
-          </div> */}
+          </div>
 
           {/* Email/Password */}
           <button

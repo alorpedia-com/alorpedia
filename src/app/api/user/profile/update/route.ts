@@ -1,32 +1,35 @@
 import { NextResponse } from "next/server";
-import { getServerSession } from "next-auth/next";
-import { authOptions } from "@/lib/auth";
+import { createClient } from "@/lib/supabase/server";
 import prisma from "@/lib/prisma";
 
 export async function POST(req: Request) {
-  const session = await getServerSession(authOptions);
+  const supabase = await createClient();
+  const {
+    data: { user },
+    error,
+  } = await supabase.auth.getUser();
 
-  if (!session || !session.user) {
+  if (error || !user) {
     return NextResponse.json({ message: "Not authenticated" }, { status: 401 });
   }
 
   try {
     const { bio } = await req.json();
 
-    const user = await prisma.user.findUnique({
-      where: { email: session.user.email! },
+    const dbUser = await prisma.user.findUnique({
+      where: { id: user.id },
     });
 
-    if (!user) {
+    if (!dbUser) {
       return NextResponse.json({ message: "User not found" }, { status: 404 });
     }
 
     const updatedProfile = await prisma.profile.upsert({
-      where: { userId: user.id },
+      where: { userId: dbUser.id },
       update: { bio },
       create: {
         bio,
-        userId: user.id,
+        userId: dbUser.id,
       },
     });
 

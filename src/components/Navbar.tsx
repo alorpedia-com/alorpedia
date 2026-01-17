@@ -2,15 +2,15 @@
 
 import Link from "next/link";
 import Image from "next/image";
-import { useSession, signOut } from "next-auth/react";
 import { usePathname } from "next/navigation";
 import { User, LogOut, UserCircle } from "lucide-react";
 import { useState, useRef, useEffect } from "react";
 import { getUserInitials } from "@/lib/utils";
 import NotificationBell from "@/components/NotificationBell";
+import { useSupabaseUser } from "@/hooks/useSupabaseUser";
 
 export default function Navbar() {
-  const { data: session } = useSession();
+  const { user, signOut: supabaseSignOut } = useSupabaseUser();
   const pathname = usePathname();
   const [showDropdown, setShowDropdown] = useState(false);
   const dropdownRef = useRef<HTMLDivElement>(null);
@@ -50,11 +50,11 @@ export default function Navbar() {
   ];
 
   const handleSignOut = async () => {
-    await signOut({ redirect: false });
+    await supabaseSignOut();
     window.location.href = "/";
   };
 
-  const userInitials = getUserInitials(session?.user?.name);
+  const userInitials = getUserInitials(user?.user_metadata?.name);
 
   return (
     <nav className="bg-primary text-background border-b border-border/10 sticky top-0 z-50 shadow-sm">
@@ -94,18 +94,18 @@ export default function Navbar() {
 
           {/* Desktop Auth */}
           <div className="hidden md:flex items-center space-x-4">
-            {session && !isAuthPage && <NotificationBell />}
-            {session ? (
+            {user && !isAuthPage && <NotificationBell />}
+            {user ? (
               <div className="relative" ref={dropdownRef}>
                 <button
                   onClick={() => setShowDropdown(!showDropdown)}
                   className="flex items-center space-x-3 hover:bg-background/10 px-3 py-2 rounded-xl transition-all active:scale-95"
                 >
                   <div className="w-9 h-9 bg-accent text-primary rounded-full flex items-center justify-center font-bold text-sm shadow-md overflow-hidden relative">
-                    {session.user?.image ? (
+                    {user.user_metadata?.avatar_url ? (
                       <Image
-                        src={session.user.image}
-                        alt={session.user.name || "User"}
+                        src={user.user_metadata.avatar_url}
+                        alt={user.user_metadata?.name || "User"}
                         fill
                         className="object-cover"
                       />
@@ -114,7 +114,7 @@ export default function Navbar() {
                     )}
                   </div>
                   <span className="text-sm font-bold">
-                    {session.user?.name || "Profile"}
+                    {user.user_metadata?.name || user.email || "Profile"}
                   </span>
                 </button>
 

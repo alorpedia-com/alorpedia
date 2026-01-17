@@ -1,14 +1,15 @@
 "use client";
 
-import { signIn } from "next-auth/react";
 import { useState } from "react";
 import { useRouter } from "next/navigation";
 import Image from "next/image";
 import { Mail, ArrowLeft } from "lucide-react";
 import Link from "next/link";
+import { createClient } from "@/lib/supabase/client";
 
 export default function Register() {
   const router = useRouter();
+  const supabase = createClient();
   const [showEmailForm, setShowEmailForm] = useState(false);
   const [formData, setFormData] = useState({
     email: "",
@@ -18,7 +19,22 @@ export default function Register() {
   const [loading, setLoading] = useState(false);
 
   const handleGoogleSignIn = async () => {
-    await signIn("google", { callbackUrl: "/onboarding" });
+    setLoading(true);
+    try {
+      const { error } = await supabase.auth.signInWithOAuth({
+        provider: "google",
+        options: {
+          redirectTo: `${window.location.origin}/auth/callback?next=/onboarding`,
+        },
+      });
+      if (error) {
+        setError(error.message);
+      }
+    } catch (err) {
+      setError("An error occurred. Please try again.");
+    } finally {
+      setLoading(false);
+    }
   };
 
   const handleEmailSubmit = async (e: React.FormEvent) => {
@@ -27,54 +43,27 @@ export default function Register() {
     setError("");
 
     try {
-      // Create account with email/password
-      const response = await fetch("/api/register", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({
-          email: formData.email,
-          password: formData.password,
-          provider: "credentials",
-        }),
+      const { data, error } = await supabase.auth.signUp({
+        email: formData.email,
+        password: formData.password,
+        options: {
+          email RedirectTo: `${window.location.origin}/auth/callback`,
+        },
       });
 
-      const data = await response.json();
-
-      if (response.ok) {
-        console.log("Registration successful, attempting sign in...");
-        // Sign in and redirect to onboarding
-        const result = await signIn("credentials", {
-          redirect: false,
-          email: formData.email,
-          password: formData.password,
-        });
-
-        console.log("Sign in result:", result);
-
-        if (result?.ok) {
-          console.log("Sign in successful, redirecting to onboarding...");
-          router.refresh();
-          router.push("/onboarding");
+      if (error) {
+        setError(error.message || "Registration failed. Please try again.");
+      } else if (data.user) {
+        // Check if email confirmation is required
+        if (data.user.identities?.length === 0) {
+          setError("This email is already registered. Please log in.");
         } else {
-          console.error("Sign in failed:", result?.error);
-          setError(
-            `Failed to sign in after registration: ${
-              result?.error || "Unknown error"
-            }. Please try logging in.`
-          );
+          // Successful registration - redirect to onboarding
+          router.push("/onboarding");
         }
-      } else {
-        // Display user-friendly error message
-        const errorMessage =
-          data.message || "Registration failed. Please try again.";
-        setError(errorMessage);
-        console.error("Registration error:", data);
       }
     } catch (err) {
-      console.error("Registration exception:", err);
-      setError(
-        "An unexpected error occurred. Please check your connection and try again."
-      );
+      setError("An unexpected error occurred. Please try again.");
     } finally {
       setLoading(false);
     }
@@ -229,10 +218,11 @@ export default function Register() {
 
         {/* Authentication Options */}
         <div className="space-y-4 pt-4">
-          {/* Google OAuth - Temporarily Disabled */}
-          {/* <button
+          {/* Google OAuth */}
+          <button
             onClick={handleGoogleSignIn}
-            className="w-full flex items-center justify-center space-x-3 px-6 py-4 bg-background border-2 border-border rounded-2xl hover:border-primary/30 hover:bg-primary/5 transition-all active:scale-[0.98] shadow-sm"
+            disabled={loading}
+            className="w-full flex items-center justify-center space-x-3 px-6 py-4 bg-background border-2 border-border rounded-2xl hover:border-primary/30 hover:bg-primary/5 transition-all active:scale-[0.98] shadow-sm disabled:opacity-50"
           >
             <svg className="w-5 h-5" viewBox="0 0 24 24">
               <path
@@ -253,12 +243,12 @@ export default function Register() {
               />
             </svg>
             <span className="font-semibold text-foreground">
-              Continue with Google
+              {loading ? "Loading..." : "Continue with Google"}
             </span>
-          </button> */}
+          </button>
 
           {/* Divider */}
-          {/* <div className="relative">
+          <div className="relative">
             <div className="absolute inset-0 flex items-center">
               <div className="w-full border-t border-border"></div>
             </div>
@@ -267,7 +257,7 @@ export default function Register() {
                 Or
               </span>
             </div>
-          </div> */}
+          </div>
 
           {/* Email/Password */}
           <button
