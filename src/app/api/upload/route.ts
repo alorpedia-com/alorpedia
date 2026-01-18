@@ -1,20 +1,22 @@
 import { NextResponse } from "next/server";
-import { getServerSession } from "next-auth/next";
-import { authOptions } from "@/lib/auth";
+import { createClient } from "@/lib/supabase/server";
 import { v2 as cloudinary } from "cloudinary";
 
 // Configure Cloudinary
 cloudinary.config({
-  cloud_name: process.env.CLOUDINARY_CLOUD_NAME || "dgd3z5vbo",
-  api_key: process.env.CLOUDINARY_API_KEY || "567818829335128",
-  api_secret:
-    process.env.CLOUDINARY_API_SECRET || "LpX1AjRZid6kMqjfqzMZcdxUdvw",
+  cloud_name: process.env.CLOUDINARY_CLOUD_NAME,
+  api_key: process.env.CLOUDINARY_API_KEY,
+  api_secret: process.env.CLOUDINARY_API_SECRET,
 });
 
 export async function POST(req: Request) {
-  const session = await getServerSession(authOptions);
+  const supabase = await createClient();
+  const {
+    data: { user },
+    error,
+  } = await supabase.auth.getUser();
 
-  if (!session || !session.user) {
+  if (error || !user) {
     return NextResponse.json({ message: "Not authenticated" }, { status: 401 });
   }
 

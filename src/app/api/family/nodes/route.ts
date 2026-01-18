@@ -1,27 +1,30 @@
 import { NextResponse } from "next/server";
-import { getServerSession } from "next-auth/next";
-import { authOptions } from "@/lib/auth";
+import { createClient } from "@/lib/supabase/server";
 import prisma from "@/lib/prisma";
 
 export async function GET() {
-  const session = await getServerSession(authOptions);
+  const supabase = await createClient();
+  const {
+    data: { user },
+    error,
+  } = await supabase.auth.getUser();
 
-  if (!session || !session.user) {
+  if (error || !user) {
     return NextResponse.json({ message: "Not authenticated" }, { status: 401 });
   }
 
   try {
-    const user = await prisma.user.findUnique({
-      where: { email: session.user.email! },
+    const dbUser = await prisma.user.findUnique({
+      where: { id: user.id },
       select: { id: true },
     });
 
-    if (!user) {
+    if (!dbUser) {
       return NextResponse.json({ message: "User not found" }, { status: 404 });
     }
 
     const nodes = await prisma.familyNode.findMany({
-      where: { ownerId: user.id },
+      where: { ownerId: dbUser.id },
       include: {
         user: {
           select: {
@@ -35,7 +38,7 @@ export async function GET() {
 
     const relationships = await prisma.relationship.findMany({
       where: {
-        OR: [{ from: { ownerId: user.id } }, { to: { ownerId: user.id } }],
+        OR: [{ from: { ownerId: dbUser.id } }, { to: { ownerId: dbUser.id } }],
       },
     });
 
@@ -50,21 +53,25 @@ export async function GET() {
 }
 
 export async function POST(req: Request) {
-  const session = await getServerSession(authOptions);
+  const supabase = await createClient();
+  const {
+    data: { user },
+    error,
+  } = await supabase.auth.getUser();
 
-  if (!session || !session.user) {
+  if (error || !user) {
     return NextResponse.json({ message: "Not authenticated" }, { status: 401 });
   }
 
   try {
     const { name, birthDate, gender, userId } = await req.json();
 
-    const user = await prisma.user.findUnique({
-      where: { email: session.user.email! },
+    const dbUser = await prisma.user.findUnique({
+      where: { id: user.id },
       select: { id: true },
     });
 
-    if (!user) {
+    if (!dbUser) {
       return NextResponse.json({ message: "User not found" }, { status: 404 });
     }
 
@@ -74,7 +81,7 @@ export async function POST(req: Request) {
         birthDate: birthDate ? new Date(birthDate) : null,
         gender,
         userId,
-        ownerId: user.id,
+        ownerId: dbUser.id,
       },
     });
 

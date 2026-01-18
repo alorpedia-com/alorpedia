@@ -1,32 +1,35 @@
 import { NextResponse } from "next/server";
-import { getServerSession } from "next-auth/next";
-import { authOptions } from "@/lib/auth";
+import { createClient } from "@/lib/supabase/server";
 import prisma from "@/lib/prisma";
 
 export async function GET() {
-  const session = await getServerSession(authOptions);
+  const supabase = await createClient();
+  const {
+    data: { user },
+    error,
+  } = await supabase.auth.getUser();
 
-  if (!session || !session.user) {
+  if (error || !user) {
     return NextResponse.json({ message: "Not authenticated" }, { status: 401 });
   }
 
   try {
-    const user = await prisma.user.findUnique({
-      where: { email: session.user.email! },
+    const dbUser = await prisma.user.findUnique({
+      where: { id: user.id },
     });
 
-    if (!user) {
+    if (!dbUser) {
       return NextResponse.json({ message: "User not found" }, { status: 404 });
     }
 
     const notifications = await prisma.notification.findMany({
-      where: { userId: user.id },
+      where: { userId: dbUser.id },
       orderBy: { createdAt: "desc" },
       take: 20, // Limit to 20 most recent notifications
     });
 
     const unreadCount = await prisma.notification.count({
-      where: { userId: user.id, read: false },
+      where: { userId: dbUser.id, read: false },
     });
 
     return NextResponse.json({ notifications, unreadCount });
@@ -40,24 +43,28 @@ export async function GET() {
 }
 
 export async function PATCH(req: Request) {
-  const session = await getServerSession(authOptions);
+  const supabase = await createClient();
+  const {
+    data: { user },
+    error,
+  } = await supabase.auth.getUser();
 
-  if (!session || !session.user) {
+  if (error || !user) {
     return NextResponse.json({ message: "Not authenticated" }, { status: 401 });
   }
 
   try {
-    const user = await prisma.user.findUnique({
-      where: { email: session.user.email! },
+    const dbUser = await prisma.user.findUnique({
+      where: { id: user.id },
     });
 
-    if (!user) {
+    if (!dbUser) {
       return NextResponse.json({ message: "User not found" }, { status: 404 });
     }
 
     // Mark all notifications as read
     await prisma.notification.updateMany({
-      where: { userId: user.id, read: false },
+      where: { userId: dbUser.id, read: false },
       data: { read: true },
     });
 
