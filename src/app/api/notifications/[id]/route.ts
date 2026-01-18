@@ -1,24 +1,27 @@
 import { NextResponse } from "next/server";
-import { getServerSession } from "next-auth/next";
-import { authOptions } from "@/lib/auth";
+import { createClient } from "@/lib/supabase/server";
 import prisma from "@/lib/prisma";
 
 export async function PATCH(
   req: Request,
   { params }: { params: { id: string } }
 ) {
-  const session = await getServerSession(authOptions);
+  const supabase = await createClient();
+  const {
+    data: { user },
+    error,
+  } = await supabase.auth.getUser();
 
-  if (!session || !session.user) {
+  if (error || !user) {
     return NextResponse.json({ message: "Not authenticated" }, { status: 401 });
   }
 
   try {
-    const user = await prisma.user.findUnique({
-      where: { email: session.user.email! },
+    const dbUser = await prisma.user.findUnique({
+      where: { id: user.id },
     });
 
-    if (!user) {
+    if (!dbUser) {
       return NextResponse.json({ message: "User not found" }, { status: 404 });
     }
 
@@ -26,7 +29,7 @@ export async function PATCH(
       where: { id: params.id },
     });
 
-    if (!notification || notification.userId !== user.id) {
+    if (!notification || notification.userId !== dbUser.id) {
       return NextResponse.json(
         { message: "Notification not found" },
         { status: 404 }
@@ -52,18 +55,22 @@ export async function DELETE(
   req: Request,
   { params }: { params: { id: string } }
 ) {
-  const session = await getServerSession(authOptions);
+  const supabase = await createClient();
+  const {
+    data: { user },
+    error,
+  } = await supabase.auth.getUser();
 
-  if (!session || !session.user) {
+  if (error || !user) {
     return NextResponse.json({ message: "Not authenticated" }, { status: 401 });
   }
 
   try {
-    const user = await prisma.user.findUnique({
-      where: { email: session.user.email! },
+    const dbUser = await prisma.user.findUnique({
+      where: { id: user.id },
     });
 
-    if (!user) {
+    if (!dbUser) {
       return NextResponse.json({ message: "User not found" }, { status: 404 });
     }
 
@@ -71,7 +78,7 @@ export async function DELETE(
       where: { id: params.id },
     });
 
-    if (!notification || notification.userId !== user.id) {
+    if (!notification || notification.userId !== dbUser.id) {
       return NextResponse.json(
         { message: "Notification not found" },
         { status: 404 }

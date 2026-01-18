@@ -1,6 +1,5 @@
 import { NextResponse } from "next/server";
-import { getServerSession } from "next-auth/next";
-import { authOptions } from "@/lib/auth";
+import { createClient } from "@/lib/supabase/server";
 import prisma from "@/lib/prisma";
 
 export async function POST(
@@ -8,9 +7,13 @@ export async function POST(
   { params }: { params: Promise<{ id: string }> }
 ) {
   const { id: postId } = await params;
-  const session = await getServerSession(authOptions);
+  const supabase = await createClient();
+  const {
+    data: { user },
+    error,
+  } = await supabase.auth.getUser();
 
-  if (!session || !session.user) {
+  if (error || !user) {
     return NextResponse.json({ message: "Not authenticated" }, { status: 401 });
   }
 
@@ -25,15 +28,11 @@ export async function POST(
     }
 
     const comment = await prisma.$transaction(async (tx: any) => {
-      if (!session.user || !session.user.email) {
-        throw new Error("No user email found in session");
-      }
-
       const newComment = await tx.comment.create({
         data: {
           content,
           post: { connect: { id: postId } },
-          author: { connect: { email: session.user.email } },
+          author: { connect: { id: user.id } },
         },
       });
 
