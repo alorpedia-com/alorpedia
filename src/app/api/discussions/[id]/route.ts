@@ -1,6 +1,5 @@
 import { NextResponse } from "next/server";
-import { getServerSession } from "next-auth/next";
-import { authOptions } from "@/lib/auth";
+import { createClient } from "@/lib/supabase/server";
 import prisma from "@/lib/prisma";
 
 export async function GET(
@@ -57,9 +56,13 @@ export async function DELETE(
   { params }: { params: Promise<{ id: string }> }
 ) {
   const { id } = await params;
-  const session = await getServerSession(authOptions);
+  const supabase = await createClient();
+  const {
+    data: { user },
+    error,
+  } = await supabase.auth.getUser();
 
-  if (!session || !session.user) {
+  if (error || !user) {
     return NextResponse.json({ message: "Not authenticated" }, { status: 401 });
   }
 
@@ -76,11 +79,11 @@ export async function DELETE(
     }
 
     // Check if user is the author
-    const user = await prisma.user.findUnique({
-      where: { email: session.user.email! },
+    const dbUser = await prisma.user.findUnique({
+      where: { id: user.id },
     });
 
-    if (!user || discussion.authorId !== user.id) {
+    if (!dbUser || discussion.authorId !== dbUser.id) {
       return NextResponse.json({ message: "Not authorized" }, { status: 403 });
     }
 
