@@ -12,12 +12,9 @@ import {
   User,
 } from "lucide-react";
 
-import SessionDebugger from "@/components/SessionDebugger";
-
 export default function Home() {
   return (
     <div className="bg-background overflow-x-hidden">
-      <SessionDebugger />
       {/* Hero Section - Clean & Immersive */}
       <section className="relative min-h-[85vh] md:min-h-[90vh] flex items-center justify-center overflow-hidden">
         <div className="absolute inset-0 z-0">

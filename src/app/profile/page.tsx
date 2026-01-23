@@ -1,14 +1,14 @@
 "use client";
 
-import { useSession } from "next-auth/react";
 import { useRouter } from "next/navigation";
 import { useRef, useEffect, useState } from "react";
 import Link from "next/link";
 import { User, MapPin, Calendar, Shield, Save, X, Check } from "lucide-react";
 import { formatAgeGrade, getUserInitials } from "@/lib/utils";
+import { useSupabaseUser } from "@/hooks/useSupabaseUser";
 
 export default function ProfilePage() {
-  const { data: session, status } = useSession();
+  const { user, loading: authLoading } = useSupabaseUser();
   const router = useRouter();
   const [profileData, setProfileData] = useState<any>(null);
   const [loading, setLoading] = useState(true);
@@ -16,18 +16,18 @@ export default function ProfilePage() {
   const [newBio, setNewBio] = useState("");
   const [savingBio, setSavingBio] = useState(false);
   const [activeTab, setActiveTab] = useState<"stories" | "dialogues">(
-    "stories"
+    "stories",
   );
   const [justSaved, setJustSaved] = useState(false);
   const bioRef = useRef<HTMLTextAreaElement>(null);
 
   useEffect(() => {
-    if (status === "unauthenticated") {
+    if (!authLoading && !user) {
       router.push("/login");
-    } else if (status === "authenticated" && session.user) {
+    } else if (user) {
       fetchProfile();
     }
-  }, [status, session, router]);
+  }, [authLoading, user, router]);
 
   const fetchProfile = async () => {
     try {
@@ -76,7 +76,7 @@ export default function ProfilePage() {
     }
   }, [isEditingBio]);
 
-  if (loading || status === "loading") {
+  if (loading || authLoading) {
     return (
       <div className="flex justify-center items-center h-screen bg-background text-primary">
         <div className="animate-spin rounded-full h-12 w-12 border-t-2 border-b-2 border-primary"></div>
@@ -84,8 +84,9 @@ export default function ProfilePage() {
     );
   }
 
-  const user = session?.user as any;
-  const userInitials = getUserInitials(user?.name);
+  const userInitials = getUserInitials(
+    profileData?.name || user?.user_metadata?.name,
+  );
 
   return (
     <div className="max-w-4xl mx-auto px-native py-native bg-background min-h-screen">
@@ -94,10 +95,16 @@ export default function ProfilePage() {
         <div className="h-32 sm:h-48 bg-primary/10 relative">
           <div className="absolute -bottom-12 sm:-bottom-16 left-8 sm:left-12">
             <div className="w-24 h-24 sm:w-32 sm:h-32 bg-primary text-background rounded-3xl border-8 border-card flex items-center justify-center shadow-2xl overflow-hidden relative">
-              {user?.image ? (
+              {profileData?.profileImage || user?.user_metadata?.avatar_url ? (
                 <img
-                  src={user.image}
-                  alt={user.name || "User"}
+                  src={
+                    profileData?.profileImage || user?.user_metadata?.avatar_url
+                  }
+                  alt={
+                    profileData?.name ||
+                    user?.user_metadata?.full_name ||
+                    "User"
+                  }
                   className="w-full h-full object-cover"
                 />
               ) : (
@@ -113,16 +120,19 @@ export default function ProfilePage() {
           <div className="flex flex-col sm:flex-row sm:justify-between sm:items-start gap-6">
             <div className="space-y-3">
               <h1 className="text-2xl sm:text-4xl font-serif font-bold text-primary tracking-tight">
-                {user?.name || "Member Name"}
+                {profileData?.name ||
+                  user?.user_metadata?.full_name ||
+                  user?.user_metadata?.name ||
+                  "Member Name"}
               </h1>
               {/* User Type Badge */}
               <div className="flex items-center space-x-2">
-                {user?.userType === "INDIGENE" ? (
+                {profileData?.userType === "INDIGENE" ? (
                   <span className="inline-flex items-center px-3 py-1.5 bg-primary/10 text-primary text-[10px] font-black uppercase tracking-[0.15em] rounded-xl border border-primary/20">
                     <Shield className="w-3 h-3 mr-1.5" />
                     Alor Indigene
                   </span>
-                ) : user?.userType === "NDI_OGO" ? (
+                ) : profileData?.userType === "NDI_OGO" ? (
                   <span className="inline-flex items-center px-3 py-1.5 bg-secondary/10 text-secondary text-[10px] font-black uppercase tracking-[0.15em] rounded-xl border border-secondary/20">
                     <User className="w-3 h-3 mr-1.5" />
                     Ndi Ogo
@@ -130,7 +140,8 @@ export default function ProfilePage() {
                 ) : null}
               </div>
               <p className="text-secondary font-bold text-xs sm:text-sm uppercase tracking-wider opacity-80">
-                alor.pedia/u/{user?.id?.substring(0, 8)}
+                alor.pedia/u/
+                {profileData?.id?.substring(0, 8) || user?.id?.substring(0, 8)}
               </p>
             </div>
             {!isEditingBio && (
@@ -152,24 +163,26 @@ export default function ProfilePage() {
               </div>
               <div className="space-y-1">
                 <p className="text-[10px] font-black uppercase tracking-[0.2em] text-primary/40">
-                  {user?.userType === "INDIGENE" ? "Village" : "Host Village"}
+                  {profileData?.userType === "INDIGENE"
+                    ? "Village"
+                    : "Host Village"}
                 </p>
                 <p className="font-serif font-bold text-base text-primary leading-none">
-                  {user?.userType === "INDIGENE"
-                    ? user?.village || "Not set"
-                    : user?.hostVillage || "Not set"}
+                  {profileData?.userType === "INDIGENE"
+                    ? profileData?.village || "Not set"
+                    : profileData?.hostVillage || "Not set"}
                 </p>
                 <div className="flex items-center space-x-1">
                   <span className="w-1 h-1 rounded-full bg-secondary animate-pulse"></span>
                   <p className="text-[9px] text-secondary font-black uppercase tracking-widest">
-                    {user?.userType === "INDIGENE" ? "Ebo" : "Community"}
+                    {profileData?.userType === "INDIGENE" ? "Ebo" : "Community"}
                   </p>
                 </div>
               </div>
             </div>
 
             {/* Kindred - Only for Indigenes */}
-            {user?.userType === "INDIGENE" && (
+            {profileData?.userType === "INDIGENE" && (
               <div className="flex items-center space-x-4 bg-primary/5 p-5 rounded-2xl border border-primary/10 shadow-sm">
                 <div className="p-3 bg-primary text-background rounded-xl flex-shrink-0 shadow-lg">
                   <User className="w-6 h-6" />
@@ -179,7 +192,7 @@ export default function ProfilePage() {
                     Kindred
                   </p>
                   <p className="font-serif font-bold text-base text-primary leading-none">
-                    {user?.kindred || "Not set"}
+                    {profileData?.kindred || "Not set"}
                   </p>
                   <div className="flex items-center space-x-1">
                     <span className="w-1 h-1 rounded-full bg-primary animate-pulse"></span>
@@ -202,16 +215,16 @@ export default function ProfilePage() {
                 </p>
                 <div className="flex flex-col">
                   <p className="font-serif font-bold text-base text-primary leading-none">
-                    {formatAgeGrade(user?.ageGrade).name || "Not set"}
+                    {formatAgeGrade(profileData?.ageGrade).name || "Not set"}
                   </p>
-                  {user?.generationalRole && (
+                  {profileData?.generationalRole && (
                     <p className="text-[10px] text-accent font-black uppercase tracking-widest mt-1">
-                      {user.generationalRole}
+                      {profileData.generationalRole}
                     </p>
                   )}
-                  {formatAgeGrade(user?.ageGrade).years && (
+                  {formatAgeGrade(profileData?.ageGrade).years && (
                     <p className="text-[9px] text-foreground/40 font-medium mt-0.5">
-                      {formatAgeGrade(user?.ageGrade).years}
+                      {formatAgeGrade(profileData?.ageGrade).years}
                     </p>
                   )}
                 </div>
@@ -410,7 +423,7 @@ export default function ProfilePage() {
                           </div>
                           <span className="text-[10px] font-black uppercase tracking-widest text-foreground/20 bg-background/50 px-3 py-1.5 rounded-xl border border-border/30 flex-shrink-0">
                             {new Date(
-                              discussion.createdAt
+                              discussion.createdAt,
                             ).toLocaleDateString()}
                           </span>
                         </div>

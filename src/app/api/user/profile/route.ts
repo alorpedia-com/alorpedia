@@ -14,7 +14,7 @@ export async function GET() {
   }
 
   try {
-    const dbUser = await prisma.user.findUnique({
+    let dbUser = await prisma.user.findUnique({
       where: { id: user.id },
       include: {
         profile: true,
@@ -28,24 +28,50 @@ export async function GET() {
     });
 
     if (!dbUser) {
-      return NextResponse.json({ message: "User not found" }, { status: 404 });
+      // Create user in Prisma if they exist in Supabase but not in Prisma
+      dbUser = await prisma.user.create({
+        data: {
+          id: user.id,
+          email: user.email!,
+          name:
+            user.user_metadata?.full_name || user.user_metadata?.name || "User",
+          profileImage: user.user_metadata?.avatar_url || null,
+          onboardingCompleted: false,
+          onboardingStep: 0,
+        },
+        include: {
+          profile: true,
+          posts: true,
+          discussions: true,
+        },
+      });
     }
 
     return NextResponse.json({
       id: dbUser.id,
       name: dbUser.name,
       email: dbUser.email,
+      profileImage: dbUser.profileImage,
+      userType: dbUser.userType,
       village: dbUser.village,
+      kindred: dbUser.kindred,
+      hostVillage: dbUser.hostVillage,
+      birthDate: dbUser.birthDate,
+      birthYear: dbUser.birthYear,
       ageGrade: dbUser.ageGrade,
+      generationalRole: dbUser.generationalRole,
+      onboardingCompleted: dbUser.onboardingCompleted,
+      onboardingStep: dbUser.onboardingStep,
       createdAt: dbUser.createdAt,
       bio: dbUser.profile?.bio,
-      avatar: dbUser.profile?.avatar,
+      posts: dbUser.posts,
+      discussions: dbUser.discussions,
     });
   } catch (error) {
     console.error("Profile fetch error:", error);
     return NextResponse.json(
       { message: "Internal server error" },
-      { status: 500 }
+      { status: 500 },
     );
   }
 }

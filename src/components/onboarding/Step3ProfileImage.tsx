@@ -109,22 +109,14 @@ export default function Step3ProfileImage({
         <div className="space-y-6">
           <div className="flex justify-center">
             {preview ? (
-              <div className="relative">
-                <div className="w-40 h-40 rounded-full overflow-hidden border-4 border-primary/20 shadow-lg">
-                  <Image
-                    src={preview}
-                    alt="Profile preview"
-                    width={160}
-                    height={160}
-                    className="object-cover w-full h-full"
-                  />
-                </div>
-                <button
-                  onClick={handleRemove}
-                  className="absolute -top-2 -right-2 w-8 h-8 bg-red-500 text-white rounded-full flex items-center justify-center shadow-md hover:bg-red-600 transition-colors"
-                >
-                  <X className="w-4 h-4" />
-                </button>
+              <div className="w-40 h-40 rounded-full overflow-hidden border-4 border-primary/20 shadow-lg">
+                <Image
+                  src={preview}
+                  alt="Profile preview"
+                  width={160}
+                  height={160}
+                  className="object-cover w-full h-full"
+                />
               </div>
             ) : (
               <button
@@ -148,14 +140,16 @@ export default function Step3ProfileImage({
             className="hidden"
           />
 
-          {/* Upload Button (if preview exists) */}
-          {preview && !initialImage && (
+          {/* Change Photo Button (always show if preview exists) */}
+          {preview && (
             <button
               onClick={() => fileInputRef.current?.click()}
-              className="w-full flex items-center justify-center space-x-2 px-4 py-3 border-2 border-border rounded-xl text-sm font-medium text-foreground hover:bg-background/50 transition-all"
+              className="w-full flex items-center justify-center space-x-2 px-4 py-3 border-2 border-border rounded-xl text-sm font-medium text-foreground hover:bg-muted transition-all"
             >
               <Upload className="w-4 h-4" />
-              <span>Choose Different Photo</span>
+              <span>
+                {initialImage ? "Change Photo" : "Choose Different Photo"}
+              </span>
             </button>
           )}
 

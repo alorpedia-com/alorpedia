@@ -1,13 +1,13 @@
 "use client";
 
 import { useState, useEffect } from "react";
-import { useSession } from "next-auth/react";
 import { useRouter } from "next/navigation";
 import StepIndicator from "@/components/onboarding/StepIndicator";
 import Step2BasicInfo from "@/components/onboarding/Step2BasicInfo";
 import Step3ProfileImage from "@/components/onboarding/Step3ProfileImage";
 import Step4VillageInfo from "@/components/onboarding/Step4VillageInfo";
 import Step5Complete from "@/components/onboarding/Step5Complete";
+import { useSupabaseUser } from "@/hooks/useSupabaseUser";
 
 interface OnboardingData {
   name?: string;
@@ -23,60 +23,76 @@ interface OnboardingData {
 }
 
 export default function OnboardingPage() {
-  const { data: session, status, update } = useSession();
+  const { user, loading: authLoading } = useSupabaseUser();
   const router = useRouter();
   const [currentStep, setCurrentStep] = useState(2); // Start at Step 2 (Basic Info) since user is already authenticated
   const [data, setData] = useState<OnboardingData>({});
   const [loading, setLoading] = useState(true);
+  const [dbUser, setDbUser] = useState<any>(null);
 
   useEffect(() => {
-    // Wait for session to load
-    if (status === "loading") {
+    // Wait for auth to load
+    if (authLoading) {
       return;
     }
 
-    if (status === "unauthenticated" || !session) {
+    if (!user) {
       router.push("/register");
       return;
     }
 
-    const user = session.user as any;
+    // Fetch user from database to check onboarding status
+    const fetchUserData = async () => {
+      try {
+        const response = await fetch("/api/user/profile");
+        if (response.ok) {
+          const userData = await response.json();
+          setDbUser(userData);
 
-    // Check if onboarding is already completed
-    if (user.onboardingCompleted) {
-      router.push("/profile");
-      return;
-    }
+          // Check if onboarding is already completed
+          if (userData.onboardingCompleted) {
+            router.push("/profile");
+            return;
+          }
 
-    // Set current step based on user's progress (minimum step 2)
-    if (user.onboardingStep && user.onboardingStep > 1) {
-      setCurrentStep(user.onboardingStep);
-    } else {
-      setCurrentStep(2); // Default to step 2 for new users
-    }
+          // Set current step based on onboardingStep
+          if (userData.onboardingStep) {
+            setCurrentStep(userData.onboardingStep);
+          }
 
-    // Pre-fill data from session
-    setData({
-      name: user.name || "",
-      profileImage: user.image || "",
-      village: user.village || "",
-      userType: user.userType || "",
-      birthDate: "",
-    });
+          // Pre-fill data if available
+          setData({
+            name: userData.name || user.user_metadata?.name || "",
+            profileImage:
+              userData.profileImage || user.user_metadata?.avatar_url || "",
+            userType: userData.userType,
+            village: userData.village,
+            kindred: userData.kindred,
+            hostVillage: userData.hostVillage,
+            birthDate: userData.birthDate,
+            birthYear: userData.birthYear,
+            ageGrade: userData.ageGrade,
+            generationalRole: userData.generationalRole,
+          });
+        }
+      } catch (error) {
+        console.error("Failed to fetch user data:", error);
+      } finally {
+        setLoading(false);
+      }
+    };
 
-    setLoading(false);
-  }, [session, status, router]);
+    fetchUserData();
+  }, [authLoading, user, router]);
 
   const updateOnboarding = async (
     step: number,
-    stepData: Partial<OnboardingData>
+    stepData: Partial<OnboardingData>,
   ) => {
     try {
       console.log(
-        `Sending onboarding update for User ${
-          (session?.user as any)?.id
-        } (Step ${step}):`,
-        stepData
+        `Sending onboarding update for User ${user?.id} (Step ${step}):`,
+        stepData,
       );
       const response = await fetch("/api/onboarding/update", {
         method: "POST",

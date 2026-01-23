@@ -1,7 +1,6 @@
 "use client";
 
 import { useRouter } from "next/navigation";
-import { useSession } from "next-auth/react";
 import { CheckCircle, Sparkles } from "lucide-react";
 import confetti from "canvas-confetti";
 import { useEffect, useState } from "react";
@@ -16,7 +15,6 @@ export default function Step5Complete({
   userType,
 }: Step5CompleteProps) {
   const router = useRouter();
-  const { update } = useSession();
   const [isNavigating, setIsNavigating] = useState(false);
 
   useEffect(() => {
@@ -34,11 +32,8 @@ export default function Step5Complete({
     setIsNavigating(true);
 
     try {
-      // Update session to reflect onboarding completion
-      await update();
-
-      // Small delay to ensure session is updated
-      await new Promise((resolve) => setTimeout(resolve, 500));
+      // Small delay for better UX
+      await new Promise((resolve) => setTimeout(resolve, 300));
 
       // Navigate to profile
       router.push("/profile");

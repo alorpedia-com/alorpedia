@@ -163,16 +163,16 @@ export default function Navbar() {
 
           {/* Mobile Auth/Profile Icon */}
           <div className="md:hidden">
-            {session ? (
+            {user ? (
               <div className="relative" ref={dropdownRef}>
                 <button
                   onClick={() => setShowDropdown(!showDropdown)}
                   className="w-9 h-9 bg-accent text-primary rounded-full flex items-center justify-center font-bold text-sm shadow-md active:scale-90 transition-transform overflow-hidden relative"
                 >
-                  {session.user?.image ? (
+                  {user.user_metadata?.avatar_url ? (
                     <Image
-                      src={session.user.image}
-                      alt={session.user.name || "User"}
+                      src={user.user_metadata.avatar_url}
+                      alt={user.user_metadata?.name || "User"}
                       fill
                       className="object-cover"
                     />

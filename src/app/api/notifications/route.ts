@@ -14,12 +14,23 @@ export async function GET() {
   }
 
   try {
-    const dbUser = await prisma.user.findUnique({
+    let dbUser = await prisma.user.findUnique({
       where: { id: user.id },
     });
 
     if (!dbUser) {
-      return NextResponse.json({ message: "User not found" }, { status: 404 });
+      // Create user in Prisma if they exist in Supabase but not in Prisma
+      dbUser = await prisma.user.create({
+        data: {
+          id: user.id,
+          email: user.email!,
+          name:
+            user.user_metadata?.full_name || user.user_metadata?.name || "User",
+          profileImage: user.user_metadata?.avatar_url || null,
+          onboardingCompleted: false,
+          onboardingStep: 0,
+        },
+      });
     }
 
     const notifications = await prisma.notification.findMany({
@@ -37,7 +48,7 @@ export async function GET() {
     console.error("Notifications fetch error:", error);
     return NextResponse.json(
       { message: "Internal server error" },
-      { status: 500 }
+      { status: 500 },
     );
   }
 }
@@ -54,12 +65,23 @@ export async function PATCH(req: Request) {
   }
 
   try {
-    const dbUser = await prisma.user.findUnique({
+    let dbUser = await prisma.user.findUnique({
       where: { id: user.id },
     });
 
     if (!dbUser) {
-      return NextResponse.json({ message: "User not found" }, { status: 404 });
+      // Create user in Prisma if they exist in Supabase but not in Prisma
+      dbUser = await prisma.user.create({
+        data: {
+          id: user.id,
+          email: user.email!,
+          name:
+            user.user_metadata?.full_name || user.user_metadata?.name || "User",
+          profileImage: user.user_metadata?.avatar_url || null,
+          onboardingCompleted: false,
+          onboardingStep: 0,
+        },
+      });
     }
 
     // Mark all notifications as read
@@ -73,7 +95,7 @@ export async function PATCH(req: Request) {
     console.error("Notifications update error:", error);
     return NextResponse.json(
       { message: "Internal server error" },
-      { status: 500 }
+      { status: 500 },
     );
   }
 }
