@@ -70,6 +70,7 @@ export default function Navbar() {
                   src="/logo.jpg"
                   alt="Alorpedia Logo"
                   fill
+                  sizes="(max-width: 768px) 28px, 40px"
                   className="object-cover"
                 />
               </div>
@@ -107,6 +108,7 @@ export default function Navbar() {
                         src={user.user_metadata.avatar_url}
                         alt={user.user_metadata?.name || "User"}
                         fill
+                        sizes="36px"
                         className="object-cover"
                       />
                     ) : (
@@ -174,6 +176,7 @@ export default function Navbar() {
                       src={user.user_metadata.avatar_url}
                       alt={user.user_metadata?.name || "User"}
                       fill
+                      sizes="36px"
                       className="object-cover"
                     />
                   ) : (
