@@ -58,7 +58,7 @@ export async function GET(
 
     // Check if user is participant
     const isParticipant = conversation.participants.some(
-      (p) => p.id === userId,
+      (p: { id: string }) => p.id === userId,
     );
     if (!isParticipant) {
       return NextResponse.json({ error: "Forbidden" }, { status: 403 });
@@ -109,7 +109,7 @@ export async function DELETE(
 
     // Check if user is participant
     const isParticipant = conversation.participants.some(
-      (p) => p.id === userId,
+      (p: { id: string }) => p.id === userId,
     );
     if (!isParticipant) {
       return NextResponse.json({ error: "Forbidden" }, { status: 403 });
