@@ -30,6 +30,7 @@ export async function GET(req: Request) {
         name: true,
         village: true,
         ageGrade: true,
+        profileImage: true,
         createdAt: true,
       },
       orderBy: { name: "asc" },
@@ -49,7 +50,7 @@ export async function GET(req: Request) {
     console.error("Users fetch error:", error);
     return NextResponse.json(
       { message: "Internal server error" },
-      { status: 500 }
+      { status: 500 },
     );
   }
 }

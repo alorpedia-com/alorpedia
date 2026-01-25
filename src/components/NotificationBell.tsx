@@ -4,6 +4,7 @@ import { useState, useEffect, useRef } from "react";
 import { Bell, X } from "lucide-react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
+import { useSession } from "next-auth/react";
 
 interface Notification {
   id: string;
@@ -16,6 +17,7 @@ interface Notification {
 }
 
 export default function NotificationBell() {
+  const { status } = useSession();
   const [notifications, setNotifications] = useState<Notification[]>([]);
   const [unreadCount, setUnreadCount] = useState(0);
   const [showDropdown, setShowDropdown] = useState(false);
@@ -25,6 +27,7 @@ export default function NotificationBell() {
 
   // Fetch notifications
   const fetchNotifications = async () => {
+    if (status !== "authenticated") return;
     try {
       const response = await fetch("/api/notifications");
       if (response.ok) {
@@ -99,7 +102,7 @@ export default function NotificationBell() {
 
   const handleDeleteNotification = async (
     e: React.MouseEvent,
-    notificationId: string
+    notificationId: string,
   ) => {
     e.stopPropagation();
     try {

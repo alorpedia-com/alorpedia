@@ -58,7 +58,7 @@ export default function TreeVisualization({
 
     // Build parent-child relationships
     const parentChildRels = relationships.filter(
-      (r) => r.type === "PARENT_CHILD"
+      (r) => r.type === "PARENT_CHILD",
     );
     const spouseRels = relationships.filter((r) => r.type === "SPOUSE");
     const siblingRels = relationships.filter((r) => r.type === "SIBLING");
@@ -97,14 +97,14 @@ export default function TreeVisualization({
 
     // Find root nodes (oldest generation - those without parents)
     const roots = Array.from(nodeMap.values()).filter(
-      (node) => !hasParent.has(node.id)
+      (node) => !hasParent.has(node.id),
     );
 
     // Calculate generations recursively
     const calculateGenerations = (node: TreeNode, generation: number) => {
       node.generation = generation;
       node.children.forEach((child) =>
-        calculateGenerations(child, generation + 1)
+        calculateGenerations(child, generation + 1),
       );
     };
 
@@ -240,7 +240,7 @@ export default function TreeVisualization({
                 className="text-primary/20"
               />
             </g>
-          ))
+          )),
         )}
 
         {/* Draw spouse connections */}
@@ -264,7 +264,7 @@ export default function TreeVisualization({
                   className="text-accent/30"
                 />
               );
-            })
+            }),
         )}
 
         {/* Draw sibling connections */}
@@ -303,7 +303,7 @@ export default function TreeVisualization({
 
         {/* Render nodes */}
         {allNodes.map((node, index) => {
-          const NodeWrapper = node.userId ? "a" : "g";
+          const NodeWrapper = node.userId ? "a" : "div";
           const wrapperProps = node.userId
             ? { href: `/profile/${node.userId}` }
             : {};

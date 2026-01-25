@@ -11,6 +11,7 @@ import {
   formatAgeGrade,
 } from "@/lib/utils";
 import StyledDropdown from "@/components/StyledDropdown";
+import Image from "next/image";
 import Link from "next/link";
 
 export default function DirectoryPage() {
@@ -44,7 +45,7 @@ export default function DirectoryPage() {
   }, []);
 
   const availableAgeGrades = Array.from(
-    new Set(users.map((u) => u.ageGrade).filter(Boolean))
+    new Set(users.map((u) => u.ageGrade).filter(Boolean)),
   );
 
   const filteredUsers = users.filter((user) => {
@@ -195,8 +196,18 @@ export default function DirectoryPage() {
               >
                 {/* Collapsed View - Always Visible */}
                 <div className="p-4 flex items-center space-x-3">
-                  <div className="w-12 h-12 bg-primary text-background rounded-xl flex items-center justify-center shrink-0 shadow-sm">
-                    <UserIcon className="w-6 h-6" />
+                  <div className="w-12 h-12 md:w-14 md:h-14 bg-primary text-background rounded-xl flex items-center justify-center shrink-0 shadow-sm overflow-hidden relative">
+                    {user.profileImage ? (
+                      <Image
+                        src={user.profileImage}
+                        alt={user.name}
+                        fill
+                        sizes="(max-width: 768px) 48px, 56px"
+                        className="object-cover"
+                      />
+                    ) : (
+                      <UserIcon className="w-6 h-6 md:w-7 md:h-7" />
+                    )}
                   </div>
                   <div className="flex-1 min-w-0">
                     <h3 className="text-sm font-semibold text-primary truncate">

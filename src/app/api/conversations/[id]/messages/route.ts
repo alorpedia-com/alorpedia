@@ -5,9 +5,10 @@ import prisma from "@/lib/prisma";
 // POST /api/conversations/[id]/messages - Send a message
 export async function POST(
   request: NextRequest,
-  { params }: { params: { id: string } }
+  { params }: { params: Promise<{ id: string }> },
 ) {
   try {
+    const { id: conversationId } = await params;
     const supabase = await createClient();
     const {
       data: { user },
@@ -19,13 +20,12 @@ export async function POST(
     }
 
     const userId = user.id;
-    const conversationId = params.id;
     const { content } = await request.json();
 
     if (!content || content.trim().length === 0) {
       return NextResponse.json(
         { error: "Message content is required" },
-        { status: 400 }
+        { status: 400 },
       );
     }
 
@@ -38,12 +38,12 @@ export async function POST(
     if (!conversation) {
       return NextResponse.json(
         { error: "Conversation not found" },
-        { status: 404 }
+        { status: 404 },
       );
     }
 
     const isParticipant = conversation.participants.some(
-      (p) => p.id === userId
+      (p) => p.id === userId,
     );
     if (!isParticipant) {
       return NextResponse.json({ error: "Forbidden" }, { status: 403 });
@@ -78,7 +78,7 @@ export async function POST(
     console.error("Error sending message:", error);
     return NextResponse.json(
       { error: "Failed to send message" },
-      { status: 500 }
+      { status: 500 },
     );
   }
 }
@@ -86,9 +86,10 @@ export async function POST(
 // PATCH /api/conversations/[id]/messages - Mark messages as read
 export async function PATCH(
   request: NextRequest,
-  { params }: { params: { id: string } }
+  { params }: { params: Promise<{ id: string }> },
 ) {
   try {
+    const { id: conversationId } = await params;
     const supabase = await createClient();
     const {
       data: { user },
@@ -100,7 +101,6 @@ export async function PATCH(
     }
 
     const userId = user.id;
-    const conversationId = params.id;
 
     // Mark all messages in conversation as read (except user's own messages)
     await prisma.message.updateMany({
@@ -119,7 +119,7 @@ export async function PATCH(
     console.error("Error marking messages as read:", error);
     return NextResponse.json(
       { error: "Failed to mark messages as read" },
-      { status: 500 }
+      { status: 500 },
     );
   }
 }

@@ -5,9 +5,10 @@ import prisma from "@/lib/prisma";
 // GET /api/conversations/[id] - Get conversation details and messages
 export async function GET(
   request: NextRequest,
-  { params }: { params: { id: string } }
+  { params }: { params: Promise<{ id: string }> },
 ) {
   try {
+    const { id: conversationId } = await params;
     const supabase = await createClient();
     const {
       data: { user },
@@ -19,7 +20,6 @@ export async function GET(
     }
 
     const userId = user.id;
-    const conversationId = params.id;
 
     const conversation = await prisma.conversation.findUnique({
       where: { id: conversationId },
@@ -52,13 +52,13 @@ export async function GET(
     if (!conversation) {
       return NextResponse.json(
         { error: "Conversation not found" },
-        { status: 404 }
+        { status: 404 },
       );
     }
 
     // Check if user is participant
     const isParticipant = conversation.participants.some(
-      (p) => p.id === userId
+      (p) => p.id === userId,
     );
     if (!isParticipant) {
       return NextResponse.json({ error: "Forbidden" }, { status: 403 });
@@ -69,7 +69,7 @@ export async function GET(
     console.error("Error fetching conversation:", error);
     return NextResponse.json(
       { error: "Failed to fetch conversation" },
-      { status: 500 }
+      { status: 500 },
     );
   }
 }
@@ -77,9 +77,10 @@ export async function GET(
 // DELETE /api/conversations/[id] - Delete conversation
 export async function DELETE(
   request: NextRequest,
-  { params }: { params: { id: string } }
+  { params }: { params: Promise<{ id: string }> },
 ) {
   try {
+    const { id: conversationId } = await params;
     const supabase = await createClient();
     const {
       data: { user },
@@ -91,7 +92,6 @@ export async function DELETE(
     }
 
     const userId = user.id;
-    const conversationId = params.id;
 
     const conversation = await prisma.conversation.findUnique({
       where: { id: conversationId },
@@ -103,13 +103,13 @@ export async function DELETE(
     if (!conversation) {
       return NextResponse.json(
         { error: "Conversation not found" },
-        { status: 404 }
+        { status: 404 },
       );
     }
 
     // Check if user is participant
     const isParticipant = conversation.participants.some(
-      (p) => p.id === userId
+      (p) => p.id === userId,
     );
     if (!isParticipant) {
       return NextResponse.json({ error: "Forbidden" }, { status: 403 });
@@ -124,7 +124,7 @@ export async function DELETE(
     console.error("Error deleting conversation:", error);
     return NextResponse.json(
       { error: "Failed to delete conversation" },
-      { status: 500 }
+      { status: 500 },
     );
   }
 }

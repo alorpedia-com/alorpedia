@@ -31,7 +31,7 @@ export const authOptions: NextAuthOptions = {
 
         const isPasswordValid = await bcrypt.compare(
           credentials.password,
-          user.password
+          user.password,
         );
 
         if (!isPasswordValid) {
@@ -67,7 +67,6 @@ export const authOptions: NextAuthOptions = {
               email: user.email!,
               name: user.name,
               profileImage: user.image,
-              provider: "google",
               onboardingCompleted: false,
               onboardingStep: 2, // Skip auth method selection
             },

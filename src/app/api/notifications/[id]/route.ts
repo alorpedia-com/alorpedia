@@ -4,8 +4,9 @@ import prisma from "@/lib/prisma";
 
 export async function PATCH(
   req: Request,
-  { params }: { params: { id: string } }
+  { params }: { params: Promise<{ id: string }> },
 ) {
+  const { id: notificationId } = await params;
   const supabase = await createClient();
   const {
     data: { user },
@@ -26,18 +27,18 @@ export async function PATCH(
     }
 
     const notification = await prisma.notification.findUnique({
-      where: { id: params.id },
+      where: { id: notificationId },
     });
 
     if (!notification || notification.userId !== dbUser.id) {
       return NextResponse.json(
         { message: "Notification not found" },
-        { status: 404 }
+        { status: 404 },
       );
     }
 
     const updated = await prisma.notification.update({
-      where: { id: params.id },
+      where: { id: notificationId },
       data: { read: true },
     });
 
@@ -46,15 +47,16 @@ export async function PATCH(
     console.error("Notification update error:", error);
     return NextResponse.json(
       { message: "Internal server error" },
-      { status: 500 }
+      { status: 500 },
     );
   }
 }
 
 export async function DELETE(
   req: Request,
-  { params }: { params: { id: string } }
+  { params }: { params: Promise<{ id: string }> },
 ) {
+  const { id: notificationId } = await params;
   const supabase = await createClient();
   const {
     data: { user },
@@ -75,18 +77,18 @@ export async function DELETE(
     }
 
     const notification = await prisma.notification.findUnique({
-      where: { id: params.id },
+      where: { id: notificationId },
     });
 
     if (!notification || notification.userId !== dbUser.id) {
       return NextResponse.json(
         { message: "Notification not found" },
-        { status: 404 }
+        { status: 404 },
       );
     }
 
     await prisma.notification.delete({
-      where: { id: params.id },
+      where: { id: notificationId },
     });
 
     return NextResponse.json({ message: "Notification deleted" });
@@ -94,7 +96,7 @@ export async function DELETE(
     console.error("Notification delete error:", error);
     return NextResponse.json(
       { message: "Internal server error" },
-      { status: 500 }
+      { status: 500 },
     );
   }
 }

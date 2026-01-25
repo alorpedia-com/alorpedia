@@ -5,14 +5,13 @@ import { calculateAgeGrade } from "@/lib/utils";
 
 export async function POST(req: Request) {
   try {
-    const { name, email, password, village, birthDate, provider } =
-      await req.json();
+    const { name, email, password, village, birthDate } = await req.json();
 
     // For phased registration, only email and password are required initially
     if (!email || !password) {
       return NextResponse.json(
         { message: "Email and password are required" },
-        { status: 400 }
+        { status: 400 },
       );
     }
 
@@ -23,7 +22,7 @@ export async function POST(req: Request) {
     if (existingUser) {
       return NextResponse.json(
         { message: "User already exists" },
-        { status: 400 }
+        { status: 400 },
       );
     }
 
@@ -33,7 +32,6 @@ export async function POST(req: Request) {
     const userData: any = {
       email,
       password: hashedPassword,
-      provider: provider || "credentials",
       onboardingCompleted: false,
       onboardingStep: 2, // Start at step 2 (name collection)
     };
@@ -44,7 +42,8 @@ export async function POST(req: Request) {
     if (birthDate) {
       const birthDateObj = new Date(birthDate);
       userData.birthDate = birthDateObj;
-      userData.ageGrade = calculateAgeGrade(birthDateObj);
+      userData.ageGrade =
+        calculateAgeGrade(birthDateObj.getFullYear())?.name || null;
       userData.onboardingCompleted = true;
       userData.onboardingStep = 5;
     }
@@ -66,13 +65,13 @@ export async function POST(req: Request) {
         userId: user.id,
         onboardingCompleted: user.onboardingCompleted,
       },
-      { status: 201 }
+      { status: 201 },
     );
   } catch (error: any) {
     console.error("Registration error:", error);
     return NextResponse.json(
       { message: error.message || "Internal server error" },
-      { status: 500 }
+      { status: 500 },
     );
   }
 }

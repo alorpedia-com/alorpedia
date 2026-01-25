@@ -4,7 +4,6 @@ import "./globals.css";
 import Navbar from "@/components/Navbar";
 import MobileNav from "@/components/MobileNav";
 import MainContent from "@/components/MainContent";
-import NextAuthSessionProvider from "@/components/SessionProvider";
 
 const inter = Inter({
   subsets: ["latin"],
