@@ -48,7 +48,7 @@ export async function GET(request: NextRequest) {
 
     // Calculate unread count for each conversation
     const conversationsWithUnread = await Promise.all(
-      conversations.map(async (conv) => {
+      conversations.map(async (conv: any) => {
         const unreadCount = await prisma.message.count({
           where: {
             conversationId: conv.id,
@@ -62,7 +62,7 @@ export async function GET(request: NextRequest) {
           unreadCount,
           lastMessage: conv.messages[0] || null,
         };
-      })
+      }),
     );
 
     return NextResponse.json({ conversations: conversationsWithUnread });
@@ -70,7 +70,7 @@ export async function GET(request: NextRequest) {
     console.error("Error fetching conversations:", error);
     return NextResponse.json(
       { error: "Failed to fetch conversations" },
-      { status: 500 }
+      { status: 500 },
     );
   }
 }
@@ -94,7 +94,7 @@ export async function POST(request: NextRequest) {
     if (!recipientId) {
       return NextResponse.json(
         { error: "Recipient ID is required" },
-        { status: 400 }
+        { status: 400 },
       );
     }
 
@@ -147,7 +147,7 @@ export async function POST(request: NextRequest) {
     console.error("Error creating conversation:", error);
     return NextResponse.json(
       { error: "Failed to create conversation" },
-      { status: 500 }
+      { status: 500 },
     );
   }
 }
