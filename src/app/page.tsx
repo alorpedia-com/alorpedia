@@ -19,13 +19,13 @@ export default function Home() {
       <section className="relative min-h-[85vh] md:min-h-[90vh] flex items-center justify-center overflow-hidden">
         <div className="absolute inset-0 z-0">
           <Image
-            src="/images/landing/hero.png"
-            alt="Traditional Alor community assembly under a majestic Oji tree"
+            src="/images/landing/hero-new.webp"
+            alt="Traditional Igbo community gathering under an ancient tree"
             fill
-            className="object-cover brightness-[0.35] scale-105"
+            className="object-cover brightness-[0.4] scale-105"
             priority
           />
-          <div className="absolute inset-0 bg-gradient-to-b from-primary/40 via-primary/20 to-background" />
+          <div className="absolute inset-0 bg-gradient-to-b from-primary/30 to-primary/60" />
         </div>
 
         <div className="max-w-6xl mx-auto px-5 sm:px-6 lg:px-8 relative z-10 text-center">
