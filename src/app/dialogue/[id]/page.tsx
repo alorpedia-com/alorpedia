@@ -273,7 +273,7 @@ export default function DiscussionDetailsPage({
               <span>Your Contribution</span>
             </h3>
 
-            {session ? (
+            {user ? (
               <form onSubmit={handleReplySubmit} className="space-y-6">
                 <textarea
                   placeholder="Share your perspective..."
