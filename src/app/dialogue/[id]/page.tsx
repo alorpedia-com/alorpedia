@@ -96,8 +96,7 @@ export default function DiscussionDetailsPage({
 
   if (!discussion) return null;
 
-  const isAuthor =
-    !!session?.user && (session.user as any).id === discussion.authorId;
+  const isAuthor = !!user && user.id === discussion.authorId;
 
   return (
     <div className="max-w-5xl mx-auto px-native py-native bg-background min-h-screen">
