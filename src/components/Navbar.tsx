@@ -50,8 +50,8 @@ export default function Navbar() {
   ];
 
   const handleSignOut = async () => {
+    setShowDropdown(false);
     await supabaseSignOut();
-    window.location.href = "/";
   };
 
   const userInitials = getUserInitials(user?.user_metadata?.name);
