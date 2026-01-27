@@ -43,11 +43,6 @@ export default function CreatePostPage() {
     setFormData({ ...formData, imageUrl: "" });
   };
 
-  if (status === "unauthenticated") {
-    router.push("/login");
-    return null;
-  }
-
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setLoading(true);
