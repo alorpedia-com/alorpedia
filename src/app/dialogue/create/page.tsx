@@ -31,7 +31,7 @@ export default function CreateDiscussionPage() {
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
           ...formData,
-          village: user?.village,
+          village: (user as any)?.village,
         }),
       });
 
@@ -76,7 +76,7 @@ export default function CreateDiscussionPage() {
         <p className="text-xs md:text-base text-foreground/60">
           Your conversation will be tagged with{" "}
           <span className="text-primary font-bold">
-            {user?.village} Village
+            {(user as any)?.village} Village
           </span>
           .
         </p>
@@ -139,9 +139,9 @@ export default function CreateDiscussionPage() {
                   Community Guidelines
                 </p>
                 As a member of the{" "}
-                <span className="font-bold">{user?.ageGrade}</span>, your words
-                carry weight. Please ensure your contributions are respectful,
-                constructive, and aligned with Alor heritage.
+                <span className="font-bold">{(user as any)?.ageGrade}</span>,
+                your words carry weight. Please ensure your contributions are
+                respectful, constructive, and aligned with Alor heritage.
               </div>
             </div>
 
