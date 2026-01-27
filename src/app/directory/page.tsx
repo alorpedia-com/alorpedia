@@ -1,7 +1,7 @@
 "use client";
 
 import { useState, useEffect } from "react";
-import { useSession } from "next-auth/react";
+import { useSupabaseSession } from "@/components/SupabaseSessionProvider";
 import { useRouter } from "next/navigation";
 import { Search, Filter, Shield, User as UserIcon, MapPin } from "lucide-react";
 import {
@@ -15,6 +15,7 @@ import Image from "next/image";
 import Link from "next/link";
 
 export default function DirectoryPage() {
+  const { user } = useSupabaseSession();
   const router = useRouter();
   const [users, setUsers] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);

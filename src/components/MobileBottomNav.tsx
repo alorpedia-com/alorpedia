@@ -2,7 +2,7 @@
 
 import Link from "next/link";
 import { usePathname } from "next/navigation";
-import { useSession } from "next-auth/react";
+import { useSupabaseSession } from "./SupabaseSessionProvider";
 import {
   BookOpen,
   MessageSquare,
@@ -13,7 +13,7 @@ import {
 
 export default function MobileBottomNav() {
   const pathname = usePathname();
-  const { data: session } = useSession();
+  const { session } = useSupabaseSession();
 
   // Hide on auth pages and landing page only if not logged in
   const authPages = ["/login", "/register", "/onboarding"];

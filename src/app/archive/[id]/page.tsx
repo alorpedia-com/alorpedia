@@ -1,7 +1,7 @@
 "use client";
 
 import { useState, useEffect, use } from "react";
-import { useSession } from "next-auth/react";
+import { useSupabaseSession } from "@/components/SupabaseSessionProvider";
 import {
   User,
   Calendar,
@@ -21,7 +21,7 @@ export default function PostPage({
   params: Promise<{ id: string }>;
 }) {
   const { id } = use(params);
-  const { data: session } = useSession();
+  const { user } = useSupabaseSession();
   const router = useRouter();
   const [post, setPost] = useState<any>(null);
   const [loading, setLoading] = useState(true);
@@ -93,8 +93,7 @@ export default function PostPage({
 
   if (!post) return null;
 
-  const isAuthor =
-    !!session?.user && (session.user as any).id === post.authorId;
+  const isAuthor = !!user && user.id === post.authorId;
 
   return (
     <div className="max-w-4xl mx-auto px-native py-native bg-background min-h-screen">
@@ -187,7 +186,7 @@ export default function PostPage({
           </div>
         </div>
 
-        {session ? (
+        {user ? (
           <form onSubmit={handleCommentSubmit} className="mb-16">
             <div className="card-premium p-6 sm:p-8 border-none shadow-xl">
               <textarea

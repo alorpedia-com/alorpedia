@@ -2,12 +2,12 @@
 
 import { useState } from "react";
 import { useRouter } from "next/navigation";
-import { useSession } from "next-auth/react";
+import { useSupabaseSession } from "@/components/SupabaseSessionProvider";
 import { BookOpen, Type, Image as ImageIcon, Send, X } from "lucide-react";
 
 export default function CreatePostPage() {
   const router = useRouter();
-  const { data: session, status } = useSession();
+  const { user, loading: sessionLoading } = useSupabaseSession();
   const [formData, setFormData] = useState({
     title: "",
     content: "",
@@ -95,7 +95,7 @@ export default function CreatePostPage() {
       }
     } catch (err) {
       setError(
-        err instanceof Error ? err.message : "An unexpected error occurred"
+        err instanceof Error ? err.message : "An unexpected error occurred",
       );
     } finally {
       setLoading(false);

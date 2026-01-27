@@ -2,7 +2,7 @@
 
 import { useState, useEffect } from "react";
 import Link from "next/link";
-import { useSession } from "next-auth/react";
+import { useSupabaseSession } from "@/components/SupabaseSessionProvider";
 import {
   BookOpen,
   User as UserIcon,
@@ -16,7 +16,7 @@ import StyledDropdown from "@/components/StyledDropdown";
 import { useDebounce } from "@/hooks/useDebounce";
 
 export default function ArchivePage() {
-  const { data: session } = useSession();
+  const { user } = useSupabaseSession();
   const [posts, setPosts] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
   const [selectedVillage, setSelectedVillage] = useState<string>("All");
@@ -86,7 +86,7 @@ export default function ArchivePage() {
             />
             <Filter className="w-5 h-5 text-foreground/20 absolute left-4 top-1/2 -translate-y-1/2" />
           </div>
-          {session && (
+          {user && (
             <Link
               href="/archive/create"
               className="flex items-center justify-center space-x-2 bg-primary text-background px-8 py-3 rounded-2xl font-black uppercase tracking-widest hover:bg-primary/90 transition-all shadow-lg active:scale-95 text-sm"
@@ -261,7 +261,7 @@ export default function ArchivePage() {
                     {selectedVillage !== "All" && `for ${selectedVillage}`}. Be
                     the first to document our heritage.
                   </p>
-                  {session ? (
+                  {user ? (
                     <Link
                       href="/archive/create"
                       className="inline-block bg-primary text-background px-10 py-5 rounded-[2rem] font-black uppercase tracking-widest shadow-2xl hover:scale-105 active:scale-95 transition-all"

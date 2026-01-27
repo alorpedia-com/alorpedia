@@ -1,9 +1,9 @@
 "use client";
 
 import { useState } from "react";
-import { signIn } from "next-auth/react";
 import { useRouter, useSearchParams } from "next/navigation";
 import Link from "next/link";
+import { createClient } from "@supabase/supabase-js";
 
 export default function LoginForm() {
   const router = useRouter();
@@ -13,6 +13,10 @@ export default function LoginForm() {
   const [password, setPassword] = useState("");
   const [error, setError] = useState("");
   const [loading, setLoading] = useState(false);
+  const supabase = createClient(
+    process.env.NEXT_PUBLIC_SUPABASE_URL!,
+    process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!,
+  );
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -20,16 +24,17 @@ export default function LoginForm() {
     setError("");
 
     try {
-      const res = await signIn("credentials", {
-        redirect: false,
-        email,
-        password,
-      });
+      const { data, error: signInError } =
+        await supabase.auth.signInWithPassword({
+          email,
+          password,
+        });
 
-      if (res?.error) {
+      if (signInError) {
         setError("Invalid email or password");
-      } else {
+      } else if (data.user) {
         router.push(callbackUrl);
+        router.refresh();
       }
     } catch (err: any) {
       setError("An error occurred. Please try again.");

@@ -2,7 +2,7 @@
 
 import { useState, useEffect } from "react";
 import Link from "next/link";
-import { useSession } from "next-auth/react";
+import { useSupabaseSession } from "@/components/SupabaseSessionProvider";
 import {
   MessageSquare,
   Plus,
@@ -14,7 +14,7 @@ import { VILLAGES, formatAgeGrade } from "@/lib/utils";
 import StyledDropdown from "@/components/StyledDropdown";
 
 export default function DialoguePage() {
-  const { data: session } = useSession();
+  const { user } = useSupabaseSession();
   const [discussions, setDiscussions] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
   const [selectedVillage, setSelectedVillage] = useState<string>("All");
@@ -54,7 +54,7 @@ export default function DialoguePage() {
             kin, share wisdom, and shape our collective future.
           </p>
         </div>
-        {session && (
+        {user && (
           <Link
             href="/dialogue/create"
             className="flex items-center justify-center space-x-2 bg-primary text-background px-8 py-3.5 rounded-2xl font-black uppercase tracking-widest hover:bg-primary/90 transition-all shadow-xl active:scale-95 text-sm"
@@ -171,7 +171,7 @@ export default function DialoguePage() {
                 {selectedVillage === "All" ? "Alor" : selectedVillage}. Be the
                 one to start the conversation.
               </p>
-              {session ? (
+              {user ? (
                 <Link
                   href="/dialogue/create"
                   className="inline-block bg-primary text-background px-10 py-5 rounded-[2rem] font-black uppercase tracking-widest shadow-2xl hover:scale-105 active:scale-95 transition-all text-sm"

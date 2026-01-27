@@ -4,7 +4,7 @@ import { useState, useEffect, useRef } from "react";
 import { Bell, X } from "lucide-react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
-import { useSession } from "next-auth/react";
+import { useSupabaseSession } from "./SupabaseSessionProvider";
 
 interface Notification {
   id: string;
@@ -17,7 +17,7 @@ interface Notification {
 }
 
 export default function NotificationBell() {
-  const { status } = useSession();
+  const { user, loading: sessionLoading } = useSupabaseSession();
   const [notifications, setNotifications] = useState<Notification[]>([]);
   const [unreadCount, setUnreadCount] = useState(0);
   const [showDropdown, setShowDropdown] = useState(false);
@@ -27,7 +27,7 @@ export default function NotificationBell() {
 
   // Fetch notifications
   const fetchNotifications = async () => {
-    if (status !== "authenticated") return;
+    if (!user) return;
     try {
       const response = await fetch("/api/notifications");
       if (response.ok) {

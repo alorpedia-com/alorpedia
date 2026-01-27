@@ -1,7 +1,8 @@
 "use client";
 
 import { useState, useEffect, use } from "react";
-import { useSession } from "next-auth/react";
+import { useRouter } from "next/navigation";
+import { useSupabaseSession } from "@/components/SupabaseSessionProvider";
 import {
   MessageSquare,
   ChevronLeft,
@@ -13,7 +14,6 @@ import {
   Trash2,
 } from "lucide-react";
 import Link from "next/link";
-import { useRouter } from "next/navigation";
 import { formatAgeGrade } from "@/lib/utils";
 
 export default function DiscussionDetailsPage({
@@ -22,7 +22,7 @@ export default function DiscussionDetailsPage({
   params: Promise<{ id: string }>;
 }) {
   const { id } = use(params);
-  const { data: session } = useSession();
+  const { user } = useSupabaseSession();
   const router = useRouter();
   const [discussion, setDiscussion] = useState<any>(null);
   const [loading, setLoading] = useState(true);

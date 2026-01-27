@@ -1,9 +1,15 @@
 "use client";
 
 import { useState, useEffect } from "react";
-import { useSession } from "next-auth/react";
+import { useSupabaseSession } from "@/components/SupabaseSessionProvider";
 import { useRouter } from "next/navigation";
-import { MessageCircle, Send, ArrowLeft, Loader2 } from "lucide-react";
+import {
+  MessageSquare,
+  MessageCircle,
+  Send,
+  ArrowLeft,
+  Loader2,
+} from "lucide-react";
 import Link from "next/link";
 
 interface Participant {
@@ -34,7 +40,7 @@ interface Conversation {
 }
 
 export default function MessagesPage() {
-  const { data: session } = useSession();
+  const { user } = useSupabaseSession();
   const router = useRouter();
   const [conversations, setConversations] = useState<Conversation[]>([]);
   const [selectedConversation, setSelectedConversation] = useState<
@@ -46,12 +52,12 @@ export default function MessagesPage() {
   const [sending, setSending] = useState(false);
 
   useEffect(() => {
-    if (!session) {
+    if (!user) {
       router.push("/login");
       return;
     }
     fetchConversations();
-  }, [session, router]);
+  }, [user, router]);
 
   const fetchConversations = async () => {
     try {
@@ -82,8 +88,8 @@ export default function MessagesPage() {
         // Update unread count in local state
         setConversations((prev) =>
           prev.map((conv) =>
-            conv.id === conversationId ? { ...conv, unreadCount: 0 } : conv
-          )
+            conv.id === conversationId ? { ...conv, unreadCount: 0 } : conv,
+          ),
         );
       }
     } catch (error) {
@@ -108,7 +114,7 @@ export default function MessagesPage() {
           method: "POST",
           headers: { "Content-Type": "application/json" },
           body: JSON.stringify({ content: newMessage }),
-        }
+        },
       );
 
       if (response.ok) {
@@ -125,8 +131,8 @@ export default function MessagesPage() {
                   lastMessage: data.message,
                   updatedAt: new Date().toISOString(),
                 }
-              : conv
-          )
+              : conv,
+          ),
         );
       }
     } catch (error) {
@@ -137,8 +143,7 @@ export default function MessagesPage() {
   };
 
   const getOtherParticipant = (conversation: Conversation) => {
-    const userId = (session?.user as any)?.id;
-    return conversation.participants.find((p) => p.id !== userId);
+    return conversation.participants.find((p: any) => p.id !== user?.id);
   };
 
   const selectedConv = conversations.find((c) => c.id === selectedConversation);
@@ -251,8 +256,8 @@ export default function MessagesPage() {
                 {/* Messages */}
                 <div className="flex-1 overflow-y-auto p-4 space-y-4">
                   {messages.map((message) => {
-                    const isOwn =
-                      message.senderId === (session?.user as any)?.id;
+                    const isOwn = message.senderId === user?.id;
+
                     return (
                       <div
                         key={message.id}
@@ -277,7 +282,7 @@ export default function MessagesPage() {
                           >
                             {new Date(message.createdAt).toLocaleTimeString(
                               [],
-                              { hour: "2-digit", minute: "2-digit" }
+                              { hour: "2-digit", minute: "2-digit" },
                             )}
                           </p>
                         </div>

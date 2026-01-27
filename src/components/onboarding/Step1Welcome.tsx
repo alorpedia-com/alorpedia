@@ -1,6 +1,5 @@
 "use client";
 
-import { signIn } from "next-auth/react";
 import { Trees, Mail, Phone } from "lucide-react";
 import Image from "next/image";
 
@@ -9,10 +8,6 @@ interface Step1WelcomeProps {
 }
 
 export default function Step1Welcome({ onNext }: Step1WelcomeProps) {
-  const handleGoogleSignIn = async () => {
-    await signIn("google", { callbackUrl: "/onboarding" });
-  };
-
   return (
     <div className="flex flex-col items-center justify-center min-h-[70vh] px-5 py-8">
       <div className="w-full max-w-md space-y-8">

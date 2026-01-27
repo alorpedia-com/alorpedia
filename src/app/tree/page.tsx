@@ -1,7 +1,6 @@
 "use client";
 
 import { useState, useEffect } from "react";
-import { useSession } from "next-auth/react";
 import {
   GitBranch,
   Plus,
@@ -16,9 +15,10 @@ import {
 } from "lucide-react";
 import TreeOnboardingModal from "@/components/TreeOnboardingModal";
 import TreeVisualization from "@/components/TreeVisualization";
-
+import { useQuery } from "@tanstack/react-query";
+import { useSupabaseSession } from "@/components/SupabaseSessionProvider";
 export default function TreeOfLife() {
-  const { data: session } = useSession();
+  const { user } = useSupabaseSession();
   const [nodes, setNodes] = useState<any[]>([]);
   const [relationships, setRelationships] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
