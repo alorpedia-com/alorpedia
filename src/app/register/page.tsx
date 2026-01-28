@@ -58,22 +58,34 @@ export default function Register() {
         if (data.user.identities?.length === 0) {
           setError("This email is already registered. Please log in.");
         } else {
-          // Create database user record and wait for it to complete
+          // Wait for session to be established before creating database user
           try {
-            const profileResponse = await fetch("/api/user/profile", {
-              method: "GET",
-            });
-
-            if (!profileResponse.ok) {
-              console.error("Failed to create user profile");
-              // Even if profile creation fails, continue - it will be created on next page load
+            // Wait for session to propagate (max 3 seconds)
+            let sessionReady = false;
+            for (let i = 0; i < 6; i++) {
+              await new Promise((resolve) => setTimeout(resolve, 500));
+              const {
+                data: { session },
+              } = await supabase.auth.getSession();
+              if (session) {
+                sessionReady = true;
+                break;
+              }
             }
 
-            // Wait a bit to ensure database user is created
-            await new Promise((resolve) => setTimeout(resolve, 500));
+            if (sessionReady) {
+              // Now create database user
+              const profileResponse = await fetch("/api/user/profile", {
+                method: "GET",
+              });
+
+              if (!profileResponse.ok) {
+                console.log("Profile will be created on first page load");
+              }
+            }
           } catch (dbError) {
-            console.error("Error creating user profile:", dbError);
-            // Continue anyway
+            console.error("Error during user setup:", dbError);
+            // Continue anyway - onboarding page will handle user creation
           }
 
           // Successful registration - redirect to onboarding
