@@ -51,7 +51,7 @@ export interface AgeGrade {
  */
 export const AGE_GRADES: AgeGrade[] = [
   // The Elders (1800-1967)
-  { name: "Isi Ogbo", start: 1800, end: 1912, role: "The Elders" },
+  { name: "Isi Ogbo", start: 1800, end: 1911, role: "The Elders" },
   { name: "Alordimma", start: 1913, end: 1917, role: "The Elders" },
   { name: "Chizolu", start: 1918, end: 1922, role: "The Elders" },
   { name: "Anadodo", start: 1923, end: 1927, role: "The Elders" },
@@ -92,7 +92,7 @@ export const AGE_GRADES: AgeGrade[] = [
 export function calculateAgeGrade(birthYear: number): AgeGrade | null {
   return (
     AGE_GRADES.find(
-      (grade) => birthYear >= grade.start && birthYear <= grade.end
+      (grade) => birthYear >= grade.start && birthYear <= grade.end,
     ) || null
   );
 }
@@ -148,7 +148,7 @@ export function isValidKindred(village: string, kindred: string): boolean {
  */
 export function getAgeGradeDisplay(
   ageGradeName: string | null | undefined,
-  role?: string | null
+  role?: string | null,
 ): string {
   if (!ageGradeName) return "Not Set";
   return role ? `${ageGradeName} (${role})` : ageGradeName;
@@ -160,7 +160,7 @@ export function getAgeGradeDisplay(
  * @returns Array of age grades
  */
 export function getAgeGradesByRole(
-  role: "The Elders" | "The Workforce"
+  role: "The Elders" | "The Workforce",
 ): AgeGrade[] {
   return AGE_GRADES.filter((grade) => grade.role === role);
 }
