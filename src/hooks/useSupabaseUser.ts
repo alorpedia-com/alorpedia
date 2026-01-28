@@ -15,10 +15,12 @@ export function useSupabaseUser() {
     // Get initial session
     supabase.auth.getUser().then(({ data: { user }, error }) => {
       if (error) {
-        console.error("Auth user error:", error);
-        // Sign out on error
-        supabase.auth.signOut();
-        setUser(null);
+        // Only log and potentially sign out if it's a REAL error, not just a missing session
+        if (error.name !== "AuthSessionMissingError") {
+          console.error("Auth user error:", error);
+          supabase.auth.signOut();
+          setUser(null);
+        }
         setLoading(false);
         return;
       }
@@ -30,8 +32,11 @@ export function useSupabaseUser() {
     const {
       data: { subscription },
     } = supabase.auth.onAuthStateChange(async (event, session) => {
-      // Auto sign-out on auth errors
-      if (event === "SIGNED_OUT" || (event === "TOKEN_REFRESHED" && !session)) {
+      // Auto sign-out only on explicit SIGNED_OUT or invalid refresh
+      if (event === "SIGNED_OUT") {
+        setUser(null);
+      } else if (event === "TOKEN_REFRESHED" && !session) {
+        // If token refresh failed to yield a session, it's an error
         await supabase.auth.signOut();
         setUser(null);
       } else {

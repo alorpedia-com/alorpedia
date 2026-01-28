@@ -44,7 +44,11 @@ export default function OnboardingPage() {
     // Fetch user from database to check onboarding status
     const fetchUserData = async () => {
       try {
+        setLoading(true);
+        setError(null);
+        console.log("Onboarding: Fetching user profile...");
         const response = await fetch("/api/user/profile");
+
         if (response.ok) {
           const userData = await response.json();
           setDbUser(userData);
@@ -74,9 +78,22 @@ export default function OnboardingPage() {
             ageGrade: userData.ageGrade,
             generationalRole: userData.generationalRole,
           });
+        } else {
+          const errorText = await response.text();
+          console.error(
+            "Onboarding: Profile API returned error",
+            response.status,
+            errorText,
+          );
+          setError(
+            "Could not load your profile. Please check your connection and try again.",
+          );
         }
       } catch (error) {
-        console.error("Failed to fetch user data:", error);
+        console.error("Onboarding: Failed to fetch user data:", error);
+        setError(
+          "An unexpected error occurred. Please refresh the page or try again.",
+        );
       } finally {
         setLoading(false);
       }

@@ -35,8 +35,8 @@ export function SupabaseSessionProvider({
           error,
         } = await supabase.auth.getSession();
 
-        // If there's an auth error, sign out
-        if (error) {
+        // If there's an auth error, only sign out if it's not a missing session
+        if (error && error.name !== "AuthSessionMissingError") {
           console.error("Auth session error:", error);
           await supabase.auth.signOut();
           setSession(null);
@@ -50,7 +50,6 @@ export function SupabaseSessionProvider({
         setLoading(false);
       } catch (err) {
         console.error("Session initialization error:", err);
-        await supabase.auth.signOut();
         setSession(null);
         setUser(null);
         setLoading(false);
