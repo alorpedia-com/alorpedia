@@ -58,6 +58,16 @@ export default function Register() {
         if (data.user.identities?.length === 0) {
           setError("This email is already registered. Please log in.");
         } else {
+          // Create database user record
+          try {
+            await fetch("/api/user/profile", {
+              method: "GET",
+            });
+          } catch (dbError) {
+            console.error("Failed to create user profile:", dbError);
+            // Continue anyway - profile API will create user on first access
+          }
+
           // Successful registration - redirect to onboarding
           router.push("/onboarding");
         }
