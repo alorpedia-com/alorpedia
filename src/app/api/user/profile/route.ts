@@ -29,22 +29,35 @@ export async function GET() {
 
     if (!dbUser) {
       // Create user in Prisma if they exist in Supabase but not in Prisma
-      dbUser = await prisma.user.create({
-        data: {
-          id: user.id,
-          email: user.email!,
-          name:
-            user.user_metadata?.full_name || user.user_metadata?.name || "User",
-          profileImage: user.user_metadata?.avatar_url || null,
-          onboardingCompleted: false,
-          onboardingStep: 0,
-        },
-        include: {
-          profile: true,
-          posts: true,
-          discussions: true,
-        },
-      });
+      try {
+        console.log("Creating new user in Prisma for Supabase ID:", user.id);
+        dbUser = await prisma.user.create({
+          data: {
+            id: user.id,
+            email: user.email!,
+            name:
+              user.user_metadata?.full_name ||
+              user.user_metadata?.name ||
+              "User",
+            profileImage: user.user_metadata?.avatar_url || null,
+            onboardingCompleted: false,
+            onboardingStep: 0,
+          },
+          include: {
+            profile: true,
+            posts: true,
+            discussions: true,
+          },
+        });
+        console.log("Successfully created user in Prisma:", dbUser.id);
+      } catch (createError) {
+        console.error(
+          "CRITICAL: Failed to create user in Prisma:",
+          createError,
+        );
+        // Throw to reach the main catch block
+        throw createError;
+      }
     }
 
     return NextResponse.json({
