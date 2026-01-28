@@ -29,12 +29,32 @@ export function SupabaseSessionProvider({
   useEffect(() => {
     // Get initial session
     const initSession = async () => {
-      const {
-        data: { session: initialSession },
-      } = await supabase.auth.getSession();
-      setSession(initialSession);
-      setUser(initialSession?.user ?? null);
-      setLoading(false);
+      try {
+        const {
+          data: { session: initialSession },
+          error,
+        } = await supabase.auth.getSession();
+
+        // If there's an auth error, sign out
+        if (error) {
+          console.error("Auth session error:", error);
+          await supabase.auth.signOut();
+          setSession(null);
+          setUser(null);
+          setLoading(false);
+          return;
+        }
+
+        setSession(initialSession);
+        setUser(initialSession?.user ?? null);
+        setLoading(false);
+      } catch (err) {
+        console.error("Session initialization error:", err);
+        await supabase.auth.signOut();
+        setSession(null);
+        setUser(null);
+        setLoading(false);
+      }
     };
 
     initSession();
@@ -42,9 +62,16 @@ export function SupabaseSessionProvider({
     // Listen for auth changes
     const {
       data: { subscription },
-    } = supabase.auth.onAuthStateChange((_event, session) => {
-      setSession(session);
-      setUser(session?.user ?? null);
+    } = supabase.auth.onAuthStateChange(async (event, session) => {
+      // Sign out on auth errors or token expired
+      if (event === "SIGNED_OUT" || (event === "TOKEN_REFRESHED" && !session)) {
+        await supabase.auth.signOut();
+        setSession(null);
+        setUser(null);
+      } else {
+        setSession(session);
+        setUser(session?.user ?? null);
+      }
       setLoading(false);
     });
 

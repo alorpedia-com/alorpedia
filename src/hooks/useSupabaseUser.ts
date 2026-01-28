@@ -13,7 +13,15 @@ export function useSupabaseUser() {
 
   useEffect(() => {
     // Get initial session
-    supabase.auth.getUser().then(({ data: { user } }) => {
+    supabase.auth.getUser().then(({ data: { user }, error }) => {
+      if (error) {
+        console.error("Auth user error:", error);
+        // Sign out on error
+        supabase.auth.signOut();
+        setUser(null);
+        setLoading(false);
+        return;
+      }
       setUser(user);
       setLoading(false);
     });
@@ -21,8 +29,14 @@ export function useSupabaseUser() {
     // Listen for auth changes
     const {
       data: { subscription },
-    } = supabase.auth.onAuthStateChange((_event, session) => {
-      setUser(session?.user ?? null);
+    } = supabase.auth.onAuthStateChange(async (event, session) => {
+      // Auto sign-out on auth errors
+      if (event === "SIGNED_OUT" || (event === "TOKEN_REFRESHED" && !session)) {
+        await supabase.auth.signOut();
+        setUser(null);
+      } else {
+        setUser(session?.user ?? null);
+      }
       setLoading(false);
     });
 
