@@ -34,13 +34,20 @@ export function SupabaseSessionProvider({
         const initialSession = data?.session;
 
         // If there's an auth error, only sign out if it's not a missing session
-        if (error && error.name !== "AuthSessionMissingError") {
-          console.error("Auth session error:", error);
-          await supabase.auth.signOut();
-          setSession(null);
-          setUser(null);
-          setLoading(false);
-          return;
+        if (error) {
+          const isMissingSession =
+            error.name === "AuthSessionMissingError" ||
+            error.message?.includes("session_not_found") ||
+            error.message?.includes("Auth session missing");
+
+          if (!isMissingSession) {
+            console.error("Auth session error:", error);
+            await supabase.auth.signOut();
+            setSession(null);
+            setUser(null);
+            setLoading(false);
+            return;
+          }
         }
 
         setSession(initialSession);
