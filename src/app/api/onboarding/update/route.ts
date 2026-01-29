@@ -5,10 +5,8 @@ import prisma from "@/lib/prisma";
 export async function POST(request: NextRequest) {
   try {
     const supabase = await createClient();
-    const {
-      data: { user },
-      error,
-    } = await supabase.auth.getUser();
+    const { data: authData, error } = await supabase.auth.getUser();
+    const user = authData?.user;
 
     if (error || !user) {
       return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
@@ -77,7 +75,7 @@ export async function POST(request: NextRequest) {
     });
 
     console.log(
-      `User ${userId} updated successfully. onboardingCompleted: ${updatedUser.onboardingCompleted}`
+      `User ${userId} updated successfully. onboardingCompleted: ${updatedUser.onboardingCompleted}`,
     );
 
     return NextResponse.json({
@@ -88,7 +86,7 @@ export async function POST(request: NextRequest) {
     console.error("Onboarding update error:", error);
     return NextResponse.json(
       { error: "Failed to update onboarding progress" },
-      { status: 500 }
+      { status: 500 },
     );
   }
 }

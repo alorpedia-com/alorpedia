@@ -13,25 +13,28 @@ export function useSupabaseUser() {
 
   useEffect(() => {
     // Get initial session
-    supabase.auth.getUser().then(({ data: { user }, error }) => {
-      if (error) {
-        // Only log and potentially sign out if it's a REAL error, not just a missing session
-        if (error.name !== "AuthSessionMissingError") {
-          console.error("Auth user error:", error);
-          supabase.auth.signOut();
-          setUser(null);
+    supabase.auth
+      .getUser()
+      .then(({ data, error }: { data: any; error: any }) => {
+        const user = data?.user;
+        if (error) {
+          // Only log and potentially sign out if it's a REAL error, not just a missing session
+          if (error.name !== "AuthSessionMissingError") {
+            console.error("Auth user error:", error);
+            supabase.auth.signOut();
+            setUser(null);
+          }
+          setLoading(false);
+          return;
         }
+        setUser(user);
         setLoading(false);
-        return;
-      }
-      setUser(user);
-      setLoading(false);
-    });
+      });
 
     // Listen for auth changes
     const {
       data: { subscription },
-    } = supabase.auth.onAuthStateChange(async (event, session) => {
+    } = supabase.auth.onAuthStateChange(async (event: any, session: any) => {
       // Auto sign-out only on explicit SIGNED_OUT or invalid refresh
       if (event === "SIGNED_OUT") {
         setUser(null);

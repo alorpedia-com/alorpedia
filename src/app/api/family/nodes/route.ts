@@ -4,10 +4,8 @@ import prisma from "@/lib/prisma";
 
 export async function GET() {
   const supabase = await createClient();
-  const {
-    data: { user },
-    error,
-  } = await supabase.auth.getUser();
+  const { data: authData, error } = await supabase.auth.getUser();
+  const user = authData?.user;
 
   if (error || !user) {
     return NextResponse.json({ message: "Not authenticated" }, { status: 401 });
@@ -47,17 +45,15 @@ export async function GET() {
     console.error("Family fetch error:", error);
     return NextResponse.json(
       { message: "Internal server error" },
-      { status: 500 }
+      { status: 500 },
     );
   }
 }
 
 export async function POST(req: Request) {
   const supabase = await createClient();
-  const {
-    data: { user },
-    error,
-  } = await supabase.auth.getUser();
+  const { data: authData, error } = await supabase.auth.getUser();
+  const user = authData?.user;
 
   if (error || !user) {
     return NextResponse.json({ message: "Not authenticated" }, { status: 401 });
@@ -90,7 +86,7 @@ export async function POST(req: Request) {
     console.error("Node creation error:", error);
     return NextResponse.json(
       { message: "Internal server error" },
-      { status: 500 }
+      { status: 500 },
     );
   }
 }

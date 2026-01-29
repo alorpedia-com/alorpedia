@@ -4,10 +4,8 @@ import prisma from "@/lib/prisma";
 
 export async function POST(req: Request) {
   const supabase = await createClient();
-  const {
-    data: { user },
-    error,
-  } = await supabase.auth.getUser();
+  const { data, error } = await supabase.auth.getUser();
+  const user = data?.user;
 
   if (error || !user) {
     return NextResponse.json({ message: "Not authenticated" }, { status: 401 });
@@ -38,7 +36,7 @@ export async function POST(req: Request) {
     console.error("Profile update error:", error);
     return NextResponse.json(
       { message: "Internal server error" },
-      { status: 500 }
+      { status: 500 },
     );
   }
 }

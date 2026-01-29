@@ -4,7 +4,7 @@ import prisma from "@/lib/prisma";
 
 export async function GET(
   req: Request,
-  { params }: { params: Promise<{ id: string }> }
+  { params }: { params: Promise<{ id: string }> },
 ) {
   const { id } = await params;
 
@@ -42,21 +42,19 @@ export async function GET(
     console.error("Post fetch error:", error);
     return NextResponse.json(
       { message: "Internal server error" },
-      { status: 500 }
+      { status: 500 },
     );
   }
 }
 
 export async function PATCH(
   req: Request,
-  { params }: { params: Promise<{ id: string }> }
+  { params }: { params: Promise<{ id: string }> },
 ) {
   const { id } = await params;
   const supabase = await createClient();
-  const {
-    data: { user },
-    error,
-  } = await supabase.auth.getUser();
+  const { data: authData, error } = await supabase.auth.getUser();
+  const user = authData?.user;
 
   if (error || !user) {
     return NextResponse.json({ message: "Not authenticated" }, { status: 401 });
@@ -92,21 +90,19 @@ export async function PATCH(
     console.error("Post update error:", error);
     return NextResponse.json(
       { message: "Internal server error" },
-      { status: 500 }
+      { status: 500 },
     );
   }
 }
 
 export async function DELETE(
   req: Request,
-  { params }: { params: Promise<{ id: string }> }
+  { params }: { params: Promise<{ id: string }> },
 ) {
   const { id } = await params;
   const supabase = await createClient();
-  const {
-    data: { user },
-    error,
-  } = await supabase.auth.getUser();
+  const { data: authData, error } = await supabase.auth.getUser();
+  const user = authData?.user;
 
   if (error || !user) {
     return NextResponse.json({ message: "Not authenticated" }, { status: 401 });
@@ -139,7 +135,7 @@ export async function DELETE(
     console.error("Post deletion error:", error);
     return NextResponse.json(
       { message: "Internal server error" },
-      { status: 500 }
+      { status: 500 },
     );
   }
 }

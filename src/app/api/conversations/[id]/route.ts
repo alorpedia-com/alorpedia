@@ -10,10 +10,8 @@ export async function GET(
   try {
     const { id: conversationId } = await params;
     const supabase = await createClient();
-    const {
-      data: { user },
-      error,
-    } = await supabase.auth.getUser();
+    const { data: authData, error } = await supabase.auth.getUser();
+    const user = authData?.user;
 
     if (error || !user) {
       return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
@@ -82,10 +80,8 @@ export async function DELETE(
   try {
     const { id: conversationId } = await params;
     const supabase = await createClient();
-    const {
-      data: { user },
-      error,
-    } = await supabase.auth.getUser();
+    const { data: authData, error } = await supabase.auth.getUser();
+    const user = authData?.user;
 
     if (error || !user) {
       return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
