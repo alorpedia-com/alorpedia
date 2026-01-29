@@ -11,10 +11,8 @@ cloudinary.config({
 
 export async function POST(req: Request) {
   const supabase = await createClient();
-  const {
-    data: { user },
-    error,
-  } = await supabase.auth.getUser();
+  const { data: authData, error } = await supabase.auth.getUser();
+  const user = authData?.user;
 
   if (error || !user) {
     return NextResponse.json({ message: "Not authenticated" }, { status: 401 });
@@ -28,7 +26,7 @@ export async function POST(req: Request) {
     if (!file) {
       return NextResponse.json(
         { message: "No file provided" },
-        { status: 400 }
+        { status: 400 },
       );
     }
 
@@ -58,7 +56,7 @@ export async function POST(req: Request) {
     console.error("Upload error:", error);
     return NextResponse.json(
       { message: "Upload failed", error: String(error) },
-      { status: 500 }
+      { status: 500 },
     );
   }
 }

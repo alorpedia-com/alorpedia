@@ -30,10 +30,8 @@ export function SupabaseSessionProvider({
     // Get initial session
     const initSession = async () => {
       try {
-        const {
-          data: { session: initialSession },
-          error,
-        } = await supabase.auth.getSession();
+        const { data, error } = await supabase.auth.getSession();
+        const initialSession = data?.session;
 
         // If there's an auth error, only sign out if it's not a missing session
         if (error && error.name !== "AuthSessionMissingError") {

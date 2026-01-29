@@ -4,10 +4,8 @@ import prisma from "@/lib/prisma";
 
 export async function GET() {
   const supabase = await createClient();
-  const {
-    data: { user },
-    error,
-  } = await supabase.auth.getUser();
+  const { data, error } = await supabase.auth.getUser();
+  const user = data?.user;
 
   if (error || !user) {
     return NextResponse.json({ message: "Not authenticated" }, { status: 401 });
