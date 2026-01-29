@@ -22,6 +22,7 @@ export default function Home() {
             src="/images/landing/hero-new.webp"
             alt="Traditional Igbo community gathering under an ancient tree"
             fill
+            sizes="100vw"
             className="object-cover brightness-[0.4] scale-105"
             priority
           />
@@ -77,6 +78,7 @@ export default function Home() {
                 src="/images/landing/archive.png"
                 alt="Heritage scrolls and digital archive"
                 fill
+                sizes="(max-width: 1024px) 100vw, 50vw"
                 className="object-cover"
               />
             </div>
@@ -150,6 +152,7 @@ export default function Home() {
                 src="/images/landing/tree.png"
                 alt="Tree of Life Minimal"
                 fill
+                sizes="208px"
                 className="object-contain"
               />
             </div>

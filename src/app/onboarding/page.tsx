@@ -2,6 +2,7 @@
 
 import { useState, useEffect } from "react";
 import { useRouter } from "next/navigation";
+import { useQueryClient } from "@tanstack/react-query";
 import StepIndicator from "@/components/onboarding/StepIndicator";
 import Step2BasicInfo from "@/components/onboarding/Step2BasicInfo";
 import Step3ProfileImage from "@/components/onboarding/Step3ProfileImage";
@@ -25,10 +26,12 @@ interface OnboardingData {
 export default function OnboardingPage() {
   const { user, loading: authLoading } = useSupabaseUser();
   const router = useRouter();
+  const queryClient = useQueryClient();
   const [currentStep, setCurrentStep] = useState(2); // Start at Step 2 (Basic Info) since user is already authenticated
   const [data, setData] = useState<OnboardingData>({});
   const [loading, setLoading] = useState(true);
   const [dbUser, setDbUser] = useState<any>(null);
+  const [error, setError] = useState<string | null>(null);
 
   useEffect(() => {
     // Wait for auth to load
@@ -144,6 +147,7 @@ export default function OnboardingPage() {
     try {
       setData((prev) => ({ ...prev, ...stepData }));
       await updateOnboarding(2, stepData);
+      queryClient.invalidateQueries({ queryKey: ["userProfile"] });
       setCurrentStep(3);
     } catch (error) {
       console.error("Failed to proceed to next step:", error);
@@ -155,6 +159,7 @@ export default function OnboardingPage() {
   const handleStep3Next = async (stepData: { profileImage?: string }) => {
     setData((prev) => ({ ...prev, ...stepData }));
     await updateOnboarding(3, stepData);
+    queryClient.invalidateQueries({ queryKey: ["userProfile"] });
     setCurrentStep(4);
   };
 
@@ -170,6 +175,7 @@ export default function OnboardingPage() {
     try {
       setData((prev) => ({ ...prev, ...stepData }));
       await updateOnboarding(4, stepData);
+      queryClient.invalidateQueries({ queryKey: ["userProfile"] });
 
       // Don't update session here - it will be updated in Step5Complete
       setCurrentStep(5);

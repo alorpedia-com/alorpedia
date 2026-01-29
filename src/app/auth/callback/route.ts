@@ -14,50 +14,45 @@ export async function GET(request: Request) {
       // Import prisma dynamically to avoid edge runtime issues
       const prisma = (await import("@/lib/prisma")).default;
 
-      // Check if user exists in database
-      let dbUser = await prisma.user.findUnique({
+      // Use upsert to handle existing users or race conditions
+      const dbUser = await prisma.user.upsert({
         where: { id: data.user.id },
+        update: {
+          email: data.user.email!,
+          name:
+            data.user.user_metadata?.full_name ||
+            data.user.user_metadata?.name ||
+            "User",
+          profileImage: data.user.user_metadata?.avatar_url || null,
+        },
+        create: {
+          id: data.user.id,
+          email: data.user.email!,
+          name:
+            data.user.user_metadata?.full_name ||
+            data.user.user_metadata?.name ||
+            "User",
+          profileImage: data.user.user_metadata?.avatar_url || null,
+          onboardingCompleted: false,
+          onboardingStep: 2,
+          profile: {
+            create: {},
+          },
+        },
       });
 
-      // If user doesn't exist, create them
-      if (!dbUser) {
-        dbUser = await prisma.user.create({
-          data: {
-            id: data.user.id,
-            email: data.user.email!,
-            name:
-              data.user.user_metadata?.full_name ||
-              data.user.user_metadata?.name ||
-              "User",
-            profileImage: data.user.user_metadata?.avatar_url || null,
-            onboardingCompleted: false,
-            onboardingStep: 0,
-          },
-        });
-
-        // Redirect to onboarding for new users
-        const forwardedHost = request.headers.get("x-forwarded-host");
-        const isLocalHost = forwardedHost?.includes("localhost");
-        if (isLocalHost) {
-          return NextResponse.redirect(`${origin}/onboarding`);
-        } else if (forwardedHost) {
-          return NextResponse.redirect(`https://${forwardedHost}/onboarding`);
-        } else {
-          return NextResponse.redirect(`${origin}/onboarding`);
-        }
-      }
-
-      // For existing users, redirect to requested page or profile
+      // Redirect to onboarding or profile
       const redirectPath = dbUser.onboardingCompleted ? next : "/onboarding";
       const forwardedHost = request.headers.get("x-forwarded-host");
       const isLocalHost = forwardedHost?.includes("localhost");
-      if (isLocalHost) {
-        return NextResponse.redirect(`${origin}${redirectPath}`);
-      } else if (forwardedHost) {
-        return NextResponse.redirect(`https://${forwardedHost}${redirectPath}`);
-      } else {
-        return NextResponse.redirect(`${origin}${redirectPath}`);
-      }
+
+      const targetUrl = isLocalHost
+        ? `${origin}${redirectPath}`
+        : forwardedHost
+          ? `https://${forwardedHost}${redirectPath}`
+          : `${origin}${redirectPath}`;
+
+      return NextResponse.redirect(targetUrl);
     }
   }
 

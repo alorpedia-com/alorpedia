@@ -8,9 +8,11 @@ import { useState, useRef, useEffect } from "react";
 import { getUserInitials } from "@/lib/utils";
 import NotificationBell from "@/components/NotificationBell";
 import { useSupabaseUser } from "@/hooks/useSupabaseUser";
+import { useUserProfile } from "@/hooks/useUserProfile";
 
 export default function Navbar() {
   const { user, signOut: supabaseSignOut } = useSupabaseUser();
+  const { profile } = useUserProfile();
   const pathname = usePathname();
   const [showDropdown, setShowDropdown] = useState(false);
   const dropdownRef = useRef<HTMLDivElement>(null);
@@ -54,7 +56,12 @@ export default function Navbar() {
     await supabaseSignOut();
   };
 
-  const userInitials = getUserInitials(user?.user_metadata?.name);
+  const userInitials = getUserInitials(
+    profile?.name || user?.user_metadata?.name,
+  );
+  const displayName =
+    profile?.name || user?.user_metadata?.name || user?.email || "Profile";
+  const avatarImage = profile?.profileImage || user?.user_metadata?.avatar_url;
 
   return (
     <nav className="bg-primary text-background border-b border-border/10 sticky top-0 z-50 shadow-sm">
@@ -103,10 +110,10 @@ export default function Navbar() {
                   className="flex items-center space-x-3 hover:bg-background/10 px-3 py-2 rounded-xl transition-all active:scale-95"
                 >
                   <div className="w-9 h-9 bg-accent text-primary rounded-full flex items-center justify-center font-bold text-sm shadow-md overflow-hidden relative">
-                    {user.user_metadata?.avatar_url ? (
+                    {avatarImage ? (
                       <Image
-                        src={user.user_metadata.avatar_url}
-                        alt={user.user_metadata?.name || "User"}
+                        src={avatarImage}
+                        alt={displayName}
                         fill
                         sizes="36px"
                         className="object-cover"
@@ -115,9 +122,7 @@ export default function Navbar() {
                       userInitials
                     )}
                   </div>
-                  <span className="text-sm font-bold">
-                    {user.user_metadata?.name || user.email || "Profile"}
-                  </span>
+                  <span className="text-sm font-bold">{displayName}</span>
                 </button>
 
                 {/* Dropdown Menu */}
@@ -171,10 +176,10 @@ export default function Navbar() {
                   onClick={() => setShowDropdown(!showDropdown)}
                   className="w-9 h-9 bg-accent text-primary rounded-full flex items-center justify-center font-bold text-sm shadow-md active:scale-90 transition-transform overflow-hidden relative"
                 >
-                  {user.user_metadata?.avatar_url ? (
+                  {avatarImage ? (
                     <Image
-                      src={user.user_metadata.avatar_url}
-                      alt={user.user_metadata?.name || "User"}
+                      src={avatarImage}
+                      alt={displayName}
                       fill
                       sizes="36px"
                       className="object-cover"

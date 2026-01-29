@@ -170,8 +170,14 @@ export default function TreeOfLife() {
         {/* Connection visualization / Tree Structure */}
         <div className="lg:col-span-2 space-y-12 sm:space-y-16">
           <div className="card-premium p-8 sm:p-12 min-h-[500px] border-none shadow-2xl relative overflow-hidden group">
-            {/* Background pattern */}
-            <div className="absolute inset-0 opacity-[0.05] pointer-events-none bg-[url('https://www.transparenttextures.com/patterns/leaf.png')] group-hover:scale-110 transition-transform duration-[10s] ease-linear" />
+            {/* Background pattern - much subtler organic leaf-like SVG pattern */}
+            <div
+              className="absolute inset-0 opacity-[0.02] pointer-events-none group-hover:scale-105 transition-transform duration-[15s] ease-linear"
+              style={{
+                backgroundImage: `url("data:image/svg+xml,%3Csvg width='40' height='40' viewBox='0 0 40 40' xmlns='http://www.w3.org/2000/svg'%3E%3Cpath d='M20 5c-5 0-10 5-10 15 0 10 10 15 10 15s10-5 10-15c0-10-5-15-10-15zm0 2c3 0 8 4 8 13 0 5-4 10-8 10s-8-5-8-10c0-9 5-13 8-13z' fill='%230f2818' fill-rule='evenodd'/%3E%3C/svg%3E")`,
+                backgroundSize: "30px 30px",
+              }}
+            />
 
             <div className="relative z-10">
               <div className="flex items-center justify-between mb-12">

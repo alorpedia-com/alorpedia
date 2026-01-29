@@ -28,11 +28,19 @@ export async function GET() {
     });
 
     if (!dbUser) {
-      // Create user in Prisma if they exist in Supabase but not in Prisma
+      // Use upsert to prevent race conditions during parallel creation requests
       try {
-        console.log("Creating new user in Prisma for Supabase ID:", user.id);
-        dbUser = await prisma.user.create({
-          data: {
+        console.log(
+          "Creating/Ensuring user in Prisma for Supabase ID:",
+          user.id,
+        );
+        const name =
+          user.user_metadata?.full_name || user.user_metadata?.name || "User";
+        const profileImage = user.user_metadata?.avatar_url || null;
+
+        dbUser = await prisma.user.upsert({
+          where: { id: user.id },
+          create: {
             id: user.id,
             email: user.email!,
             name:
@@ -41,7 +49,15 @@ export async function GET() {
               "User",
             profileImage: user.user_metadata?.avatar_url || null,
             onboardingCompleted: false,
-            onboardingStep: 0,
+            onboardingStep: 2,
+            profile: {
+              create: {},
+            },
+          },
+          update: {
+            // Update email or name if they changed (optional)
+            email: user.email!,
+            name,
           },
           include: {
             profile: true,
@@ -49,13 +65,12 @@ export async function GET() {
             discussions: true,
           },
         });
-        console.log("Successfully created user in Prisma:", dbUser.id);
+        console.log("Successfully ensured user in Prisma:", dbUser.id);
       } catch (createError) {
         console.error(
-          "CRITICAL: Failed to create user in Prisma:",
+          "CRITICAL: Failed to ensure user in Prisma:",
           createError,
         );
-        // Throw to reach the main catch block
         throw createError;
       }
     }
@@ -80,10 +95,14 @@ export async function GET() {
       posts: dbUser.posts,
       discussions: dbUser.discussions,
     });
-  } catch (error) {
-    console.error("Profile fetch error:", error);
+  } catch (error: any) {
+    console.error("Profile fetch error detail:", {
+      message: error.message,
+      stack: error.stack,
+      code: error.code,
+    });
     return NextResponse.json(
-      { message: "Internal server error" },
+      { message: "Internal server error", error: error.message },
       { status: 500 },
     );
   }

@@ -4,6 +4,7 @@ import { useRouter } from "next/navigation";
 import { CheckCircle, Sparkles } from "lucide-react";
 import confetti from "canvas-confetti";
 import { useEffect, useState } from "react";
+import { useQueryClient } from "@tanstack/react-query";
 
 interface Step5CompleteProps {
   userName?: string;
@@ -15,6 +16,7 @@ export default function Step5Complete({
   userType,
 }: Step5CompleteProps) {
   const router = useRouter();
+  const queryClient = useQueryClient();
   const [isNavigating, setIsNavigating] = useState(false);
 
   useEffect(() => {
@@ -34,6 +36,9 @@ export default function Step5Complete({
     try {
       // Small delay for better UX
       await new Promise((resolve) => setTimeout(resolve, 300));
+
+      // Invalidate profile query to update Navbar
+      queryClient.invalidateQueries({ queryKey: ["userProfile"] });
 
       // Navigate to profile
       router.push("/profile");

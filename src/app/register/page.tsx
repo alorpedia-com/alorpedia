@@ -101,6 +101,7 @@ export default function Register() {
               src="/logo.jpg"
               alt="Alorpedia"
               fill
+              sizes="20px"
               className="object-contain"
             />
           </div>
@@ -125,6 +126,7 @@ export default function Register() {
                   src="/logo.jpg"
                   alt="Alorpedia"
                   fill
+                  sizes="64px"
                   className="object-contain"
                 />
               </div>
@@ -223,6 +225,7 @@ export default function Register() {
                 src="/logo.jpg"
                 alt="Alorpedia"
                 fill
+                sizes="80px"
                 className="object-contain"
               />
             </div>

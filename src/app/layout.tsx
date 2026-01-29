@@ -4,6 +4,7 @@ import "./globals.css";
 import Navbar from "@/components/Navbar";
 import MobileNav from "@/components/MobileNav";
 import MainContent from "@/components/MainContent";
+import Providers from "@/components/Providers";
 
 const inter = Inter({
   subsets: ["latin"],
@@ -21,6 +22,9 @@ const outfit = Outfit({
 });
 
 export const metadata: Metadata = {
+  metadataBase: new URL(
+    process.env.NEXT_PUBLIC_APP_URL || "http://localhost:3000",
+  ),
   title: "Alorpedia",
   description: "Preserving Alor heritage and culture",
   icons: {
@@ -33,8 +37,6 @@ export const metadata: Metadata = {
     images: ["/logo.jpg"],
   },
 };
-
-import Providers from "@/components/Providers";
 
 export default function RootLayout({
   children,
