@@ -17,6 +17,7 @@ import TreeOnboardingModal from "@/components/TreeOnboardingModal";
 import TreeVisualization from "@/components/TreeVisualization";
 import { useQuery } from "@tanstack/react-query";
 import { useSupabaseSession } from "@/components/SupabaseSessionProvider";
+import Link from "next/link";
 export default function TreeOfLife() {
   const { user } = useSupabaseSession();
   const [nodes, setNodes] = useState<any[]>([]);
