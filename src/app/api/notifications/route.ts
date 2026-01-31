@@ -4,10 +4,11 @@ import prisma from "@/lib/prisma";
 
 export async function GET() {
   const supabase = await createClient();
-  const { data: authData, error } = await supabase.auth.getUser();
+  const { data: authData, error: authError } = await supabase.auth.getUser();
   const user = authData?.user;
 
-  if (error || !user) {
+  if (authError || !user) {
+    console.warn("Notifications GET: Not authenticated", authError);
     return NextResponse.json({ message: "Not authenticated" }, { status: 401 });
   }
 
@@ -17,11 +18,14 @@ export async function GET() {
     });
 
     if (!dbUser) {
+      console.info(
+        `Notifications GET: Creating missing Prisma user for ${user.id}`,
+      );
       // Create user in Prisma if they exist in Supabase but not in Prisma
       dbUser = await prisma.user.create({
         data: {
           id: user.id,
-          email: user.email!,
+          email: user.email || `${user.id}@placeholder.com`, // Fallback for email
           name:
             user.user_metadata?.full_name || user.user_metadata?.name || "User",
           profileImage: user.user_metadata?.avatar_url || null,
@@ -45,7 +49,10 @@ export async function GET() {
   } catch (error) {
     console.error("Notifications fetch error:", error);
     return NextResponse.json(
-      { message: "Internal server error" },
+      {
+        message: "Internal server error",
+        error: error instanceof Error ? error.message : String(error),
+      },
       { status: 500 },
     );
   }
@@ -70,7 +77,7 @@ export async function PATCH(req: Request) {
       dbUser = await prisma.user.create({
         data: {
           id: user.id,
-          email: user.email!,
+          email: user.email || `${user.id}@placeholder.com`,
           name:
             user.user_metadata?.full_name || user.user_metadata?.name || "User",
           profileImage: user.user_metadata?.avatar_url || null,

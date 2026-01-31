@@ -27,6 +27,8 @@ export default function TreeOfLife() {
   const [isRelateOpen, setIsRelateOpen] = useState(false);
   const [showOnboarding, setShowOnboarding] = useState(false);
   const [viewMode, setViewMode] = useState<"grid" | "tree">("tree"); // Default to tree view
+  const [isCreating, setIsCreating] = useState(false);
+  const [deletingId, setDeletingId] = useState<string | null>(null);
 
   const [newNode, setNewNode] = useState({
     name: "",
@@ -73,6 +75,9 @@ export default function TreeOfLife() {
 
   const handleCreateNode = async (e: React.FormEvent) => {
     e.preventDefault();
+    if (isCreating) return;
+
+    setIsCreating(true);
     try {
       const response = await fetch("/api/family/nodes", {
         method: "POST",
@@ -86,6 +91,32 @@ export default function TreeOfLife() {
       }
     } catch (error) {
       console.error("Failed to create node:", error);
+    } finally {
+      setIsCreating(false);
+    }
+  };
+
+  const handleDeleteNode = async (nodeId: string) => {
+    if (
+      !confirm(
+        "Are you sure you want to delete this family member? This will also remove all their relationships.",
+      )
+    ) {
+      return;
+    }
+
+    setDeletingId(nodeId);
+    try {
+      const response = await fetch(`/api/family/nodes/${nodeId}`, {
+        method: "DELETE",
+      });
+      if (response.ok) {
+        fetchFamily();
+      }
+    } catch (error) {
+      console.error("Failed to delete node:", error);
+    } finally {
+      setDeletingId(null);
     }
   };
 
@@ -227,6 +258,8 @@ export default function TreeOfLife() {
                 <TreeVisualization
                   nodes={nodes}
                   relationships={relationships}
+                  onDelete={handleDeleteNode}
+                  deletingId={deletingId || undefined}
                 />
               ) : (
                 <div className="grid grid-cols-1 sm:grid-cols-2 gap-6">
@@ -235,6 +268,7 @@ export default function TreeOfLife() {
                     const wrapperProps = node.userId
                       ? { href: `/profile/${node.userId}` }
                       : {};
+                    const isDeleting = deletingId === node.id;
 
                     return (
                       <NodeWrapper
@@ -243,8 +277,8 @@ export default function TreeOfLife() {
                         className={`p-6 sm:p-8 rounded-[2rem] border-2 transition-all flex items-center justify-between group/node ${
                           node.userId
                             ? "border-primary/20 bg-primary/5 shadow-inner cursor-pointer hover:shadow-xl active:scale-95"
-                            : "border-border/30 bg-card shadow-sm cursor-default opacity-75"
-                        }`}
+                            : "border-border/30 bg-card shadow-sm cursor-default"
+                        } ${isDeleting ? "opacity-50 grayscale pointer-events-none" : ""}`}
                       >
                         <div className="space-y-2">
                           <h3 className="font-serif font-bold text-primary text-xl">
@@ -261,11 +295,35 @@ export default function TreeOfLife() {
                             )}
                           </div>
                         </div>
-                        {node.userId && (
-                          <div className="w-10 h-10 bg-primary/5 rounded-xl flex items-center justify-center group-hover/node:bg-primary group-hover/node:text-background transition-all">
-                            <ChevronRight className="w-5 h-5 transition-transform group-hover/node:translate-x-1" />
-                          </div>
-                        )}
+                        <div className="flex items-center space-x-3">
+                          {node.userId && !isDeleting && (
+                            <Link
+                              href={`/profile/${node.userId}`}
+                              className="w-10 h-10 bg-primary/5 rounded-xl flex items-center justify-center hover:bg-primary hover:text-background transition-all"
+                            >
+                              <ChevronRight className="w-5 h-5" />
+                            </Link>
+                          )}
+                          <button
+                            onClick={(e) => {
+                              e.preventDefault();
+                              handleDeleteNode(node.id);
+                            }}
+                            disabled={!!deletingId}
+                            className={`w-10 h-10 rounded-xl flex items-center justify-center transition-all ${
+                              isDeleting
+                                ? "bg-red-100 text-red-600"
+                                : "bg-red-50 text-red-600 hover:bg-red-600 hover:text-white"
+                            }`}
+                            title="Delete Member"
+                          >
+                            {isDeleting ? (
+                              <div className="w-5 h-5 border-2 border-red-600/30 border-t-red-600 rounded-full animate-spin" />
+                            ) : (
+                              <Trash2 className="w-5 h-5" />
+                            )}
+                          </button>
+                        </div>
                       </NodeWrapper>
                     );
                   })}
@@ -485,9 +543,14 @@ export default function TreeOfLife() {
                   </button>
                   <button
                     type="submit"
-                    className="flex-1 py-3 px-6 bg-primary text-background rounded-xl font-bold shadow-lg hover:bg-primary/90 transition-all"
+                    disabled={isCreating}
+                    className="flex-1 py-3 px-6 bg-primary text-background rounded-xl font-bold shadow-lg hover:bg-primary/90 transition-all disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center"
                   >
-                    Plant Node
+                    {isCreating ? (
+                      <div className="w-5 h-5 border-2 border-background/30 border-t-background rounded-full animate-spin" />
+                    ) : (
+                      "Plant Node"
+                    )}
                   </button>
                 </div>
               </form>
