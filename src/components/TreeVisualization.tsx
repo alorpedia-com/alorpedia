@@ -1,6 +1,4 @@
-"use client";
-
-import { ChevronRight, Users } from "lucide-react";
+import { ChevronRight, Users, Trash2 } from "lucide-react";
 import Link from "next/link";
 
 interface FamilyNode {
@@ -17,6 +15,7 @@ interface Relationship {
   toId: string;
   type: string;
   isFlagged: boolean;
+  isInferred?: boolean;
 }
 
 interface TreeNode extends FamilyNode {
@@ -30,18 +29,24 @@ interface TreeNode extends FamilyNode {
 interface TreeVisualizationProps {
   nodes: FamilyNode[];
   relationships: Relationship[];
+  onDelete?: (nodeId: string) => void;
+  deletingId?: string;
 }
 
 export default function TreeVisualization({
   nodes,
   relationships,
+  onDelete,
+  deletingId,
 }: TreeVisualizationProps) {
   // Calculate generational hierarchy
   const buildTree = (): {
     roots: TreeNode[];
-    siblingPairs: Array<[TreeNode, TreeNode]>;
+    siblingPairs: Array<[TreeNode, TreeNode, boolean]>; // [node1, node2, isInferred]
+    inferredSpouseRels: Array<[TreeNode, TreeNode]>;
   } => {
-    if (nodes.length === 0) return { roots: [], siblingPairs: [] };
+    if (nodes.length === 0)
+      return { roots: [], siblingPairs: [], inferredSpouseRels: [] };
 
     // Find root nodes (nodes with no parents)
     const nodeMap = new Map<string, TreeNode>();
@@ -55,6 +60,9 @@ export default function TreeVisualization({
         spouses: [],
       });
     });
+
+    // Parent maps for inference
+    const nodeParents = new Map<string, Set<string>>();
 
     // Build parent-child relationships
     const parentChildRels = relationships.filter(
@@ -72,27 +80,89 @@ export default function TreeVisualization({
       if (parent && child) {
         parent.children.push(child);
         hasParent.add(child.id);
+
+        // For inference
+        if (!nodeParents.has(child.id)) nodeParents.set(child.id, new Set());
+        nodeParents.get(child.id)!.add(parent.id);
       }
     });
 
-    // Add spouse relationships
+    // Add explicit spouse relationships
     spouseRels.forEach((rel) => {
       const spouse1 = nodeMap.get(rel.fromId);
       const spouse2 = nodeMap.get(rel.toId);
       if (spouse1 && spouse2) {
-        spouse1.spouses.push(spouse2);
-        spouse2.spouses.push(spouse1);
+        if (!spouse1.spouses.some((s) => s.id === spouse2.id))
+          spouse1.spouses.push(spouse2);
+        if (!spouse2.spouses.some((s) => s.id === spouse1.id))
+          spouse2.spouses.push(spouse1);
       }
     });
 
-    // Store sibling relationships for later visualization
-    const siblingPairs: Array<[TreeNode, TreeNode]> = [];
+    // Infer spouse relationships (polygamy inclusive)
+    const inferredSpouseRels: Array<[TreeNode, TreeNode]> = [];
+    nodeParents.forEach((parents, childId) => {
+      const parentArray = Array.from(parents);
+      if (parentArray.length >= 2) {
+        for (let i = 0; i < parentArray.length; i++) {
+          for (let j = i + 1; j < parentArray.length; j++) {
+            const p1 = nodeMap.get(parentArray[i]);
+            const p2 = nodeMap.get(parentArray[j]);
+            if (p1 && p2) {
+              // Check if already exist as explicit spouse
+              const alreadyLinked = p1.spouses.some((s) => s.id === p2.id);
+              if (!alreadyLinked) {
+                p1.spouses.push(p2);
+                p2.spouses.push(p1);
+                inferredSpouseRels.push([p1, p2]);
+              }
+            }
+          }
+        }
+      }
+    });
+
+    // Explicit sibling relationships
+    const siblingPairs: Array<[TreeNode, TreeNode, boolean]> = [];
     siblingRels.forEach((rel) => {
       const sibling1 = nodeMap.get(rel.fromId);
       const sibling2 = nodeMap.get(rel.toId);
       if (sibling1 && sibling2) {
-        siblingPairs.push([sibling1, sibling2]);
+        siblingPairs.push([sibling1, sibling2, false]);
       }
+    });
+
+    // Infer sibling relationships
+    const processedSiblings = new Set<string>();
+    nodeMap.forEach((nodeI) => {
+      nodeMap.forEach((nodeJ) => {
+        if (nodeI.id === nodeJ.id) return;
+
+        const parentsI = nodeParents.get(nodeI.id);
+        const parentsJ = nodeParents.get(nodeJ.id);
+
+        if (parentsI && parentsJ) {
+          // Check for common parents
+          const hasCommonParent = Array.from(parentsI).some((pId) =>
+            parentsJ.has(pId),
+          );
+          if (hasCommonParent) {
+            const pairKey = [nodeI.id, nodeJ.id].sort().join("-");
+            if (!processedSiblings.has(pairKey)) {
+              // Check if already in siblingPairs (explicit)
+              const alreadyLinked = siblingPairs.some(
+                (p) =>
+                  (p[0].id === nodeI.id && p[1].id === nodeJ.id) ||
+                  (p[0].id === nodeJ.id && p[1].id === nodeI.id),
+              );
+              if (!alreadyLinked) {
+                siblingPairs.push([nodeI, nodeJ, true]);
+              }
+              processedSiblings.add(pairKey);
+            }
+          }
+        }
+      });
     });
 
     // Find root nodes (oldest generation - those without parents)
@@ -110,7 +180,7 @@ export default function TreeVisualization({
 
     roots.forEach((root) => calculateGenerations(root, 0));
 
-    return { roots, siblingPairs };
+    return { roots, siblingPairs, inferredSpouseRels };
   };
 
   // Position nodes in a hierarchical layout
@@ -168,7 +238,7 @@ export default function TreeVisualization({
     return result;
   };
 
-  const { roots: treeRoots, siblingPairs } = buildTree();
+  const { roots: treeRoots, siblingPairs, inferredSpouseRels } = buildTree();
   const positionedRoots = positionNodes(treeRoots);
   const allNodes = flattenTree(positionedRoots);
 
@@ -251,6 +321,12 @@ export default function TreeVisualization({
               const spouseNode = allNodes.find((n) => n.id === spouse.id);
               if (!spouseNode || node.x >= spouseNode.x) return null;
 
+              const isInferred = inferredSpouseRels.some(
+                (pair) =>
+                  (pair[0].id === node.id && pair[1].id === spouse.id) ||
+                  (pair[0].id === spouse.id && pair[1].id === node.id),
+              );
+
               return (
                 <line
                   key={`spouse-${node.id}-${spouse.id}`}
@@ -260,15 +336,15 @@ export default function TreeVisualization({
                   y2={spouseNode.y + offsetY + 30}
                   stroke="currentColor"
                   strokeWidth="2"
-                  strokeDasharray="4 4"
-                  className="text-accent/30"
+                  strokeDasharray={isInferred ? "2 2" : "4 4"}
+                  className={isInferred ? "text-accent/50" : "text-accent/30"}
                 />
               );
             }),
         )}
 
         {/* Draw sibling connections */}
-        {siblingPairs.map(([sibling1, sibling2], index) => {
+        {siblingPairs.map(([sibling1, sibling2, isInferred], index) => {
           // Find positioned nodes
           const node1 = allNodes.find((n) => n.id === sibling1.id);
           const node2 = allNodes.find((n) => n.id === sibling2.id);
@@ -294,9 +370,9 @@ export default function TreeVisualization({
               d={pathData}
               stroke="currentColor"
               strokeWidth="2"
-              strokeDasharray="2 3"
+              strokeDasharray={isInferred ? "1 2" : "2 3"}
               fill="none"
-              className="text-secondary/30"
+              className={isInferred ? "text-secondary/50" : "text-secondary/30"}
             />
           );
         })}
@@ -308,23 +384,48 @@ export default function TreeVisualization({
             ? { href: `/profile/${node.userId}` }
             : {};
 
+          const isDeleting = deletingId === node.id;
+
           return (
             <foreignObject
               key={`node-${node.id}-${node.x}-${node.y}`}
               x={node.x + offsetX - 80}
               y={node.y + offsetY - 30}
               width="160"
-              height="120"
+              height="150"
             >
-              <NodeWrapper
-                {...wrapperProps}
-                className={`block p-4 rounded-2xl border-2 transition-all ${
+              <div
+                className={`group relative p-4 rounded-2xl border-2 transition-all ${
                   node.userId
                     ? "border-primary/20 bg-primary/5 shadow-inner cursor-pointer hover:shadow-xl hover:scale-105"
-                    : "border-border/30 bg-card shadow-sm cursor-default opacity-75"
-                }`}
+                    : "border-border/30 bg-card shadow-sm cursor-default"
+                } ${isDeleting ? "opacity-40 grayscale pointer-events-none" : ""}`}
               >
-                <div className="text-center">
+                {/* Delete Button - only visible on hover (or during deletion) */}
+                {onDelete && (
+                  <button
+                    onClick={(e) => {
+                      e.preventDefault();
+                      e.stopPropagation();
+                      onDelete(node.id);
+                    }}
+                    disabled={!!deletingId}
+                    className={`absolute -top-2 -right-2 w-8 h-8 rounded-full flex items-center justify-center transition-all shadow-lg z-20 ${
+                      isDeleting
+                        ? "bg-red-500 text-white opacity-100"
+                        : "bg-red-500 text-white opacity-0 group-hover:opacity-100 hover:bg-red-600"
+                    }`}
+                    title="Delete Member"
+                  >
+                    {isDeleting ? (
+                      <div className="w-4 h-4 border-2 border-white/30 border-t-white rounded-full animate-spin" />
+                    ) : (
+                      <Trash2 className="w-4 h-4" />
+                    )}
+                  </button>
+                )}
+
+                <NodeWrapper {...wrapperProps} className="block text-center">
                   <h3 className="font-serif font-bold text-primary text-sm mb-1 truncate">
                     {node.name}
                   </h3>
@@ -345,8 +446,8 @@ export default function TreeVisualization({
                       </div>
                     </div>
                   )}
-                </div>
-              </NodeWrapper>
+                </NodeWrapper>
+              </div>
             </foreignObject>
           );
         })}
@@ -377,8 +478,16 @@ export default function TreeVisualization({
           <span className="text-foreground/60 font-medium">Sibling</span>
         </div>
         <div className="flex items-center space-x-2">
-          <div className="w-6 h-6 bg-primary/5 border-2 border-primary/20 rounded-lg" />
-          <span className="text-foreground/60 font-medium">Linked Member</span>
+          <div className="w-10 h-0.5 border-t border-accent/50 border-dotted" />
+          <span className="text-foreground/40 font-medium italic">
+            Inferred Spouse
+          </span>
+        </div>
+        <div className="flex items-center space-x-2">
+          <div className="w-10 h-0.5 border-t border-secondary/50 border-dotted" />
+          <span className="text-foreground/40 font-medium italic">
+            Inferred Sibling
+          </span>
         </div>
       </div>
     </div>
