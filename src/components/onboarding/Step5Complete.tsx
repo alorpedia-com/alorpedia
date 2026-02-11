@@ -34,11 +34,12 @@ export default function Step5Complete({
     setIsNavigating(true);
 
     try {
-      // Small delay for better UX
-      await new Promise((resolve) => setTimeout(resolve, 300));
-
-      // Invalidate profile query to update Navbar
+      // Invalidate profile query to ensure fresh data
       queryClient.invalidateQueries({ queryKey: ["userProfile"] });
+
+      // Wait a bit longer to ensure session cookies are fully synchronized
+      // This prevents 401 errors when the profile page loads
+      await new Promise((resolve) => setTimeout(resolve, 800));
 
       // Navigate to profile
       router.push("/profile");

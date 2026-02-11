@@ -3,7 +3,7 @@
 import Link from "next/link";
 import Image from "next/image";
 import { usePathname } from "next/navigation";
-import { User, LogOut, UserCircle } from "lucide-react";
+import { User, LogOut, UserCircle, Settings } from "lucide-react";
 import { useState, useRef, useEffect } from "react";
 import { getUserInitials } from "@/lib/utils";
 import NotificationBell from "@/components/NotificationBell";
@@ -137,6 +137,16 @@ export default function Navbar() {
                         View Profile
                       </span>
                     </Link>
+                    <Link
+                      href="/settings"
+                      onClick={() => setShowDropdown(false)}
+                      className="flex items-center space-x-3 px-4 py-3 hover:bg-primary/5 transition-colors border-b border-border/50"
+                    >
+                      <Settings className="w-5 h-5 text-primary" />
+                      <span className="text-sm font-semibold text-foreground">
+                        Settings
+                      </span>
+                    </Link>
                     <button
                       onClick={handleSignOut}
                       className="w-full flex items-center space-x-3 px-4 py-3 hover:bg-red-50 transition-colors text-left"
@@ -199,6 +209,16 @@ export default function Navbar() {
                       <UserCircle className="w-4 h-4 text-primary" />
                       <span className="text-sm font-semibold text-foreground">
                         Profile
+                      </span>
+                    </Link>
+                    <Link
+                      href="/settings"
+                      onClick={() => setShowDropdown(false)}
+                      className="flex items-center space-x-3 px-4 py-3 hover:bg-primary/5 transition-colors border-b border-border/50"
+                    >
+                      <Settings className="w-4 h-4 text-primary" />
+                      <span className="text-sm font-semibold text-foreground">
+                        Settings
                       </span>
                     </Link>
                     <button
