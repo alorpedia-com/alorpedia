@@ -29,16 +29,34 @@ export default function ProfilePage() {
     }
   }, [authLoading, user, router]);
 
-  const fetchProfile = async () => {
+  const fetchProfile = async (retryCount = 0) => {
     try {
       const response = await fetch("/api/user/profile");
       if (response.ok) {
         const data = await response.json();
         setProfileData(data);
         setNewBio(data.bio || "");
+      } else if (response.status === 401 && retryCount < 3) {
+        // Retry on 401 errors (session might not be synchronized yet)
+        console.log(
+          `Profile fetch returned 401, retrying (${retryCount + 1}/3)...`,
+        );
+        await new Promise((resolve) =>
+          setTimeout(resolve, 500 * (retryCount + 1)),
+        );
+        return fetchProfile(retryCount + 1);
+      } else {
+        console.error("Failed to fetch profile:", response.status);
       }
     } catch (error) {
       console.error("Failed to fetch profile:", error);
+      if (retryCount < 3) {
+        // Retry on network errors
+        await new Promise((resolve) =>
+          setTimeout(resolve, 500 * (retryCount + 1)),
+        );
+        return fetchProfile(retryCount + 1);
+      }
     } finally {
       setLoading(false);
     }
@@ -144,14 +162,12 @@ export default function ProfilePage() {
                 {profileData?.id?.substring(0, 8) || user?.id?.substring(0, 8)}
               </p>
             </div>
-            {!isEditingBio && (
-              <button
-                onClick={() => setIsEditingBio(true)}
-                className="w-full sm:w-auto px-6 py-2.5 border-2 border-primary text-primary rounded-2xl text-xs font-black uppercase tracking-widest hover:bg-primary/5 transition-all active:scale-95"
-              >
-                Edit Bio
-              </button>
-            )}
+            <Link
+              href="/settings"
+              className="w-full sm:w-auto px-6 py-2.5 border-2 border-primary text-primary rounded-2xl text-xs font-black uppercase tracking-widest hover:bg-primary/5 transition-all active:scale-95 text-center"
+            >
+              Edit Profile
+            </Link>
           </div>
 
           {/* Cultural Identity Cards */}
